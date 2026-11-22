@@ -39,6 +39,7 @@ function imageFromSave(url) {
 class SurfaceCleaning {
   constructor(level, callbacks) {
     this.level = level;
+    this.audio = callbacks.audio;
     this.callbacks = callbacks;
     this.foam = newLayer();
     this.sample = document.createElement('canvas');
@@ -130,8 +131,9 @@ class SurfaceCleaning {
     this.pointer = event.pointerId;
     this.strokeTool = tool;
     this.previous = sceneCoordinates(event);
-    cleaningAudio.begin(event.pointerId, tool, this.previous,
-      this.level.audioMaterial?.(ctx,this.previous), event.timeStamp);
+    this.audioTime = event.timeStamp;
+    this.audioDistance = 0;
+    this.audio.startGesture(tool,this.level.audioMaterial?.(ctx,this.previous));
     this.distanceToStamp = cleaningTools[tool].spacing;
     this.started ||= performance.now();
     this.apply(this.previous.x, this.previous.y, tool);
@@ -148,6 +150,7 @@ class SurfaceCleaning {
       const dx = next.x - previous.x;
       const dy = next.y - previous.y;
       const distance = Math.hypot(dx, dy);
+      this.audioDistance += distance;
       const spacing = cleaningTools[tool].spacing;
       let offset = this.distanceToStamp;
       for (; offset <= distance; offset += spacing) {
@@ -156,15 +159,24 @@ class SurfaceCleaning {
       this.distanceToStamp = offset - distance;
       this.previous = next;
     }
-    cleaningAudio.move(event.pointerId, this.previous,
-      this.level.audioMaterial?.(ctx,this.previous), event.timeStamp);
+    const elapsed = event.timeStamp-this.audioTime;
+    if (elapsed >= 24 && this.audioDistance > 0) {
+      this.audio.updateGesture({
+        tool,
+        speed:this.audioDistance*1000/elapsed,
+        material:this.level.audioMaterial?.(ctx,this.previous)
+      });
+      this.audioTime = event.timeStamp;
+      this.audioDistance = 0;
+    }
     this.renderSoon();
   }
 
   pointerUp(event) {
     if (event.pointerId !== this.pointer) return;
     this.pointer = undefined;
-    cleaningAudio.end(event.type === 'pointerup');
+    if (event.type === 'pointerup') this.audio.endGesture();
+    else this.audio.stopAll();
     this.update();
     clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => this.save(), 850);

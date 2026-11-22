@@ -153,6 +153,19 @@ function clock(){if(S.done)return;if(surface)S.elapsed=surface.time;else if(S.st
 setInterval(clock,400);
 function levelButtons(){const n=$('levelList');n.replaceChildren();levels.forEach((l,i)=>{const b=document.createElement('button');b.textContent=i+1;b.disabled=i>=S.unlocked;b.className=i===S.level?'current':'';if(i===S.level)b.setAttribute('aria-current','step');b.setAttribute('aria-label','Level '+(i+1)+(b.disabled?' locked':''));b.onclick=()=>{S.level=i;loadLevel()};n.append(b)})}
 let surface;
+const bathtubAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume);
+
+function stopCleaningAudio() {
+  bathtubAudio.stopAll();
+  cleaningAudio.cancel();
+}
+
+function setCleaningAudio(muted, volume) {
+  bathtubAudio.set(muted,volume);
+  cleaningAudio.set(muted,volume,{activate:!surface});
+  if (surface) bathtubAudio.unlock();
+}
+
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
 const toolNotes = {
   sponge: 'Wipes and polishes', brush: 'Scrubs the grout', spray: 'Softens soap scum'
@@ -165,7 +178,7 @@ const legacyHints = {
 };
 
 function selectTool(tool) {
-  if (tool !== S.tool) cleaningAudio.cancel();
+  if (tool !== S.tool) stopCleaningAudio();
   S.tool = tool;
   for (const button of toolButtons) {
     const selected = button.dataset.tool === tool;
@@ -195,7 +208,7 @@ function updateSurfaceProgress(progress, layers) {
 }
 
 function loadLevel(replay = false) {
-  cleaningAudio.cancel();
+  stopCleaningAudio();
   surface?.dispose(!replay);
   surface = null;
   endStroke();
@@ -239,6 +252,7 @@ function loadLevel(replay = false) {
     }
     selectTool('spray');
     surface = new SurfaceCleaning(bathtubLevel, {
+      audio: bathtubAudio,
       progress: updateSurfaceProgress,
       finish() { S.elapsed = surface.time; complete(); }
     });
@@ -249,7 +263,7 @@ function loadLevel(replay = false) {
 }
 
 function complete() {
-  cleaningAudio.cancel();
+  stopCleaningAudio();
   S.done = true;
   S.down = false;
   clearInterval(holdInterval);
@@ -282,31 +296,33 @@ $('again').onclick = () => {
 };
 for (const button of toolButtons) button.onclick = () => selectTool(button.dataset.tool);
 $('sound').onclick = () => {
-  cleaningAudio.set(!cleaningAudio.muted, cleaningAudio.volume);
+  setCleaningAudio(!cleaningAudio.muted, cleaningAudio.volume);
   saveSetting('familyArcadeCleaningMuted', String(cleaningAudio.muted));
   updateAudioControls();
 };
 $('volume').oninput = () => {
-  cleaningAudio.set(cleaningAudio.muted, Number($('volume').value)/100);
+  setCleaningAudio(cleaningAudio.muted, Number($('volume').value)/100);
   saveSetting('familyArcadeCleaningVolume', $('volume').value);
 };
 function cancelCleaningInput() {
-  cleaningAudio.cancel();
+  stopCleaningAudio();
   if (surface?.pointer !== undefined) surface.pointerUp({pointerId:surface.pointer});
   else endStroke();
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) cancelCleaningInput();
 });
-window.addEventListener('pagehide', () => {
+window.addEventListener('pagehide', event => {
   cancelCleaningInput();
   surface?.save();
+  if (!event.persisted) bathtubAudio.dispose();
 });
 window.addEventListener('blur', cancelCleaningInput);
 // Some touch browsers grant audio activation on release. This also primes
 // audio after a fresh navigation when the saved preference is already on.
 dirty.addEventListener('touchend', () => {
-  if (cleaningAudio.context?.state !== 'running') cleaningAudio.unlock();
+  const audio = surface ? bathtubAudio : cleaningAudio;
+  if (audio.context?.state !== 'running') audio.unlock();
 }, {passive:true});
 updateAudioControls();
 loadLevel();
