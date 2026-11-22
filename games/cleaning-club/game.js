@@ -40,16 +40,6 @@ function baseScene(i){const l=levels[i],wall=l.palette[0],floor=l.palette[1];let
 for(let x=0;x<960;x+=93){a+=L(x,452,x-14,620,'#ffffff22',2)}
 for(let y=36;y<410;y+=100){a+=`${E(56+(y%27),y,5,5,'#ffffff50')}${E(912+(y%33),y+15,4,4,'#ffffff50')}`}
 return a}
-function kitchen(){let a='';for(let y=180;y<449;y+=43){a+=L(0,y,960,y,'#ffffff80',3)}for(let x=0;x<960;x+=76){a+=L(x,170,x,449,'#ffffff50',2)}a+=framed(72,81,210,170)+R(335,90,290,54,'#e8dbc6',13)+R(363,145,235,20,'#c2b29f')+R(650,100,238,17,'#b2a7a3',6)+cup(703,94,'#bad5de',.7)+cup(772,94,'#f7c7ca',.7)+plant(862,147,.4);
-a+=`${R(84,359,790,170,'#d6c4b7',12,'#fff5',6)}${R(65,345,828,36,'#fff9e5',12)}${drawer(96,396,188,118,'#d7e4cf')}${drawer(301,396,184,118,'#f5e8d2')}${drawer(499,396,172,118,'#d7e4cf')}${drawer(684,396,179,118,'#f5e8d2')}${R(370,346,258,17,'#c2b4bb',8)}${E(493,362,110,12,'#8ba9b5')}${E(496,362,92,8,'#cdeef2')}${P('M526 345V294Q526 271 548 271Q571 271 571 295','none','#b2bcc9',11)}${R(530,296,59,13,'#b9c6cd',6)}`;
-a+=`${R(147,329,124,14,'#4b535f',7)}${[174,241].map(x=>E(x,324,17,8,'#737988')).join('')}${R(154,282,120,48,'#b9b4cf',11)}${E(214,282,60,16,'#eff0fc')}${P('M222 267Q223 232 261 232','none','#8d8b9c',10)}${E(267,235,12,11,'#d0a3ba')}${E(746,316,56,31,'#cf9193')}${E(748,311,47,21,'#ffeee7')}${[718,748,774].map(x=>E(x,299,15,18,'#e4ae71')).join('')}${R(736,342,22,13,'#d8ad90')}${sparkle(612,259)}`;return a}
-function puppy(){let a=framed(79,87,197,175)+plant(96,515,.72)+R(686,105,189,15,'#c8b4d8',6)+R(710,120,18,99,'#b9adce')+R(839,120,18,99,'#b9adce')+cup(743,90,'#ffbfc7',.7)+cup(807,90,'#b8deea',.6);a+=`${E(479,547,269,35,'#8b82aa66')}${R(226,358,516,181,'url(#ceramic)',78,'#fff',8)}${E(481,368,255,62,'#c7eef3','#fff',9)}${E(484,380,235,39,'#8ed7ea')}${P('M268 398Q486 445 701 400','none','#ffffff95',9)}`;
-a+=`${E(475,304,124,119,'#dcab82')}${E(382,291,53,80,'#ad7b61')}${E(565,290,53,81,'#ad7b61')}${E(472,319,96,81,'#f5d6b2')}${E(439,295,13,15,'#443d46')}${E(512,295,13,15,'#443d46')}${E(477,337,25,17,'#6f4e58')}${P('M459 350Q477 367 494 350','none','#85565a',6)}${E(477,362,15,15,'#f49e9d')}${E(410,334,17,10,'#edae9d66')}${E(538,335,17,10,'#edae9d66')}`;
-for(let i=0;i<17;i++){let x=298+(i*63)%374,y=330+(i*53)%96;a+=E(x,y,8+(i%3)*6,7+(i%4)*4,'#ffffffd8','#d4eff6',2)}a+=`${R(696,276,32,75,'#e5b1bf',9)}${R(706,260,12,27,'#e9dbc9',6)}${L(650,330,650,270,'#b2c1d1',9)}${P('M650 271Q650 250 673 250L696 250','none','#b2c1d1',9)}${E(696,249,20,9,'#d5e0eb')}${sparkle(704,228)}`;return a}
-function artstudio(){let a=framed(70,80,193,190)+R(675,106,206,16,'#bc9e97',5)+R(697,124,16,97,'#b8a9a4')+R(845,124,16,97,'#b8a9a4');for(let x=710;x<845;x+=32){a+=`${R(x,95,14,25,['#b2d8df','#f1a3ab','#d9c1e9','#f4d1a2'][Math.floor(x/30)%4],3)}${R(x+4,82,6,13,'#c6a58a',2)}`}
-a+=`${P('M443 126L280 531','none','#c39b77',19)}${P('M466 126L647 529','none','#c39b77',19)}${P('M459 179L460 555','none','#a47a70',10)}${R(312,105,310,319,'#b98b73',10,'#fff6',7)}${R(330,123,274,281,'#fff7ef',6)}${E(463,245,76,74,'#ffcee0')}${P('M345 361Q423 236 497 316T585 240L585 381L345 381Z','#b7cfdd')}${E(532,190,32,31,'#ffe1a6')}${P('M357 352Q390 289 422 350T487 339T544 361','none','#6da9ae',10)}${L(326,423,613,423,'#9f7464',14)}${R(197,460,565,24,'url(#wood)',9)}${R(230,482,14,87,'#a87b6e')}${R(724,482,14,87,'#a87b6e')}`;
-for(let x=276;x<685;x+=78){a+=`${R(x,424,43,35,['#f1b3ad','#b3d5bf','#b9cbe6','#e6c5df','#ffe0af'][Math.floor((x-276)/78)],9)}${E(x+21,426,22,6,'#fff8')}`}
-a+=`${cup(742,452,'#f2cbd7',.85)}${L(729,437,706,387,'#b28b74',6)}${L(741,437,756,383,'#b28b74',5)}${L(755,437,776,399,'#b28b74',5)}${plant(116,513,.65)}${sparkle(661,200)}`;return a}
 function garden(){let a='';for(let x=45;x<960;x+=130){a+=L(x,0,x,443,'#ffffff31',4)}a+=`${P('M210 445V95Q475 -48 748 95V445','none','#c1dad0',18)}${P('M246 443V116Q480 11 713 116V443','none','#d1efee',10)}${L(476,59,476,445,'#ffffff94',8)}${L(239,233,720,233,'#ffffff85',7)}${R(59,340,837,14,'#a78377',7)}${R(60,472,836,17,'#b9937e',8)}`;
 for(let j=0;j<5;j++){let x=135+j*158,y=280+(j%2)*10;a+=`${plant(x,y,.65+(j%3)*.08)}${R(x-28,341,57,9,'#9c816e',5)}`}
 for(let j=0;j<4;j++){let x=193+j*183;a+=`${R(x-33,415,69,50,['#dfa9a3','#c4b2d6','#b6cfbc','#edc8ac'][j],9)}${leaves(x,390)}`}
@@ -63,11 +53,13 @@ a+=`${R(600,200,110,121,'#dfd6de',18)}${R(617,218,76,38,'#514e61',10)}${E(653,23
 function palace(){let a='';for(let x of [86,686]){a+=`${P(`M${x} 383V151Q${x+96} 30 ${x+188} 151V383Z`,'url(#glass)','#f9f7ff',12)}${L(x+96,116,x+96,381,'#fff9',9)}${L(x,268,x+188,268,'#fff9',8)}${sparkle(x+52,185)}`}
 a+=`${P('M0 0H160Q154 204 55 367L0 387Z','#b5a2d8','#f5e7ff',9)}${P('M960 0H800Q806 204 904 367L960 387Z','#b5a2d8','#f5e7ff',9)}${P('M390 0V75Q415 103 445 118L515 118Q547 104 570 75V0','#eddbfa','#f9efff',9)}${L(478,0,478,104,'#c3aa84',8)}${E(478,133,79,22,'#e6d4a6')}${[411,438,465,494,522,550].map(x=>`${L(x,139,x,176,'#dac89d',3)}${sparkle(x,181,'#f7e6ff')}`).join('')}`;
 a+=`${E(479,564,324,49,'#e0d8f5')}${R(333,198,292,284,'#d4b6e3',90,'#f9e6fd',14)}${R(350,220,258,222,'#a99acb',70)}${P('M354 330Q475 292 607 330L613 457Q480 482 346 455Z','#d8c4e6','#faf1fd',8)}${R(297,425,365,103,'#c1a9d3',33,'#fff2f8',10)}${R(296,518,60,57,'#d2b4d9',9)}${R(603,518,60,57,'#d2b4d9',9)}${P('M419 251L438 208L462 238L480 191L500 239L523 208L540 251Z','#ffe1a1','#e6b886',6)}${E(480,264,67,12,'#f6c778')}${E(479,336,76,35,'#e5d7f0')}${E(408,486,40,18,'#ead0f4')}${E(550,486,40,18,'#ead0f4')}${sparkle(255,428)}${sparkle(704,386)}${sparkle(782,155)}`;return a}
-const advancedLevels = [{...bathtubLevel, artwork:bathtubArtwork},vanityLevel,bedroomLevel,playroomLevel];
-const legacyDrawings = [kitchen,puppy,artstudio,garden,cafe,palace];
+const advancedLevels = [{...bathtubLevel, artwork:bathtubArtwork},vanityLevel,bedroomLevel,playroomLevel,
+  kitchenLevel,puppyLevel,artStudioLevel];
+const legacyDrawings = [garden,cafe,palace];
 const scenePaintings = [
   'assets/scenes/bath.webp', 'assets/scenes/vanity.webp',
-  'assets/scenes/bedroom.webp', 'assets/scenes/playroom.webp'
+  'assets/scenes/bedroom.webp', 'assets/scenes/playroom.webp',
+  'assets/scenes/kitchen.webp', 'assets/scenes/puppy.webp', 'assets/scenes/artstudio.webp'
 ];
 
 function renderScene() {
@@ -85,8 +77,15 @@ function renderScene() {
   const url = new URL(file, document.baseURI).href;
   painting.src = url;
   // Keep the matching SVG visible until the current level's painting decodes.
-  painting.decode().then(() => {
-    if (scenePaintings[S.level] !== file || painting.src !== url) return;
+  const ready = painting.decode().catch(error => {
+    // These painted rooms use local JPEGs on browsers without WebP support.
+    if (S.level < 4 || scenePaintings[S.level] !== file || painting.src !== url) throw error;
+    painting.src = url.replace(/\.webp$/,'.jpg');
+    return painting.decode();
+  });
+  ready.then(() => {
+    if (scenePaintings[S.level] !== file || ![url,url.replace(/\.webp$/,'.jpg')].includes(painting.src)) return;
+    svg.querySelector('.puppy-celebration')?.setAttribute('href',painting.src);
     scene.classList.add('has-painting');
     painting.classList.remove('hidden');
   }).catch(() => {});
