@@ -8,6 +8,7 @@ const toyShelves = cleaningZone(shelfRails,'wood');
 const toyBins = cleaningZone(shelfBins,'plastic');
 const toyCorners = cleaningZone(shelfCorners,'wood');
 const toySurfaces = cleaningZone(toyFaces,'plastic');
+const plasticToys = cleaningZone(toyFaces+ovalOutline(222,290,60,35),'plastic');
 
 function toyBlock(x,y,w,h,color,mark) {
   return `<g transform="translate(${x} ${y})">
@@ -100,21 +101,33 @@ function playroomArtwork() {
   ${polishGlints([[470,136,11],[669,250,12],[748,454,9],[306,349,8]])}`;
 }
 
+const toyFingerprints = [['print',220,151,23,19],['print',472,162,28,18],['print',765,164,25,14],['print',621,262,34,22]];
+
+const toyCornerMarks = [['residue',123,163,12,34],['residue',124,313,13,31],['residue',361,303,10,28],['residue',591,439,11,30],['residue',837,172,12,30],['residue',837,437,12,34]];
+const visibleCornerMarks = toyCornerMarks.map(mark => mark[1] === 591 ? ['residue',591,390,11,17] : mark);
+
 const playroomLevel = {
+  dirtVersion: 2, idleHints: true,
   artwork: playroomArtwork, seed: 64129, saveKey: 'familyArcadeRainbowToyRoomProgress1',
   description: 'Dust the rainbow shelves, clean the toys and lift sticky marks from the bins.',
   finishTitle: 'The rainbow is back!',
   finishMessage: 'The toys are bright again and the shelf corners are spotless.',
   notes: {spray:'Loosens sticky marks',sponge:'Wipes toys and bins',brush:'Dusts shelves and corners'},
-  audioMaterial: zoneMaterial([toySurfaces,toyBins,toyShelves,toyCorners],'dust'),
+  audioMaterial: zoneMaterial([plasticToys,toyBins,toyShelves,toyCorners],'dust'),
   layers: [
     dirtLayer({id:'dust',label:'Shelf dust',color:'#978b82',weight:.28,tool:'brush',action:'Dust the ledges under the toys with the brush.'},toyShelves,
-      [['dust',175,204,47,13],['dust',402,207,49,12],['dust',711,205,48,12],['dust',282,349,48,12],['dust',556,351,45,12],['dust',756,497,48,15],['dust',354,497,46,15]]),
-    dirtLayer({id:'prints',label:'Toy fingerprints',color:'#748d9b',weight:.23,tool:'sponge',action:'Wipe the marks on the teddy, blocks, rainbow and robot.'},toySurfaces,
-      [['print',220,151,23,19],['print',472,162,28,18],['print',765,164,25,14],['print',621,262,34,22]]),
+      [['dust',175,204,47,13],['dust',402,207,49,12],['dust',711,205,48,12],['dust',282,349,48,12],['dust',556,351,45,12],['dust',756,497,48,15],['dust',354,497,46,15]],paintRoomDirt),
+    {
+      ...dirtLayer({id:'prints',label:'Toy fingerprints',color:'#748d9b',weight:.23,tool:'sponge',action:'Wipe the cloudy fingerprints from the car, block, rainbow and robot.'},plasticToys,
+        [['print',220,292,23,19],...toyFingerprints.slice(1)],paintRoomDirt),
+      legacyDraw: surfaceDirt(toySurfaces,toyFingerprints)
+    },
     dirtLayer({id:'sticky',label:'Sticky marks',color:'#b97983',weight:.28,tool:'sponge',prepare:'spray',action:'Foam the sticky marks on the bins, then wipe them with the sponge.'},toyBins,
-      [['sticky',190,446,37,21,-.25],['sticky',278,450,33,19,.26],['sticky',471,455,43,16,-.1],['sticky',693,448,35,18,-.31],['sticky',773,452,33,19,.37]]),
-    dirtLayer({id:'corners',label:'Corner crumbs',color:'#907855',weight:.21,tool:'brush',action:'Brush the dusty inside edges and shelf corners.'},toyCorners,
-      [['residue',123,163,12,34],['residue',124,313,13,31],['residue',361,303,10,28],['residue',591,439,11,30],['residue',837,172,12,30],['residue',837,437,12,34]])
+      [['sticky',190,446,37,21,-.25],['sticky',278,450,33,19,.26],['sticky',471,455,43,16,-.1],['sticky',693,448,35,18,-.31],['sticky',773,452,33,19,.37]],paintRoomDirt),
+    {
+      ...dirtLayer({id:'corners',label:'Corner crumbs',color:'#907855',weight:.21,tool:'brush',action:'Brush the dusty inside edges and shelf corners.'},toyCorners,
+        visibleCornerMarks,paintRoomDirt),
+      legacyDraw: surfaceDirt(toyCorners,toyCornerMarks)
+    }
   ]
 };
