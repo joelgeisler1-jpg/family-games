@@ -1,13 +1,12 @@
 # Bathtub Bliss audio A/B test
 
 **A** is the existing GitHub Pages version with the current synthesized audio.
-**B** is the branch preview after verified recordings are supplied and enabled.
-The current B build intentionally plays no sound for empty Bathtub Bliss slots.
+**B** is the branch preview with the six supplied Foley recordings enabled.
 Levels 2–10 retain their existing audio.
 
 - [A · Live Cleaning Club](https://joelgeisler1-jpg.github.io/family-games/games/cleaning-club/)
-- [B · Review branch against main](https://github.com/joelgeisler1-jpg/family-games/compare/main...bathtub-bliss-recorded-foley?expand=1)
-- [Source files to supply](CREDITS.md)
+- [B · Review branch against main](https://github.com/joelgeisler1-jpg/family-games/compare/main...bathtub-bliss-audio-recovery?expand=1)
+- [Recording sources and credits](SOURCES.md)
 
 Serve B from the repository root with `python3 -m http.server 8000` and open
 `http://127.0.0.1:8000/games/cleaning-club/` on the same machine. On an iPad,
@@ -26,7 +25,4 @@ after review and merge. The branch link is for code review.
    and lock and wake the device. Verify sound fades and the next gesture plays.
    Reload and check old progress and preferences, replay and Level 2 audio.
 
-Physical iPad sound quality and sleep/wake still require testing. Freesound
-returned HTTP 403 for the shortlisted pages in Codex Cloud. The attachment
-contained candidate information only. No synthetic audio is substituted for
-the missing Bathtub Bliss recordings.
+Physical iPad sound quality and sleep/wake still require testing.

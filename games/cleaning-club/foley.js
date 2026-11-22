@@ -1,11 +1,15 @@
 'use strict';
 
-// Paths stay empty until each edited local excerpt is present and credited.
 const bathtubRecordings = {
-  sponge: { porcelain: null, chrome: null, glass: null },
-  brush: { grout: null },
-  spray: [],
-  foam: []
+  sponge: {
+    porcelain: 'sponge_porcelain.mp3',
+    // Reuse the porcelain recording with material-specific filtering.
+    chrome: 'sponge_porcelain.mp3',
+    glass: 'sponge_porcelain.mp3'
+  },
+  brush: { grout: 'brush_grout.mp3', dust: 'brush_dust.mp3' },
+  spray: ['spray_01.mp3', 'spray_02.mp3'],
+  foam: ['foam_bubbles.mp3']
 };
 
 const foleyDefaults = { sponge: 'porcelain', brush: 'grout' };
@@ -36,13 +40,27 @@ function makeFoleyLoop(context, recording) {
 }
 
 class RecordedFoley {
-  constructor(recordings, muted, volume) {
+  constructor(recordings, muted, volume, onStatus) {
+    this.onStatus = onStatus;
     this.recordings = recordings;
     this.muted = muted;
     this.volume = volume;
     this.buffers = new Map();
     this.voices = new Set();
     this.variant = -1;
+  }
+
+  reportStatus() {
+    const failed = [...this.buffers].filter(([, entry]) => entry.failed).map(([file]) => file);
+    const missing = [];
+    if (!this.recordings.sponge.porcelain) missing.push('sponge');
+    if (!this.recordings.brush.grout) missing.push('brush');
+    if (!this.recordings.spray.length) missing.push('spray');
+    if (!this.recordings.foam.length) missing.push('foam detail');
+    const messages = [];
+    if (missing.length) messages.push(`Missing recordings: ${missing.join(', ')}.`);
+    if (failed.length) messages.push(`Could not load or decode: ${failed.join(', ')}.`);
+    this.onStatus?.(this.muted ? '' : messages.join(' '));
   }
 
   unlock() {
@@ -86,7 +104,10 @@ class RecordedFoley {
         if (this.gesture?.tool !== 'spray') this.updateBed();
       })
       .catch(error => {
-        if (!this.disposed) console.warn('Cleaning Club Foley:',error);
+        if (this.disposed) return;
+        entry.failed = true;
+        this.reportStatus();
+        console.warn('Cleaning Club Foley:',error);
       });
   }
 
@@ -203,6 +224,7 @@ class RecordedFoley {
   set(muted, volume) {
     this.muted = muted;
     this.volume = volume;
+    this.reportStatus();
     if (muted || volume <= 0) this.stopAll();
     if (this.output) this.output.gain.setTargetAtTime(muted ? 0 : volume*.7,this.context.currentTime,.03);
   }
