@@ -130,6 +130,8 @@ class SurfaceCleaning {
     this.pointer = event.pointerId;
     this.strokeTool = tool;
     this.previous = sceneCoordinates(event);
+    cleaningAudio.begin(event.pointerId, tool, this.previous,
+      this.level.audioMaterial?.(ctx,this.previous), event.timeStamp);
     this.distanceToStamp = cleaningTools[tool].spacing;
     this.started ||= performance.now();
     this.apply(this.previous.x, this.previous.y, tool);
@@ -154,12 +156,15 @@ class SurfaceCleaning {
       this.distanceToStamp = offset - distance;
       this.previous = next;
     }
+    cleaningAudio.move(event.pointerId, this.previous,
+      this.level.audioMaterial?.(ctx,this.previous), event.timeStamp);
     this.renderSoon();
   }
 
   pointerUp(event) {
     if (event.pointerId !== this.pointer) return;
     this.pointer = undefined;
+    cleaningAudio.end(event.type === 'pointerup');
     this.update();
     clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => this.save(), 850);
@@ -194,7 +199,6 @@ class SurfaceCleaning {
     }
     this.changed = true;
     this.needsDraw = true;
-    cleaningAudio.play(tool);
   }
 
   renderSoon() {

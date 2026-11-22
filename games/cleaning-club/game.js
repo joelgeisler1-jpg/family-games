@@ -93,15 +93,62 @@ function drawFX(){fctx.clearRect(0,0,W,H);const now=performance.now();S.fx=S.fx.
 if(S.fx.length||S.down)S.animation=requestAnimationFrame(drawFX);else S.animation=0}
 function animateFX(){if(!S.animation)S.animation=requestAnimationFrame(drawFX)}
 function cleanPoint(x,y){if(S.done)return;erasePoint(x,y);fxParticle(x,y)}
-function refreshDirt(){redraw();checkProgress();animateFX();cleaningAudio.play(S.tool)}
+function refreshDirt(){redraw();checkProgress();animateFX()}
 function sceneCoordinates(e){const b=dirty.getBoundingClientRect();return{x:(e.clientX-b.left)/b.width*W,y:(e.clientY-b.top)/b.height*H,px:e.clientX-b.left,py:e.clientY-b.top}}
 function moveCursor(p){const c=$('cursor');c.classList.remove('hidden');c.textContent=spec[S.tool].icon;c.style.left=p.px+'px';c.style.top=p.py+'px'}
 function stroke(e){const p=sceneCoordinates(e);moveCursor(p);if(!S.previous){cleanPoint(p.x,p.y);S.previous=p;refreshDirt();return}const prev=S.previous;const distance=Math.hypot(p.x-prev.x,p.y-prev.y);const steps=Math.min(24,Math.max(1,Math.ceil(distance/spec[S.tool].step)));for(let n=1;n<=steps;n++){const t=n/steps;cleanPoint(prev.x+(p.x-prev.x)*t,prev.y+(p.y-prev.y)*t)}S.previous=p;refreshDirt()}
 let holdInterval=null;
-dirty.addEventListener('pointerdown',e=>{if(S.done)return;if(surface){surface.pointerDown(e,S.tool);if(surface.pointer===e.pointerId)dirty.setPointerCapture(e.pointerId);return}e.preventDefault();S.down=true;if(!S.started)S.started=performance.now();S.previous=null;try{dirty.setPointerCapture(e.pointerId)}catch(_){}stroke(e);clearInterval(holdInterval);holdInterval=setInterval(()=>{if(S.down&&S.previous){cleanPoint(S.previous.x,S.previous.y);refreshDirt()}},75)});
-dirty.addEventListener('pointermove',e=>{if(surface){surface.pointerMove(e);return}if(S.down){e.preventDefault();stroke(e)}});
-function endStroke(){if(!S.down)return;S.down=false;S.previous=null;clearInterval(holdInterval);holdInterval=null;$('cursor').classList.add('hidden');checkProgress(true)}
-for(const evt of ['pointerup','pointercancel','lostpointercapture'])dirty.addEventListener(evt,e=>surface?surface.pointerUp(e):endStroke());
+let legacyPointer;
+function legacyAudioMaterial(tool) {
+  if (S.level === 1 || S.level === 9) return 'glass';
+  return tool === 'brush' || tool === 'spray' ? 'dust' : 'porcelain';
+}
+
+dirty.addEventListener('pointerdown', event => {
+  if (S.done) return;
+  if (surface) surface.pointerDown(event,S.tool);
+  else {
+    if (S.down || event.button !== 0) return;
+    event.preventDefault();
+    legacyPointer = event.pointerId;
+    S.down = true;
+    if (!S.started) S.started = performance.now();
+    S.previous = null;
+    cleaningAudio.begin(event.pointerId,S.tool,sceneCoordinates(event),legacyAudioMaterial(S.tool),event.timeStamp);
+    stroke(event);
+    if (S.down) holdInterval = setInterval(() => {
+      if (S.previous) { cleanPoint(S.previous.x,S.previous.y); refreshDirt(); }
+    },75);
+  }
+  if (surface ? surface.pointer === event.pointerId : S.down) {
+    try { dirty.setPointerCapture(event.pointerId); } catch { /* The pointer can end before capture. */ }
+  }
+});
+dirty.addEventListener('pointermove', event => {
+  if (surface) surface.pointerMove(event);
+  else if (S.down && legacyPointer === event.pointerId) {
+    event.preventDefault();
+    cleaningAudio.move(event.pointerId,sceneCoordinates(event),legacyAudioMaterial(S.tool),event.timeStamp);
+    stroke(event);
+  }
+});
+function endStroke(withFoam = false) {
+  if (!S.down) return;
+  S.down = false;
+  legacyPointer = undefined;
+  S.previous = null;
+  clearInterval(holdInterval);
+  holdInterval = null;
+  cleaningAudio.end(withFoam);
+  $('cursor').classList.add('hidden');
+  checkProgress(true);
+}
+for (const type of ['pointerup','pointercancel','lostpointercapture']) {
+  dirty.addEventListener(type,event => {
+    if (surface) surface.pointerUp(event);
+    else if (legacyPointer === event.pointerId) endStroke(type === 'pointerup');
+  });
+}
 function clock(){if(S.done)return;if(surface)S.elapsed=surface.time;else if(S.started)S.elapsed=Math.floor((performance.now()-S.started)/1000);$('timeLabel').textContent='⏱ '+Math.floor(S.elapsed/60)+':'+String(S.elapsed%60).padStart(2,'0')}
 setInterval(clock,400);
 function levelButtons(){const n=$('levelList');n.replaceChildren();levels.forEach((l,i)=>{const b=document.createElement('button');b.textContent=i+1;b.disabled=i>=S.unlocked;b.className=i===S.level?'current':'';if(i===S.level)b.setAttribute('aria-current','step');b.setAttribute('aria-label','Level '+(i+1)+(b.disabled?' locked':''));b.onclick=()=>{S.level=i;loadLevel()};n.append(b)})}
@@ -118,6 +165,7 @@ const legacyHints = {
 };
 
 function selectTool(tool) {
+  if (tool !== S.tool) cleaningAudio.cancel();
   S.tool = tool;
   for (const button of toolButtons) {
     const selected = button.dataset.tool === tool;
@@ -147,6 +195,7 @@ function updateSurfaceProgress(progress, layers) {
 }
 
 function loadLevel(replay = false) {
+  cleaningAudio.cancel();
   surface?.dispose(!replay);
   surface = null;
   endStroke();
@@ -200,6 +249,7 @@ function loadLevel(replay = false) {
 }
 
 function complete() {
+  cleaningAudio.cancel();
   S.done = true;
   S.down = false;
   clearInterval(holdInterval);
@@ -240,6 +290,23 @@ $('volume').oninput = () => {
   cleaningAudio.set(cleaningAudio.muted, Number($('volume').value)/100);
   saveSetting('familyArcadeCleaningVolume', $('volume').value);
 };
-window.addEventListener('pagehide', () => surface?.save());
+function cancelCleaningInput() {
+  cleaningAudio.cancel();
+  if (surface?.pointer !== undefined) surface.pointerUp({pointerId:surface.pointer});
+  else endStroke();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) cancelCleaningInput();
+});
+window.addEventListener('pagehide', () => {
+  cancelCleaningInput();
+  surface?.save();
+});
+window.addEventListener('blur', cancelCleaningInput);
+// Some touch browsers grant audio activation on release. This also primes
+// audio after a fresh navigation when the saved preference is already on.
+dirty.addEventListener('touchend', () => {
+  if (cleaningAudio.context?.state !== 'running') cleaningAudio.unlock();
+}, {passive:true});
 updateAudioControls();
 loadLevel();
