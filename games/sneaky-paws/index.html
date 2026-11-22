@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#201b3b"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Sneaky Paws • Family Arcade</title>
+<style>
+:root{font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#29223e;background:#f7f4fd;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top left,#e9e5ff,transparent 48%),#f7f4fd}
+button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,a:focus-visible{outline:3px solid #7260ed;outline-offset:3px}
+.shell{max-width:1000px;margin:auto;padding:15px 14px 30px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.back{font-size:13px;text-decoration:none;color:#554b88;font-weight:800;background:white;border:1px solid #ded8f2;border-radius:99px;padding:10px 13px}
+.brand{font-size:12px;color:#817596;font-weight:900;letter-spacing:1px;text-transform:uppercase}.heading{display:flex;align-items:center;gap:10px}.heading h1{margin:0;font-size:clamp(22px,4vw,33px);letter-spacing:-1px}.badge{padding:7px 10px;background:#fff2c9;border-radius:99px;color:#665219;font-size:12px;font-weight:900;white-space:nowrap}
+.intro{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}.intro p{margin:5px 0 0;color:#746984;font-size:13px;line-height:1.4}
+.levels{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:3px 0 11px;scrollbar-width:thin}
+.level{flex:1;min-width:51px;border:1px solid #ddd5ed;background:white;color:#756b92;border-radius:12px;padding:9px 7px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;gap:5px}
+.level.active{background:#6254c8;border-color:#6254c8;color:white;box-shadow:0 5px 12px #6254c844}.level:disabled{opacity:.45;cursor:not-allowed}
+.play{background:#fff;border:1px solid #e0daf0;border-radius:21px;padding:9px;box-shadow:0 15px 32px #39315b16;overflow:hidden}
+.board{position:relative;border-radius:14px;overflow:hidden;background:#f5f1ff}.board svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+#arm{fill:none;stroke:#28223a;stroke-width:22;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 3px 1px #0002)}
+#armHighlight{fill:none;stroke:#c3a4fa;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#glow{pointer-events:none}.guide{pointer-events:none}#cameraCone{mix-blend-mode:multiply;pointer-events:none}
+#board.alarm{animation:blink .4s ease-in-out 2}@keyframes blink{50%{filter:sepia(.8) hue-rotate(315deg) saturate(2)}}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 6px 2px;flex-wrap:wrap}.story h2{font-size:16px;margin:0 0 2px}.story p{font-size:12px;margin:0;color:#716889}.right{display:flex;gap:8px}
+.btn{border:0;padding:11px 15px;border-radius:13px;font-size:13px;font-weight:900;background:#e9e5f8;color:#443a70}.btn.primary{background:#6254c8;color:#fff}.btn:disabled{opacity:.46;cursor:default}
+.notice{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;font-size:13px;font-weight:800;color:#574c80}.notice.fail{color:#c84a53}.notice.win{color:#228b68}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;padding:7px;color:#716887;font-size:11px;font-weight:800}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.purple{background:#8c7ac8}.dot.red{background:#f26b7b}.dot.yellow{background:#f5bc4a}
+.winpanel{display:none;align-items:center;justify-content:space-between;gap:10px;border:1px solid #c7e7dc;background:#eefff8;padding:12px;border-radius:14px;margin:9px 2px 2px}.winpanel.show{display:flex}.winpanel b{color:#247e61;font-size:15px}.winpanel p{margin:3px 0 0;color:#65877b;font-size:12px}
+@media(max-width:520px){.shell{padding:11px 7px 18px}.brand{font-size:10px}.intro{align-items:start}.heading h1{font-size:23px}.badge{font-size:10px}.play{padding:5px;border-radius:15px}.hud{padding:11px 5px 2px}.right{width:100%}.btn{flex:1;padding:12px 8px}.winpanel{flex-wrap:wrap}.winpanel button{width:100%}.legend{font-size:10px}}
+@media(prefers-reduced-motion:reduce){#board.alarm{animation:none}}
+</style>
+</head>
+<body>
+<main class="shell">
+ <nav class="top"><a class="back" href="../../">← Family Arcade</a><span class="brand">🕵️ Little big missions</span></nav>
+ <div class="intro"><div><div class="heading"><h1>🐾 Sneaky Paws</h1><span class="badge">5 puzzles</span></div><p>Stretch your thief's arm. Go around the traps. Grab the treasure!</p></div></div>
+ <div class="levels" id="levels" aria-label="Choose unlocked level"></div>
+ <section class="play" aria-label="Sneaky Paws puzzle">
+  <div class="board" id="board">
+   <svg id="scene" viewBox="0 0 780 510" role="img" aria-label="Drag from the thief's glowing hand to the treasure, avoiding obstacles and red danger zones">
+    <defs><pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#bfb2dc" opacity=".22"/></pattern><filter id="blur"><feGaussianBlur stdDeviation="6"/></filter></defs>
+    <rect width="780" height="510" fill="#faf8ff"/><rect width="780" height="510" fill="url(#dots)"/>
+    <rect x="14" y="14" width="752" height="482" rx="20" fill="none" stroke="#dfd7ee" stroke-width="3" stroke-dasharray="8 11"/>
+    <path id="cameraCone" fill="#ffc957" opacity=".27" stroke="#f0ae38" stroke-width="2"/><g id="static"></g><g id="dynamic"><g id="armGroup"><polyline id="arm" points=""/><polyline id="armHighlight" points=""/></g><g id="stolen" class="guide"></g></g>
+    <g id="thief" class="guide"><ellipse cx="97" cy="465" rx="63" ry="12" fill="#3d3154" opacity=".1"/><path d="M83 414 L87 460 M83 458 L59 481 M86 458 L109 480 M83 420 L60 443" fill="none" stroke="#292239" stroke-width="11" stroke-linecap="round"/><circle cx="81" cy="391" r="26" fill="#292239"/><rect x="58" y="390" width="47" height="16" rx="8" fill="#ebe3ff"/><circle cx="76" cy="399" r="3.5" fill="#292239"/><circle cx="93" cy="399" r="3.5" fill="#292239"/><circle cx="81" cy="377" r="4" fill="#ad98e8"/></g>
+    <circle id="glow" cx="119" cy="425" r="40" fill="#9becc9" opacity=".3"/><circle id="hand" cx="119" cy="425" r="17" fill="#ab7ef6" stroke="#33283d" stroke-width="5"/><circle id="handDot" cx="119" cy="425" r="5" fill="#fff" class="guide"/>
+    <g id="targetGroup" class="guide"></g>
+   </svg>
+  </div>
+  <div class="hud"><div class="story"><h2 id="levelTitle">Level 1</h2><p id="levelClue">Find a way to the treasure.</p></div><div class="right"><button id="reset" class="btn" type="button">↻ Try again</button><button id="hint" class="btn primary" type="button">💡 Hint</button></div></div>
+  <div class="notice" id="notice" role="status" aria-live="polite"><span id="noticeText">👆 Start on the glowing hand and drag to the treasure.</span><span id="attempts"></span></div>
+  <div class="winpanel" id="winpanel"><div><b id="winTitle">✨ Treasure secured!</b><p id="winText">Your sneaky arm did it.</p></div><button class="btn primary" id="next" type="button">Next mission →</button></div>
+ </section>
+ <div class="legend"><span><i class="dot purple"></i> Purple = solid object</span><span><i class="dot red"></i> Red = alarm</span><span><i class="dot yellow"></i> Gold = treasure / key</span></div>
+</main>
+<script>
+(()=>{'use strict';
+const NS='http://www.w3.org/2000/svg',W=780,H=510,START={x:119,y:425},ARM_R=11,SAVE='familyArcadeSneakyUnlocked';
+const LEVELS=[
+ {name:'The Crate Caper',clue:'One crate. One shiny gem. Sneak above or below!',hint:'Curve ABOVE the big crate, then come down to the gem.',goal:{x:686,y:401},walls:[{x:298,y:290,w:177,h:148,type:'crate'}],lasers:[{x1:518,y1:451,x2:604,y2:451}]},
+ {name:'Laser Zigzag',clue:'Red beams sound the alarm. Find the gaps!',hint:'Above the first beam, BELOW the second, above the third.',goal:{x:697,y:106},walls:[],lasers:[{x1:274,y1:168,x2:274,y2:469},{x1:460,y1:44,x2:460,y2:304},{x1:623,y1:247,x2:623,y2:476}]},
+ {name:'Shhh… Sleeping Guard',clue:"Don't enter the guard's red listening circle.",hint:'Sneak underneath the guard, then around the tall locker.',goal:{x:695,y:132},walls:[{x:235,y:113,w:92,h:184,type:'locker'},{x:522,y:278,w:101,h:185,type:'locker'}],guards:[{x:405,y:269,r:87}]},
+ {name:'The Sweeping Eye',clue:'The camera moves! Time your stretchy reach.',hint:'Go above the tall crate, then hide below the smaller one until the spotlight turns away.',goal:{x:704,y:391},walls:[{x:252,y:248,w:142,h:230,type:'crate'},{x:449,y:169,w:131,h:136,type:'crate'}],camera:{x:606,y:102,r:257,base:1.83,sweep:.64,half:.22,speed:.00125}},
+ {name:'The Grand Vault',clue:'Collect the gold key FIRST, then snatch the ruby.',hint:'Go under the first red beam, over the first wall, then beneath the second wall.',goal:{x:697,y:408},key:{x:412,y:143},walls:[{x:251,y:207,w:72,h:276,type:'locker'},{x:525,y:46,w:73,h:269,type:'locker'}],lasers:[{x1:178,y1:44,x2:178,y2:313},{x1:644,y1:92,x2:744,y2:92}],guards:[{x:650,y:228,r:55}]}
+];
+const $=id=>document.getElementById(id),scene=$('scene'),board=$('board'),staticLayer=$('static'),cameraCone=$('cameraCone'),arm=$('arm'),highlight=$('armHighlight'),hand=$('hand'),handDot=$('handDot'),glow=$('glow'),targetGroup=$('targetGroup'),stolen=$('stolen');
+let unlocked=1;try{unlocked=Math.max(1,Math.min(5,Number(localStorage.getItem(SAVE))||1))}catch{}
+let level=0,points=[],mode='ready',attempt=0,keyTaken=false,grabbed=false,activePointer=null,cameraAngle=0,winTick=0,lastTime=0;
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),segDist=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,d=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/d));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)};
+const svg=(tag,attrs={})=>{let e=document.createElementNS(NS,tag);for(let [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e};
+const piece=(content,attrs)=>{let el=svg('g',attrs);el.innerHTML=content;return el};
+function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';
+  for(let wall of L.walls){let{x,y,w,h,type}=wall;let g=piece(`<rect x="${x+6}" y="${y+8}" width="${w}" height="${h}" rx="12" fill="#3a2e66" opacity=".13"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="11" fill="${type==='locker'?'#938acb':'#b9a7dc'}" stroke="#51467e" stroke-width="5"/><path d="M${x+13} ${y+16}H${x+w-14}M${x+13} ${y+h-17}H${x+w-14}" stroke="#f0eaff" opacity=".75" stroke-width="5" stroke-linecap="round"/>${type==='crate'?`<path d="M${x+24} ${y+30}L${x+w-24} ${y+h-30}M${x+w-24} ${y+30}L${x+24} ${y+h-30}" stroke="#71669d" stroke-width="9" opacity=".45"/>`:`<rect x="${x+w-25}" y="${y+h/2-18}" width="6" height="36" rx="3" fill="#ede7ff"/>`}`);staticLayer.append(g)}
+  for(let laser of L.lasers||[]){let{x1,y1,x2,y2}=laser;staticLayer.append(piece(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f66c80" stroke-width="24" opacity=".16" filter="url(#blur)"/><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ed647c" stroke-width="8" stroke-linecap="round" stroke-dasharray="12 7"/><circle cx="${x1}" cy="${y1}" r="11" fill="#e95771"/><circle cx="${x2}" cy="${y2}" r="11" fill="#e95771"/>`))}
+  for(let guard of L.guards||[]){let{x,y,r}=guard;staticLayer.append(piece(`<circle cx="${x}" cy="${y}" r="${r}" fill="#ff7680" opacity=".11"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#ed6575" stroke-width="4" stroke-dasharray="9 9"/><circle cx="${x}" cy="${y}" r="24" fill="#493c65"/><path d="M${x-13} ${y+2}Q${x} ${y+14} ${x+13} ${y+2}" stroke="#fff" fill="none" stroke-width="3"/><text x="${x+23}" y="${y-23}" font-size="27">💤</text>`))}
+  if(L.camera){let c=L.camera;staticLayer.append(piece(`<path d="M${c.x-22} ${c.y-21}h44v36h-44z" fill="#51467e"/><circle cx="${c.x}" cy="${c.y}" r="17" fill="#bdb0e4" stroke="#51467e" stroke-width="5"/><circle cx="${c.x}" cy="${c.y}" r="6" fill="#edcc72"/>`))}
+  updateTargets();cameraCone.style.display=L.camera?'':'none';
+}
+function updateTargets(){let L=LEVELS[level];targetGroup.innerHTML='';let t=L.goal;
+  targetGroup.append(piece(`<circle cx="${t.x}" cy="${t.y}" r="35" fill="#f9d76d" opacity=".26"/><circle cx="${t.x}" cy="${t.y}" r="28" fill="#fff6d3" stroke="#e7c65e" stroke-width="3"/><text x="${t.x}" y="${t.y+13}" font-size="38" text-anchor="middle">${level===4?'💎':'💰'}</text>`));
+  if(L.key&&!keyTaken){let k=L.key;targetGroup.append(piece(`<circle cx="${k.x}" cy="${k.y}" r="30" fill="#fff0a5" stroke="#e2c762" stroke-width="3"/><text x="${k.x}" y="${k.y+12}" font-size="35" text-anchor="middle">🔑</text>`))}
+}
+function redraw(){let p=points.map(q=>`${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(' ');arm.setAttribute('points',p);highlight.setAttribute('points',p);let end=points.at(-1)||START;for(let e of [hand,handDot,glow]){e.setAttribute('cx',end.x);e.setAttribute('cy',end.y)}}
+function status(msg,kind=''){ $('noticeText').textContent=msg;$('notice').className='notice '+kind;$('attempts').textContent=attempt?`${attempt} ${attempt===1?'try':'tries'}`:''}
+function choose(n){if(n>=unlocked)return;level=n;attempt=0;load()}
+function updateLevelButtons(){let e=$('levels');e.innerHTML='';LEVELS.forEach((L,i)=>{let b=document.createElement('button');b.type='button';b.className='level'+(level===i?' active':'');b.disabled=i>=unlocked;b.textContent=i<unlocked?`✦ ${i+1}`:`🔒 ${i+1}`;b.setAttribute('aria-label',`Level ${i+1}: ${L.name}${i>=unlocked?' locked':''}`);if(i===level)b.setAttribute('aria-current','step');b.onclick=()=>choose(i);e.append(b)})}
+function load(){points=[{...START}];mode='ready';keyTaken=false;grabbed=false;activePointer=null;stolen.innerHTML='';board.classList.remove('alarm');$('winpanel').classList.remove('show');$('levelTitle').textContent=`${level+1} / 5 · ${LEVELS[level].name}`;$('levelClue').textContent=LEVELS[level].clue;status('👆 Start on the glowing hand and draw a safe path.');drawStatic();redraw();updateLevelButtons();$('next').textContent=level===4?'Play again ↻':'Next mission →'}
+function fail(reason,alarm=true){if(mode!=='drawing')return;mode='failed';activePointer=null;status(`${alarm?'🚨':'🧱'} ${reason} Tap Try again.`, 'fail');if(alarm){board.classList.remove('alarm');void board.offsetWidth;board.classList.add('alarm')}playSound(alarm?'alarm':'bump')}
+function segmentBlocked(a,b){let L=LEVELS[level],len=dist(a,b),steps=Math.max(1,Math.ceil(len/6));for(let i=1;i<=steps;i++){let p={x:a.x+(b.x-a.x)*i/steps,y:a.y+(b.y-a.y)*i/steps};let issue=hit(p,L);if(issue)return issue}return null}
+function hit(p,L){if(p.x<25||p.y<25||p.x>W-25||p.y>H-25)return {msg:'Keep your arm inside the room!',alarm:false};
+ for(let w of L.walls)if(p.x>w.x-ARM_R&&p.x<w.x+w.w+ARM_R&&p.y>w.y-ARM_R&&p.y<w.y+w.h+ARM_R)return{msg:'That solid object stopped your arm!',alarm:false};
+ for(let laser of L.lasers||[])if(segDist(p,{x:laser.x1,y:laser.y1},{x:laser.x2,y:laser.y2})<ARM_R+9)return{msg:'You touched a laser!',alarm:true};
+ for(let g of L.guards||[])if(dist(p,g)<g.r+ARM_R)return{msg:'The guard heard your sneaky arm!',alarm:true};
+ if(L.camera&&inCamera(p,L.camera))return{msg:'The camera spotted your arm!',alarm:true};return null}
+function inCamera(p,c){let d=dist(p,c);if(d>c.r+ARM_R)return false;let angle=Math.atan2(p.y-c.y,p.x-c.x);if(Math.abs(Math.atan2(Math.sin(angle-cameraAngle),Math.cos(angle-cameraAngle)))>=c.half+.025)return false;const walls=LEVELS[level].walls,steps=Math.ceil(d/10);for(let i=1;i<steps;i++){let x=c.x+(p.x-c.x)*i/steps,y=c.y+(p.y-c.y)*i/steps;if(walls.some(w=>x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h))return false}return true}
+function sampleOnDrag(p){let previous=points.at(-1),d=dist(previous,p);if(d<2)return;let n=Math.ceil(d/7);for(let i=1;i<=n;i++){let next={x:previous.x+(p.x-previous.x)*i/n,y:previous.y+(p.y-previous.y)*i/n};let problem=segmentBlocked(points.at(-1),next);if(problem){fail(problem.msg,problem.alarm);return}points.push(next);if(points.length>1800){fail('Your arm got too tangled!',false);return}
+  let L=LEVELS[level];if(L.key&&!keyTaken&&dist(next,L.key)<29){keyTaken=true;updateTargets();status('🔑 Key secured! Now grab the ruby.');playSound('key')}
+  if(dist(next,L.goal)<28){if(L.key&&!keyTaken){status('🔒 Grab the gold KEY first!')}else{win();return}}}redraw()}
+function position(ev){let r=scene.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*W,y:(ev.clientY-r.top)/r.height*H}}
+scene.addEventListener('pointerdown',ev=>{if(mode==='win')return;let p=position(ev);if(mode==='failed'){status('↻ Tap Try again to reset your arm.','fail');return}if(mode==='ready'){if(dist(p,START)>65){status('👆 Touch the glowing hand beside the thief to start.');return}mode='drawing';attempt++;points=[{...START}];status('🤫 Keep away from purple blocks and red alarm zones.')}else if(mode!=='drawing')return;activePointer=ev.pointerId;scene.setPointerCapture(ev.pointerId);sampleOnDrag(p);ev.preventDefault()});
+scene.addEventListener('pointermove',ev=>{if(mode!=='drawing'||activePointer!==ev.pointerId)return;sampleOnDrag(position(ev));ev.preventDefault()});
+function release(ev){if(ev.pointerId!==activePointer)return;activePointer=null;if(mode==='drawing'){mode='ready';points=[{...START}];keyTaken=false;updateTargets();redraw();status('↻ You let go! Start at the hand and draw in ONE motion.')}}
+scene.addEventListener('pointerup',release);scene.addEventListener('pointercancel',release);
+function win(){mode='win';grabbed=true;activePointer=null;let last=points.at(-1);let loot=svg('text',{x:last.x,y:last.y+9,'text-anchor':'middle','font-size':29});loot.textContent=level===4?'💎':'💰';stolen.append(loot);targetGroup.innerHTML='';let duration=1150,start=performance.now(),original=points.slice();function retract(t){let fraction=Math.min(1,(t-start)/duration),idx=Math.max(0,Math.floor((1-fraction)*(original.length-1))),p=original[idx];let shortened=original.slice(0,idx+1);points=shortened;redraw();loot.setAttribute('x',p.x);loot.setAttribute('y',p.y+9);if(fraction<1){requestAnimationFrame(retract)}else{stolen.innerHTML='';complete()}}requestAnimationFrame(retract);playSound('win')}
+function complete(){if(level===unlocked-1&&unlocked<5){unlocked++;try{localStorage.setItem(SAVE,String(unlocked))}catch{}}updateLevelButtons();let final=level===4;status(final?'🏆 You mastered every Sneaky Paws mission!':'✨ Treasure secured. Nobody noticed!', 'win');$('winTitle').textContent=final?'🏆 Master thief!':'✨ Perfectly sneaky!';$('winText').textContent=final?'You solved all five puzzles!':'The treasure is safe in your pocket.';$('winpanel').classList.add('show')}
+let audioContext=null;let soundEnabled=true;function playSound(name){if(!soundEnabled)return;try{audioContext??=new(window.AudioContext||window.webkitAudioContext)();let frequencies=name==='alarm'?[480,240]:name==='win'?[520,660,880]:name==='key'?[660,930]:[180],t=audioContext.currentTime;frequencies.forEach((f,i)=>{let o=audioContext.createOscillator(),g=audioContext.createGain(),at=t+i*.095;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.0001,at);g.gain.exponentialRampToValueAtTime(.065,at+.01);g.gain.exponentialRampToValueAtTime(.0001,at+.1);o.connect(g).connect(audioContext.destination);o.start(at);o.stop(at+.11)})}catch{}}
+function animate(t){let c=LEVELS[level].camera;if(c){cameraAngle=c.base+Math.sin(t*c.speed)*c.sweep;let r=c.r,a=cameraAngle-c.half,b=cameraAngle+c.half;let sx=c.x+r*Math.cos(a),sy=c.y+r*Math.sin(a),ex=c.x+r*Math.cos(b),ey=c.y+r*Math.sin(b);cameraCone.setAttribute('d',`M${c.x} ${c.y} L${sx} ${sy} A${r} ${r} 0 0 1 ${ex} ${ey} Z`);if(mode==='drawing'&&t-lastTime>75){lastTime=t;for(let i=0;i<points.length;i+=2){if(inCamera(points[i],c)){fail('The moving spotlight found you!',true);break}}}}requestAnimationFrame(animate)}
+$('reset').onclick=()=>load();$('hint').onclick=()=>status(`💡 ${LEVELS[level].hint}`);$('next').onclick=()=>{if(level===4){level=0;attempt=0;load()}else{level++;attempt=0;load()}};window.addEventListener('keydown',ev=>{if(ev.key==='Escape')load();if(ev.key==='Enter'&&mode==='win')$('next').click()});
+load();requestAnimationFrame(animate);
+})();
+</script>
+</body></html>
