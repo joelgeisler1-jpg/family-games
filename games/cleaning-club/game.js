@@ -159,7 +159,32 @@ for (const type of ['pointerup','pointercancel','lostpointercapture']) {
 }
 function clock(){if(S.done)return;if(surface)S.elapsed=surface.time;else if(S.started)S.elapsed=Math.floor((performance.now()-S.started)/1000);$('timeLabel').textContent='⏱ '+Math.floor(S.elapsed/60)+':'+String(S.elapsed%60).padStart(2,'0')}
 setInterval(clock,400);
-function levelButtons(){const n=$('levelList');n.replaceChildren();levels.forEach((l,i)=>{const b=document.createElement('button');b.textContent=i+1;b.disabled=i>=S.unlocked;b.className=i===S.level?'current':'';if(i===S.level)b.setAttribute('aria-current','step');b.setAttribute('aria-label','Level '+(i+1)+(b.disabled?' locked':''));b.onclick=()=>{S.level=i;loadLevel()};n.append(b)})}
+const finaleBadgeKey = 'familyArcadeCleaningFinaleCompleted';
+function finaleEarned() {
+  if (savedSetting(finaleBadgeKey) === 'true') return true;
+  try { return JSON.parse(savedSetting(palaceLevel.saveKey))?.completed === true; }
+  catch { return false; }
+}
+
+function levelButtons() {
+  const finalBadge = finaleEarned();
+  $('collectionSummary').textContent = (S.unlocked-1+Number(finalBadge))+' / 10 rooms cleaned';
+  const buttons = levels.map((level,i) => {
+    const button = document.createElement('button');
+    const earned = i === 9 ? finalBadge : i+1 < S.unlocked;
+    button.textContent = i+1;
+    button.disabled = i>=S.unlocked;
+    button.classList.toggle('current',i===S.level);
+    button.classList.toggle('earned',earned);
+    if (i===S.level) button.setAttribute('aria-current','step');
+    button.setAttribute('aria-label','Level '+(i+1)+', '+level.title+
+      (button.disabled ? ', locked' : earned ? ', completed' : ''));
+    button.onclick = () => { S.level=i;loadLevel(); };
+    return button;
+  });
+  $('levelList').replaceChildren(...buttons);
+}
+
 let surface;
 const recordedAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume,message => {
   const warning = $('audioWarning');
@@ -223,6 +248,7 @@ function updateSurfaceProgress(progress, layers) {
 
 function loadLevel(replay = false) {
   for (const menu of gameMenus) menu.open = false;
+  setComparison(false);
   stopCleaningAudio();
   recordedAudio.reportStatus();
   surface?.dispose(!replay);
@@ -296,10 +322,38 @@ function complete() {
   $('again').textContent = S.level === 9 ? 'Replay this level' : 'Clean this scene again';
   $('finish').classList.remove('hidden');
   S.unlocked = Math.max(S.unlocked, Math.min(10, S.level+2));
+  if (S.level === 9) saveSetting(finaleBadgeKey,'true');
   saveSetting('familyArcadeCleaningUnlocked', String(S.unlocked));
   levelButtons();
   surface?.save();
 }
+
+function setComparison(open) {
+  if (open && !S.done) return;
+  const before = $('beforeCanvas');
+  if (open) {
+    surface.drawOriginalDirt(before);
+    $('compareRange').value = 50;
+    moveComparison();
+  } else if (before.width !== 1) {
+    before.width = 1;
+    before.height = 1;
+  }
+  before.classList.toggle('hidden',!open);
+  $('compareDivider').classList.toggle('hidden',!open);
+  $('comparisonPanel').classList.toggle('hidden',!open);
+  scene.classList.toggle('comparing',open);
+  if (S.done) $('finish').classList.toggle('hidden',open);
+}
+
+function moveComparison() {
+  const percent = Number($('compareRange').value);
+  scene.style.setProperty('--before-width',percent+'%');
+  $('compareRange').setAttribute('aria-valuetext',percent+'% before, '+(100-percent)+'% after');
+}
+$('compareRange').oninput = moveComparison;
+$('openComparison').onclick = () => { setComparison(true); $('compareRange').focus(); };
+$('closeComparison').onclick = () => { setComparison(false); $('openComparison').focus(); };
 
 function updateAudioControls() {
   $('sound').textContent = cleaningAudio.muted ? 'Sound off' : 'Sound on';
@@ -365,6 +419,7 @@ document.addEventListener('pointerdown', event => {
 });
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
+  if (scene.classList.contains('comparing')) $('closeComparison').click();
   for (const menu of gameMenus) {
     if (!menu.open) continue;
     menu.open = false;

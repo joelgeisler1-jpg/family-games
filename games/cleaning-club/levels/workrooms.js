@@ -117,8 +117,32 @@ function paintWorkroomDeposit(ctx, random, kind) {
   }
 }
 
+function paintRaisedMud(ctx, random) {
+  ctx.beginPath();
+  ctx.ellipse(0,0,.93,.86,0,0,Math.PI*2);
+  ctx.clip();
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#4f3725a3';
+  ctx.lineWidth = .105;
+  ctx.beginPath();
+  ctx.moveTo(-.72,.30);
+  ctx.bezierCurveTo(-.43,.79,.29,.89,.75,.29);
+  ctx.stroke();
+  for (let i=0;i<22;i++) {
+    const theta = random()*Math.PI*2;
+    const radius = .28+random()*.51;
+    const x = Math.cos(theta)*radius, y = Math.sin(theta)*radius;
+    const grain = .024+random()*.04;
+    ctx.fillStyle = i%3 ? '#dabb835e' : '#4d332771';
+    ctx.beginPath();
+    ctx.ellipse(x,y,grain,grain*1.38,.37,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
 function workroomDirt(details, zone, marks) {
-  return dirtLayer(details,zone,marks,paintWorkroomDeposit);
+  const layer = dirtLayer(details,zone,marks,paintWorkroomDeposit);
+  return details.crusted ? thickenDirt(layer,.43,surfaceDirt(zone,marks,paintRaisedMud)) : layer;
 }
 
 const kitchenStove = cleaningZone('M113 303H453Q460 304 462 315L479 387Q480 394 469 395H91Q81 394 82 385Z','chrome');
@@ -162,7 +186,7 @@ const puppyLevel = {
       <image class="puppy-celebration" width="960" height="620"/>
     </g>
     ${polishGlints([[377,329,8],[738,350,9]])}`,
-  dirtVersion:3, idleHints:true, seed:60391, saveKey:'familyArcadePuppySpaProgress1',
+  dirtVersion:4, idleHints:true, seed:60391, saveKey:'familyArcadePuppySpaProgress1',
   description:'Wipe muddy tracks, brush the washing station, and rinse away the soap film.',
   finishTitle:'A happy, clean puppy!',
   finishMessage:'The basin is bright again. Look at that happy little head tilt!',
@@ -171,7 +195,7 @@ const puppyLevel = {
   layers:[
     workroomDirt({id:'paws',label:'Muddy paw prints',color:'#926344',weight:.24,tool:'sponge',action:'Wipe the puppy’s muddy tracks across the tiled floor.'},puppyFloor,
       [['paw',99,581,25,24,-.38],['paw',164,544,25,23,.21],['paw',169,595,23,20,-.24],['paw',839,548,26,25,.16],['paw',899,594,25,20,-.44]]),
-    workroomDirt({id:'mud',effectKind:'mud',label:'Thick basin mud',color:'#8e654c',weight:.31,tool:'brush',action:'Brush the thicker mud off the front of the wash basin.'},puppyBasin,
+    workroomDirt({id:'mud',effectKind:'mud',crusted:true,label:'Thick basin mud',color:'#8e654c',weight:.31,tool:'brush',action:'Brush the thicker mud off the front of the wash basin.'},puppyBasin,
       [['mud',263,388,47,15,.22],['mud',341,419,48,15,-.19],['mud',450,447,53,19,.06],['mud',601,416,46,19,-.09],['mud',727,451,46,14,-.38]]),
     workroomDirt({id:'fur',effectKind:'fiber',label:'Loose fur and dust',color:'#b99672',weight:.20,tool:'brush',action:'Brush the tufts caught along the outside edges.'},puppyEdges,
       [['fur',115,365,24,15,.8],['fur',125,452,23,11,-.2],['fur',179,516,17,15,.48],['fur',864,397,28,15,-.44],['fur',802,526,16,12,-.4]]),

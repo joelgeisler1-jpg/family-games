@@ -25,6 +25,17 @@ const foleyTone = {
   stone: [1800, .86]
 };
 
+// Trim differences between the original recordings without changing their
+// transients or putting a compressor in the gesture path.
+const recordingLevels = {
+  'sponge_porcelain.mp3':1.32,
+  'brush_dust.mp3':1.25,
+  'brush_grout.mp3':.91,
+  'spray_01.mp3':.96,
+  'spray_02.mp3':.96,
+  'foam_bubbles.mp3':1.07
+};
+
 function makeFoleyLoop(context, recording) {
   // The first 200 ms crossfade from the continuation of the loop's last
   // sample into the head. The overlap itself is removed from the duration.
@@ -127,10 +138,11 @@ class RecordedFoley {
     this.spray = this.play(files[this.variant],false,2800,.57);
   }
 
-  updateGesture({speed, material, tool}) {
+  updateGesture({speed, material, tool, texture}) {
     if (!this.gesture || this.gesture.tool !== tool || tool === 'spray') return;
     const gesture = this.gesture;
     gesture.material = material;
+    gesture.texture = texture;
     gesture.speed += (Math.max(0,Math.min(1500,speed))-gesture.speed)*.46;
     this.updateBed();
     clearTimeout(this.stillTimer);
@@ -149,6 +161,7 @@ class RecordedFoley {
     const preferred = files[material] || (tool === 'brush' && ['dust','wood','fabric','plastic','stone'].includes(material) ? files.dust : null);
     const file = this.buffers.get(preferred)?.buffer ? preferred : files[foleyDefaults[tool]];
     const [cutoff, scale] = foleyTone[material] || foleyTone[foleyDefaults[tool]];
+    const heavy = gesture.texture === 'mud';
     if (speed > 0 && this.bed?.file !== file && this.buffers.get(file)?.buffer) {
       this.fade(this.bed,.2);
       this.bed = this.play(file,true,cutoff,0);
@@ -157,8 +170,8 @@ class RecordedFoley {
     if (!this.bed) return;
     const travel = 1-Math.exp(-speed/480);
     const now = this.context.currentTime;
-    this.bed.cutoff.setTargetAtTime(cutoff*(.88+.18*travel),now,.075);
-    this.bed.gain.setTargetAtTime((.28+.32*travel)*scale*Math.sqrt(travel),now,speed ? .045 : .047);
+    this.bed.cutoff.setTargetAtTime(cutoff*(heavy ? .84 : 1)*(.88+.18*travel),now,.075);
+    this.bed.gain.setTargetAtTime((.28+.32*travel)*scale*(recordingLevels[file] || 1)*(heavy ? 1.08 : 1)*Math.sqrt(travel),now,speed ? .045 : .047);
   }
 
   play(file, loop, cutoff, level) {
@@ -187,7 +200,7 @@ class RecordedFoley {
     };
     const offset = loop ? Math.random()*buffer.duration : 0;
     source.start(0,offset);
-    voice.gain.setTargetAtTime(level,context.currentTime,loop ? .045 : .012);
+    voice.gain.setTargetAtTime(level*(recordingLevels[file] || 1),context.currentTime,loop ? .045 : .012);
     return voice;
   }
 

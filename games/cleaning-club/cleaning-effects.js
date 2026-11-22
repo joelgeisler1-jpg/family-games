@@ -137,7 +137,7 @@ class CleaningEffects {
     for (const particle of mark.particles || []) {
       const drift = tool === 'brush' ? age*8 : age*4;
       const px = x+particle.x + dx/length*drift + nx*particle.x*age*.6;
-      const py = y+particle.y + dy/length*drift + ny*particle.x*age*.6;
+      const py = y+particle.y + dy/length*drift + ny*particle.x*age*.6 + (residue.kind === 'mud' ? age*age*12 : 0);
       ctx.fillStyle = residue.color;
       ctx.strokeStyle = finish.sheen;
       ctx.globalAlpha = fade*.76;
