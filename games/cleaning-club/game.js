@@ -40,10 +40,6 @@ function baseScene(i){const l=levels[i],wall=l.palette[0],floor=l.palette[1];let
 for(let x=0;x<960;x+=93){a+=L(x,452,x-14,620,'#ffffff22',2)}
 for(let y=36;y<410;y+=100){a+=`${E(56+(y%27),y,5,5,'#ffffff50')}${E(912+(y%33),y+15,4,4,'#ffffff50')}`}
 return a}
-function vanity(){return `${R(0,415,960,30,'#f6e4e9')}${framed(61,95,178,190)}${R(698,108,182,16,'#d4a6a3',6)}${flower(775,80,.65)}${cup(844,99,'#f1c6dc',.7)}${R(294,60,371,333,'#e2b898',135,'#fff4e7',8)}${R(317,79,326,293,'url(#glass)',139,'#ffe9e4',7)}${P('M337 126L435 89L548 89L344 302Z','#fff9')}${P('M601 110L629 154L493 351L464 351Z','#ffffff6b')}${sparkle(390,150)}${E(480,379,235,24,'#f6dede')}${R(193,393,581,135,'url(#wood)',20,'#fff4',6)}${R(216,410,538,42,'#f8e2e9',9)}${L(216,459,754,459,'#ffede4',5)}${[300,480,665].map(x=>E(x,481,10,6,'#fff0c0')).join('')}${R(216,531,36,52,'#af8077')}${R(713,531,36,52,'#af8077')}${R(250,351,32,42,'#caadc9',5)}${R(261,339,10,12,'#dda0ae',2)}${R(704,352,46,40,'#faf0cf',7)}${E(727,354,25,9,'#fff3fa')}${R(670,365,16,28,'#f2aab6',4)}${R(675,351,6,18,'#d2b591')}${flower(740,328,.65)}${cup(267,376,'#a8b6d7',.58)}${plant(84,506,.72)}${E(490,561,290,30,'#ffffff6c')}`}
-function bedroom(){return `${framed(83,76,206,192)}${P('M304 150Q309 104 352 116Q401 129 421 91Q460 131 492 108Q534 95 557 136Q603 111 642 145','#ffe9bc')}${R(365,91,220,89,'#d9b1c8',15)}${E(475,140,76,33,'#f7d4da')}${sparkle(675,139)}${R(256,278,448,205,'#e9bec9',36,'#fff9',6)}${R(279,290,402,139,'#fff7f0',34)}${R(307,307,161,85,'#f5d4e4',31)}${R(488,307,161,85,'#c1dded',31)}${P('M259 377Q486 338 699 379L708 505Q459 557 249 505Z','#b6acd9','#fff7',7)}${P('M263 407Q489 389 697 410','none','#ffffff9a',7)}${[335,405,475,545,615].map(x=>L(x,429,x-20,498,'#ffffff50',4)).join('')}${R(211,494,550,35,'#b69ba3',14)}${R(202,524,45,33,'#a98f98',10)}${R(707,524,45,33,'#a98f98',10)}${drawer(70,375,165,102)}${drawer(736,375,155,102)}${R(112,310,11,69,'#bba5b4')}${E(118,300,43,25,'#f9ecd7')}${plant(810,365,.48)}${R(470,174,8,73,'#c9ac99')}${P('M466 208Q420 199 405 234Q449 251 465 223Z','#8cbbaa')}${P('M480 222Q526 197 548 227Q511 248 477 233Z','#a9cfb1')}${E(471,189,17,20,'#ee9db4')}${E(475,187,6,8,'#fff')}`}
-function playroom(){let a=framed(74,77,191,178)+R(675,106,221,340,'#fff0e1',15,'#e3c5cb',7);for(let r=0;r<3;r++){a+=R(686,211+r*85,198,11,'#d6ac94',3)}a+=R(685,424,198,26,'#d2a9aa',9);a+=`${R(716,148,56,59,'#fac9bd',9)}${E(743,145,37,22,'#ffddad')}${R(791,156,65,52,'#b0d4de',9)}${E(820,172,8,8,'#fff')}${R(718,240,63,50,'#dac6f2',7)}${R(798,238,56,52,'#ffd19d',7)}${E(738,266,11,11,'#fff4')}${E(819,261,11,11,'#fce8ff')}${R(719,325,60,49,'#b7d9bb',8)}${E(830,347,26,28,'#ffe4bd')}${E(809,327,13,13,'#ffe4bd')}${E(853,327,13,13,'#ffe4bd')}`;
-a+=`${E(468,513,267,83,'#f6c6d4')}${E(468,514,228,62,'#faf0df')}${P('M267 498Q460 420 670 500','none','#b4d2e7',12)}${R(322,376,296,91,'#b9d0ef',24,'#fff7',7)}${E(380,408,31,22,'#ffc8c7')}${E(440,407,31,22,'#fbe3a2')}${E(502,409,31,22,'#bce0cb')}${E(564,409,31,22,'#c6baef')}${R(131,336,126,134,'#f4dabb',17)}${R(151,356,85,17,'#fff0e2',6)}${R(151,395,85,17,'#fff0e2',6)}${R(151,433,85,17,'#fff0e2',6)}${R(261,460,53,57,'#f5b7ba',8)}${R(317,476,52,41,'#b5cee9',8)}${P('M353 486L383 450L416 486Z','#ffd68c')}${E(648,458,42,43,'#d5b8df')}${E(638,449,7,8,'#574661')}${E(658,449,7,8,'#574661')}${P('M641 465Q649 476 661 465','none','#8a6e78',3)}`;return a}
 function kitchen(){let a='';for(let y=180;y<449;y+=43){a+=L(0,y,960,y,'#ffffff80',3)}for(let x=0;x<960;x+=76){a+=L(x,170,x,449,'#ffffff50',2)}a+=framed(72,81,210,170)+R(335,90,290,54,'#e8dbc6',13)+R(363,145,235,20,'#c2b29f')+R(650,100,238,17,'#b2a7a3',6)+cup(703,94,'#bad5de',.7)+cup(772,94,'#f7c7ca',.7)+plant(862,147,.4);
 a+=`${R(84,359,790,170,'#d6c4b7',12,'#fff5',6)}${R(65,345,828,36,'#fff9e5',12)}${drawer(96,396,188,118,'#d7e4cf')}${drawer(301,396,184,118,'#f5e8d2')}${drawer(499,396,172,118,'#d7e4cf')}${drawer(684,396,179,118,'#f5e8d2')}${R(370,346,258,17,'#c2b4bb',8)}${E(493,362,110,12,'#8ba9b5')}${E(496,362,92,8,'#cdeef2')}${P('M526 345V294Q526 271 548 271Q571 271 571 295','none','#b2bcc9',11)}${R(530,296,59,13,'#b9c6cd',6)}`;
 a+=`${R(147,329,124,14,'#4b535f',7)}${[174,241].map(x=>E(x,324,17,8,'#737988')).join('')}${R(154,282,120,48,'#b9b4cf',11)}${E(214,282,60,16,'#eff0fc')}${P('M222 267Q223 232 261 232','none','#8d8b9c',10)}${E(267,235,12,11,'#d0a3ba')}${E(746,316,56,31,'#cf9193')}${E(748,311,47,21,'#ffeee7')}${[718,748,774].map(x=>E(x,299,15,18,'#e4ae71')).join('')}${R(736,342,22,13,'#d8ad90')}${sparkle(612,259)}`;return a}
@@ -67,8 +63,9 @@ a+=`${R(600,200,110,121,'#dfd6de',18)}${R(617,218,76,38,'#514e61',10)}${E(653,23
 function palace(){let a='';for(let x of [86,686]){a+=`${P(`M${x} 383V151Q${x+96} 30 ${x+188} 151V383Z`,'url(#glass)','#f9f7ff',12)}${L(x+96,116,x+96,381,'#fff9',9)}${L(x,268,x+188,268,'#fff9',8)}${sparkle(x+52,185)}`}
 a+=`${P('M0 0H160Q154 204 55 367L0 387Z','#b5a2d8','#f5e7ff',9)}${P('M960 0H800Q806 204 904 367L960 387Z','#b5a2d8','#f5e7ff',9)}${P('M390 0V75Q415 103 445 118L515 118Q547 104 570 75V0','#eddbfa','#f9efff',9)}${L(478,0,478,104,'#c3aa84',8)}${E(478,133,79,22,'#e6d4a6')}${[411,438,465,494,522,550].map(x=>`${L(x,139,x,176,'#dac89d',3)}${sparkle(x,181,'#f7e6ff')}`).join('')}`;
 a+=`${E(479,564,324,49,'#e0d8f5')}${R(333,198,292,284,'#d4b6e3',90,'#f9e6fd',14)}${R(350,220,258,222,'#a99acb',70)}${P('M354 330Q475 292 607 330L613 457Q480 482 346 455Z','#d8c4e6','#faf1fd',8)}${R(297,425,365,103,'#c1a9d3',33,'#fff2f8',10)}${R(296,518,60,57,'#d2b4d9',9)}${R(603,518,60,57,'#d2b4d9',9)}${P('M419 251L438 208L462 238L480 191L500 239L523 208L540 251Z','#ffe1a1','#e6b886',6)}${E(480,264,67,12,'#f6c778')}${E(479,336,76,35,'#e5d7f0')}${E(408,486,40,18,'#ead0f4')}${E(550,486,40,18,'#ead0f4')}${sparkle(255,428)}${sparkle(704,386)}${sparkle(782,155)}`;return a}
-const drawings=[bathtubArtwork,vanity,bedroom,playroom,kitchen,puppy,artstudio,garden,cafe,palace];
-function renderScene(){svg.innerHTML=S.level===0?bathtubArtwork():baseScene(S.level)+drawings[S.level]();svg.setAttribute('aria-label',levels[S.level].title+' hand illustrated scene')}
+const advancedLevels = [{...bathtubLevel, artwork:bathtubArtwork},vanityLevel,bedroomLevel,playroomLevel];
+const legacyDrawings = [kitchen,puppy,artstudio,garden,cafe,palace];
+function renderScene(){svg.innerHTML=advancedLevels[S.level]?.artwork() ?? baseScene(S.level)+legacyDrawings[S.level-advancedLevels.length]();svg.setAttribute('aria-label',levels[S.level].title+' hand illustrated scene')}
 function seeded(n){let k=n|0;return ()=>{k^=k<<13;k^=k>>>17;k^=k<<5;return (k>>>0)/4294967296}}
 function newLayer(){const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;return {canvas,ctx:canvas.getContext('2d',{willReadFrequently:true})}}
 function paintBlob(c,x,y,rx,ry,random,kind){const angle=random()*Math.PI*2;const points=11;let p=[];for(let j=0;j<points;j++){const th=j*Math.PI*2/points;const jitter=.73+random()*.5;p.push([Math.cos(th)*rx*jitter,Math.sin(th)*ry*jitter])}
@@ -153,22 +150,22 @@ function clock(){if(S.done)return;if(surface)S.elapsed=surface.time;else if(S.st
 setInterval(clock,400);
 function levelButtons(){const n=$('levelList');n.replaceChildren();levels.forEach((l,i)=>{const b=document.createElement('button');b.textContent=i+1;b.disabled=i>=S.unlocked;b.className=i===S.level?'current':'';if(i===S.level)b.setAttribute('aria-current','step');b.setAttribute('aria-label','Level '+(i+1)+(b.disabled?' locked':''));b.onclick=()=>{S.level=i;loadLevel()};n.append(b)})}
 let surface;
-const bathtubAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume,message => {
+const recordedAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume,message => {
   const warning = $('audioWarning');
-  const visible = S.level === 0 && Boolean(message);
-  warning.textContent = visible ? 'Bathtub Bliss audio: ' + message : '';
+  const visible = Boolean(advancedLevels[S.level] && message);
+  warning.textContent = visible ? 'Cleaning Club audio: ' + message : '';
   warning.classList.toggle('hidden', !visible);
 });
 
 function stopCleaningAudio() {
-  bathtubAudio.stopAll();
+  recordedAudio.stopAll();
   cleaningAudio.cancel();
 }
 
 function setCleaningAudio(muted, volume) {
-  bathtubAudio.set(muted,volume);
+  recordedAudio.set(muted,volume);
   cleaningAudio.set(muted,volume,{activate:!surface});
-  if (surface) bathtubAudio.unlock();
+  if (surface) recordedAudio.unlock();
 }
 
 const toolButtons = [...document.querySelectorAll('[data-tool]')];
@@ -191,7 +188,7 @@ function selectTool(tool) {
     button.setAttribute('aria-pressed', selected);
   }
   if (surface?.ready) updateSurfaceProgress(S.progress * 100, surface.layers);
-  else if (S.level !== 0) $('tip').textContent = legacyHints[tool];
+  else if (!advancedLevels[S.level]) $('tip').textContent = legacyHints[tool];
 }
 
 function updateSurfaceProgress(progress, layers) {
@@ -214,7 +211,7 @@ function updateSurfaceProgress(progress, layers) {
 
 function loadLevel(replay = false) {
   stopCleaningAudio();
-  bathtubAudio.reportStatus();
+  recordedAudio.reportStatus();
   surface?.dispose(!replay);
   surface = null;
   endStroke();
@@ -232,20 +229,20 @@ function loadLevel(replay = false) {
   $('timeLabel').textContent = '⏱ 0:00';
   const level = levels[S.level];
   $('levelTitle').textContent = level.title;
-  $('levelDescription').textContent = level.sub;
+  const advanced = advancedLevels[S.level];
+  $('levelDescription').textContent = advanced?.description || level.sub;
   $('levelTag').textContent = 'Level ' + (S.level + 1) + ' of 10';
-  const isBathtub = S.level === 0;
-  $('game').classList.toggle('bathtub-level', isBathtub);
+  const notes = advanced ? advanced.notes || toolNotes : legacyNotes;
   for (const button of toolButtons) {
-    button.querySelector('small').textContent = (isBathtub ? toolNotes : legacyNotes)[button.dataset.tool];
+    button.querySelector('small').textContent = notes[button.dataset.tool];
   }
   $('tasks').replaceChildren();
   renderScene();
   levelButtons();
-  if (isBathtub) {
+  if (advanced) {
     displayProgress(0);
-    $('tip').textContent = bathtubLevel.layers[0].action;
-    for (const material of bathtubLevel.layers) {
+    $('tip').textContent = advanced.layers[0].action;
+    for (const material of advanced.layers) {
       const item = document.createElement('li');
       const dot = document.createElement('span');
       dot.className = 'task-dot';
@@ -257,8 +254,8 @@ function loadLevel(replay = false) {
       $('tasks').append(item);
     }
     selectTool('spray');
-    surface = new SurfaceCleaning(bathtubLevel, {
-      audio: bathtubAudio,
+    surface = new SurfaceCleaning(advanced, {
+      audio: recordedAudio,
       progress: updateSurfaceProgress,
       finish() { S.elapsed = surface.time; complete(); }
     });
@@ -277,10 +274,11 @@ function complete() {
   if (!surface) S.elapsed = S.started ? Math.floor((performance.now()-S.started)/1000) : 0;
   $('cursor').classList.add('hidden');
   displayProgress(100);
-  $('finishTitle').textContent = S.level === 0 ? 'Bathtub sparkling!' : S.level === 9 ? 'Ultimate sparkle champion!' : 'So satisfying!';
-  $('finishMessage').textContent = S.level === 0 ?
+  const advanced = advancedLevels[S.level];
+  $('finishTitle').textContent = advanced?.finishTitle || (S.level === 0 ? 'Bathtub sparkling!' : S.level === 9 ? 'Ultimate sparkle champion!' : 'So satisfying!');
+  $('finishMessage').textContent = advanced?.finishMessage || (S.level === 0 ?
     'The porcelain is glossy and the taps are shining. Lovely work!' :
-    'A lovely clean makeover! Take your time and enjoy the next one.';
+    'A lovely clean makeover! Take your time and enjoy the next one.');
   $('next').textContent = S.level === 9 ? 'Start again ↻' : 'Next makeover →';
   $('finish').classList.remove('hidden');
   S.unlocked = Math.max(S.unlocked, Math.min(10, S.level+2));
@@ -297,7 +295,7 @@ function updateAudioControls() {
 
 $('next').onclick = () => { S.level = (S.level+1)%10; loadLevel(); };
 $('again').onclick = () => {
-  if (S.level === 0) saveSetting(progressKey, '');
+  surface?.resetSavedProgress();
   loadLevel(true);
 };
 for (const button of toolButtons) button.onclick = () => selectTool(button.dataset.tool);
@@ -321,13 +319,13 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', event => {
   cancelCleaningInput();
   surface?.save();
-  if (!event.persisted) bathtubAudio.dispose();
+  if (!event.persisted) recordedAudio.dispose();
 });
 window.addEventListener('blur', cancelCleaningInput);
 // Some touch browsers grant audio activation on release. This also primes
 // audio after a fresh navigation when the saved preference is already on.
 dirty.addEventListener('touchend', () => {
-  const audio = surface ? bathtubAudio : cleaningAudio;
+  const audio = surface ? recordedAudio : cleaningAudio;
   if (audio.context?.state !== 'running') audio.unlock();
 }, {passive:true});
 updateAudioControls();
