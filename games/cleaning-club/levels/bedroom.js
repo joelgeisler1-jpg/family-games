@@ -97,21 +97,27 @@ function bedroomArtwork() {
   ${polishGlints([[216,388,10],[779,393,9],[594,527,12],[425,434,8]])}`;
 }
 
+const bedroomLint = [['dust',355,314,29,18],['dust',568,310,41,18],['dust',341,421,43,24],['dust',447,457,48,20],['dust',570,416,44,20],['dust',652,468,40,22]];
+
 const bedroomLevel = {
+  dirtVersion: 2, idleHints: true,
   artwork: bedroomArtwork, seed: 28683, saveKey: 'familyArcadeCosyBedroomProgress1',
   description: 'Lift timber dust, soften drink rings and brush the quilt and cushions.',
   finishTitle: 'Cosy and clean!',
   finishMessage: 'Warm timber grain shows through and the quilt is ready for a cosy evening.',
-  notes: {spray:'Loosens drink rings',sponge:'Wipes timber marks',brush:'Dusts wood and fabric'},
+  notes: {spray:'Loosens drink rings',sponge:'Wipes the bedside tables',brush:'Cleans grooves and fabric'},
   audioMaterial: zoneMaterial([bedroomTimber,bedroomTables,bedroomFabric],'dust'),
   layers: [
-    dirtLayer({id:'dust',label:'Timber dust',color:'#a58b78',weight:.28,tool:'brush',action:'Brush the dusty tops of both bedside tables.'},bedroomTables,
-      [['dust',86,392,35,22],['dust',206,374,51,22],['dust',229,406,32,15],['dust',737,368,39,21],['dust',862,388,45,21],['dust',906,412,22,12]]),
+    dirtLayer({id:'dust',label:'Timber dust',color:'#a58b78',weight:.28,tool:'sponge',action:'Wipe the dusty tops of both bedside tables with the sponge.'},bedroomTables,
+      [['dust',86,392,35,22],['dust',206,374,51,22],['dust',229,406,32,15],['dust',737,368,39,21],['dust',862,388,45,21],['dust',906,412,22,12]],paintRoomDirt),
     dirtLayer({id:'rings',label:'Drink rings',color:'#ac765c',weight:.21,tool:'sponge',prepare:'spray',action:'Foam the drink rings on the tables, then sponge them away.'},bedroomTables,
-      [['ring',156,399,29,16],['ring',791,400,31,17],['ring',877,353,22,13]]),
-    dirtLayer({id:'marks',label:'Furniture marks',color:'#9d7783',weight:.22,tool:'sponge',action:'Wipe the dark marks along the wooden footboard.'},bedroomTimber,
-      [['smudge',301,527,37,12],['smudge',397,542,51,13],['smudge',521,541,48,12],['smudge',642,525,51,12]]),
-    dirtLayer({id:'lint',label:'Lint on fabric',color:'#978ba6',weight:.29,tool:'brush',action:'Brush the little lint patches from the cushions and quilt.'},bedroomFabric,
-      [['dust',355,314,29,18],['dust',568,310,41,18],['dust',341,421,43,24],['dust',447,457,48,20],['dust',570,416,44,20],['dust',652,468,40,22]])
+      [['ring',156,399,29,16],['ring',791,400,31,17],['ring',877,353,22,13]],paintRoomDirt),
+    dirtLayer({id:'marks',label:'Footboard grooves',color:'#9d7783',weight:.22,tool:'brush',action:'Use the detail brush along the wooden footboard grooves.'},bedroomTimber,
+      [['smudge',301,527,37,12],['smudge',397,542,51,13],['smudge',521,541,48,12],['smudge',642,525,51,12]],paintRoomDirt),
+    {
+      ...dirtLayer({id:'lint',label:'Lint on fabric',color:'#978ba6',weight:.29,tool:'brush',action:'Brush the lint from the cushions and quilt.'},bedroomFabric,
+        bedroomLint.map(([, ...geometry]) => ['lint',...geometry]),paintRoomDirt),
+      legacyDraw: surfaceDirt(bedroomFabric,bedroomLint)
+    }
   ]
 };

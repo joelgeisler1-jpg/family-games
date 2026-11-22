@@ -27,7 +27,6 @@ function surfaceDirt(zone, marks, paintMark) {
     ctx.save();
     ctx.clip(zone.path,'evenodd');
     for (const [kind,x,y,rx,ry,angle=0] of marks) {
-      const [dark,light] = dirtColors[kind];
       ctx.save();
       ctx.translate(x,y);
       ctx.rotate(angle);
@@ -37,6 +36,7 @@ function surfaceDirt(zone, marks, paintMark) {
         ctx.restore();
         continue;
       }
+      const [dark,light] = dirtColors[kind];
       const fade = ctx.createRadialGradient(-.15,-.12,.02,0,0,1);
       fade.addColorStop(0,dark+'a6');
       fade.addColorStop(.69,dark+'76');
@@ -86,4 +86,83 @@ function polishGlints(points) {
 
 function ovalOutline(cx,cy,rx,ry) {
   return `M${cx-rx} ${cy}a${rx} ${ry} 0 1 0 ${rx*2} 0a${rx} ${ry} 0 1 0 ${-rx*2} 0Z`;
+}
+
+// The room marks share the clipping and save path above, with distinct
+// deposits for porous fibres, polished wood, and smooth plastic.
+function paintRoomDirt(ctx, random, kind) {
+  const [body, grain, opacity] = {
+    dust: ['#79634d','#fbe5ba','b8'],
+    lint: ['#827479','#fff0dc','a7'],
+    ring: ['#875132','#e2a977','52'],
+    smudge: ['#694535','#e5b589','b8'],
+    print: ['#526c72','#fff1d4','86'],
+    sticky: ['#994733','#f5b478','cf'],
+    residue: ['#594a38','#ceb68a','ca']
+  }[kind];
+  const phase = random()*Math.PI*2;
+  const wash = ctx.createRadialGradient(-.22,-.14,.085,0,0,1);
+  wash.addColorStop(0,body+opacity);
+  wash.addColorStop(.56,body+(kind === 'ring' ? '20' : '91'));
+  wash.addColorStop(.83,body+'39');
+  wash.addColorStop(1,body+'00');
+  ctx.fillStyle = wash;
+  ctx.beginPath();
+  for (let i=0;i<=48;i++) {
+    const angle = i*Math.PI/24;
+    const edge = .92+.10*Math.sin(5*angle+phase)+.07*Math.cos(9*angle-phase);
+    const x = edge*Math.cos(angle), y = edge*Math.sin(angle);
+    if (!i) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.clip();
+  ctx.lineCap = 'round';
+
+  if (kind === 'ring') {
+    for (const [radius,start,end,width,alpha] of [[.82,-.6,1.17,.112,'d4'],[.76,1.5,3.64,.058,'b9'],[.86,3.82,5.44,.08,'ba'],[.69,-.34,2.68,.037,'a4']]) {
+      ctx.strokeStyle = (radius < .7 ? grain : body)+alpha;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.ellipse(-.04,.035,radius,radius*.9,.06,start,end);
+      ctx.stroke();
+    }
+  } else if (kind === 'print') {
+    for (let i=0;i<9;i++) {
+      const radius = .86-i*.077;
+      ctx.strokeStyle = i%3 ? grain+'98' : body+'b7';
+      ctx.lineWidth = .026+random()*.02;
+      ctx.beginPath();
+      ctx.ellipse(-.14+i*.014,.04,radius,radius*.79,-.15,-.82+random()*.8,3.3+random()*.7);
+      ctx.stroke();
+    }
+  } else {
+    for (let i=0;i<142;i++) {
+      const angle = random()*Math.PI*2;
+      const radius = Math.pow(random(),.76);
+      const x = Math.cos(angle)*radius, y = Math.sin(angle)*radius;
+      const size = .011+random()*.040;
+      const dense = Math.sin(x*13+y*4+phase)+Math.cos(y*9-x*2) > -.1;
+      ctx.fillStyle = i%4 ? grain+(dense ? 'cb' : '65') : body+'b8';
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.beginPath();
+      if (kind === 'lint' || kind === 'smudge') {
+        ctx.lineWidth = size*.58;
+        ctx.moveTo(x,y);
+        ctx.quadraticCurveTo(x+size*1.15,y-size*1.4,x+size*(2+random()),y+size*.78);
+        ctx.stroke();
+      } else {
+        ctx.ellipse(x,y,size,size*(.72+random()),angle,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+    if (kind === 'sticky') {
+      ctx.strokeStyle = grain+'c7';
+      ctx.lineWidth = .048;
+      ctx.beginPath();
+      ctx.moveTo(-.72,-.23);
+      ctx.bezierCurveTo(-.47,-.58,.06,-.52,.47,-.24);
+      ctx.stroke();
+    }
+  }
 }
