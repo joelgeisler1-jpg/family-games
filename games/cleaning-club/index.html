@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#8272ce"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><title>Cleaning Club | Family Arcade</title>
+<link rel="stylesheet" href="../../arcade.css">
+<link rel="stylesheet" href="game.css">
+<script defer src="bathtub.js"></script>
+<script defer src="audio.js"></script>
+<script defer src="cleaning.js"></script>
+<script defer src="game.js"></script>
+</head><body><main class="wrap">
+<section id="game"><div class="topbar"><a class="back" href="../../">← Family Arcade</a><span class="club">Cleaning Club</span><div class="audio-controls"><button class="sound" id="sound" aria-pressed="true">Sound off</button><label class="volume">Volume <input id="volume" type="range" min="0" max="100" value="24"></label></div></div><div class="game-heading"><div><h1 id="levelTitle">Bathtub Bliss</h1><p id="levelDescription">Soften the soap scum, brush the grout and polish the taps.</p></div><span class="leveltag" id="levelTag">Level 1 of 10</span></div>
+<div class="level-list" id="levelList" aria-label="Unlocked levels"></div><div class="panel"><div class="playing-area"><div class="playfield"><div class="stats"><span id="progressLabel">✨ 0% clean</span><div class="meter" role="progressbar" aria-label="Cleanliness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><div class="fill" id="fill"></div></div><span class="time" id="timeLabel">⏱ 0:00</span></div>
+<div class="scene" id="scene"><svg id="sceneArt" viewBox="0 0 960 620" preserveAspectRatio="none" role="img" aria-label="Illustrated cleaning scene"></svg><canvas id="dirtCanvas" width="960" height="620" aria-label="Drag a finger to clean the dirty areas"></canvas><canvas id="fxCanvas" width="960" height="620" aria-hidden="true"></canvas><span class="cursor hidden" id="cursor">🧽</span>
+</div><div class="finish hidden" id="finish"><h2 id="finishTitle">So satisfying!</h2><p id="finishMessage">Everything is sparkling clean.</p><button class="primary" id="next">Next makeover →</button><button class="secondary" id="again">Clean this scene again</button></div></div>
+<aside class="toolbox">
+<h2>Cleaning tools</h2>
+<div class="tools" aria-label="Cleaning tools">
+<button class="tool" data-tool="spray" aria-pressed="false"><span class="emoji" aria-hidden="true">🫧</span><span>Foam spray<small>Softens soap scum</small></span></button>
+<button class="tool" data-tool="sponge" aria-pressed="false"><span class="emoji" aria-hidden="true">🧽</span><span>Sponge<small>Wipes and polishes</small></span></button>
+<button class="tool" data-tool="brush" aria-pressed="false"><span class="emoji" aria-hidden="true">🪥</span><span>Detail brush<small>Scrubs the grout</small></span></button>
+</div>
+<div class="tip" id="tip" role="status"></div>
+<ul class="tasks" id="tasks" aria-label="Cleaning tasks"></ul>
+</aside></div></div>
+<details class="help"><summary>About this game, progress and privacy</summary><p>Drag a finger or mouse to clean. Your Bathtub Bliss progress, unlocked levels and sound preferences are saved in this browser. There are no accounts, ads or analytics.</p></details>
+</section></main></body></html>

@@ -1,0 +1,235 @@
+/* Cleaning Club uses the arcade typography with a quieter, ceramic palette. */
+:root {
+  color: #303e36;
+  background: #f8f6ef;
+}
+body {
+  background: radial-gradient(ellipse at 72% 0%, #e6f0e7, transparent 48%), #f8f6ef;
+}
+.wrap { max-width: 1160px; padding: 25px 24px 36px; }
+.topbar {
+  border-bottom: 1px solid #dbe3d7;
+  padding-bottom: 16px;
+  margin: 0 0 20px;
+}
+.club { font-family: Georgia, serif; font-size: 22px; font-weight: 700; }
+.back,.sound {
+  background: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  color: #2e5748;
+  border: 1px solid #d4e1d7;
+  border-radius: 10px;
+  padding: 9px 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.back:hover,.sound:hover { background: #e7f1e8; }
+.audio-controls,.volume { display: flex; align-items: center; gap: 9px; }
+.volume { color: #4d665b; font-size: 12px; font-weight: 650; }
+.volume input { width: 74px; accent-color: #38745f; }
+.game-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.game-heading h1 {
+  margin: 0 0 5px;
+  font-family: Georgia, serif;
+  font-size: clamp(34px, 5.2vw, 58px);
+  font-weight: 600;
+  letter-spacing: -.055em;
+  line-height: 1.01;
+}
+.game-heading p { color: #4d665a; margin-bottom: 10px; font-size: 14px; }
+.leveltag {
+  background: #e2eee3;
+  color: #31594a;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+.level-list {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 4px 2px 11px;
+}
+.level-list button {
+  flex: 0 0 38px;
+  height: 35px;
+  border: 1px solid #dce2d8;
+  border-radius: 10px;
+  background: #fff;
+  color: #476251;
+  font-size: 13px;
+  font-weight: 800;
+}
+.level-list button:disabled { opacity: .45; }
+.level-list button.current { background: #38745f; border-color: #38745f; color: #fff; }
+.playing-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 249px;
+  gap: 16px;
+  align-items: start;
+}
+.playfield,.toolbox {
+  min-width: 0;
+  position: relative;
+  padding: 10px;
+  border-radius: 19px;
+  border: 1px solid #e0e3d6;
+  background: #fffdf6;
+  box-shadow: 0 10px 26px #3853450d;
+}
+.stats {
+  justify-content: flex-start;
+  color: #376351;
+  padding: 4px 4px 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.meter {
+  flex: 1;
+  height: 8px;
+  border-radius: 30px;
+  background: #e9eee5;
+  overflow: hidden;
+}
+.fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6ca789, #38816a);
+  transition: width .22s;
+}
+.time { color: #567165; margin-left: auto; font-variant-numeric: tabular-nums; }
+.scene {
+  position: relative;
+  aspect-ratio: 960/620;
+  border-radius: 12px;
+  background: #dbece1;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  isolation: isolate;
+}
+.scene svg,.scene canvas { position: absolute; width: 100%; height: 100%; inset: 0; }
+#dirtCanvas { touch-action: none; }
+#fxCanvas,.cursor { pointer-events: none; }
+.cursor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(1px 4px 3px #4444);
+  font-size: clamp(23px, 4vw, 40px);
+}
+.toolbox { padding: 15px; }
+.toolbox h2 { margin: 1px 0 12px; font-size: 17px; }
+.tools { display: grid; grid-template-columns: 1fr; margin: 0; gap: 8px; }
+.tool {
+  display: flex;
+  font-size: 14px;
+  font-weight: 800;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  color: #33483b;
+  background: #faf8f1;
+  border: 1px solid #e6e5d8;
+  border-radius: 11px;
+  min-height: 44px;
+}
+.tool:hover { background: #f0f4ea; }
+.tool .emoji { font-size: 23px; }
+.tool small { display: block; margin-top: 3px; color: #53675d; }
+.tool.active { background: #e5f2e7; border-color: #6e9b82; box-shadow: inset 0 0 0 1px #6e9b82; }
+.tip {
+  margin: 12px 0 0;
+  padding: 9px 10px;
+  background: #f4efe4;
+  border-radius: 9px;
+  color: #514839;
+  text-align: left;
+  font-size: 12px;
+}
+.tasks { list-style: none; padding: 8px 0 0; margin: 0; }
+.tasks li {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 1px;
+  font-size: 12px;
+  border-bottom: 1px solid #ecece2;
+}
+.tasks li:last-child { border: 0; }
+.task-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--material); }
+.tasks small { color: #56685e; }
+.tasks .checked { color: #376351; }
+.tasks .checked .task-dot { background: #36795c; }
+.tasks .locked .task-dot { opacity: .5; }
+.help { margin: 17px 0 0; color: #596e62; font-size: 12px; line-height: 1.6; }
+.help summary { color: #385f4c; cursor: pointer; font-weight: 800; }
+.finish {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 12px 8px 3px;
+  gap: 5px;
+}
+.finish h2 { font-family: Georgia, serif; font-size: clamp(23px, 4vw, 35px); margin: 0; }
+.finish p { margin: 0; color: #53675d; font-size: 14px; }
+.primary {
+  background: #38745f;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #285343;
+  margin: 4px 0 0;
+  padding: 8px 14px;
+}
+.primary:active { box-shadow: 0 2px 0 #285343; transform: translateY(2px); }
+.secondary {
+  padding: 6px;
+  color: #355e4b;
+  border: 0;
+  background: transparent;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+@media (max-width: 820px) {
+  .wrap { padding: 14px 12px 28px; }
+  .playing-area { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .toolbox { padding: 9px; }
+  .toolbox h2 { font-size: 14px; margin: 0 0 6px; }
+  .tools { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+  .tool { justify-content: center; gap: 5px; padding: 6px 3px; font-size: 12px; }
+  .tool .emoji { font-size: 17px; }
+  .tool small { font-size: 10px; }
+  .tip { margin-top: 7px; }
+}
+@media (max-width: 540px) {
+  .topbar { flex-wrap: wrap; gap: 6px; padding-bottom: 9px; margin-bottom: 14px; }
+  .club { display: none; }
+  .wrap { padding: 10px 8px 20px; }
+  .playfield { padding: 5px; }
+  .volume input { width: 52px; }
+  .level-list button { flex: 1 0 25px; height: 32px; }
+  .stats { font-size: 11px; }
+}
+
+.polish-glints { opacity: 0; }
+.polished .polish-glints { opacity: .88; transition: opacity 700ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .fill,.polished .polish-glints { transition: none; }
+}
