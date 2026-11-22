@@ -40,30 +40,17 @@ function baseScene(i){const l=levels[i],wall=l.palette[0],floor=l.palette[1];let
 for(let x=0;x<960;x+=93){a+=L(x,452,x-14,620,'#ffffff22',2)}
 for(let y=36;y<410;y+=100){a+=`${E(56+(y%27),y,5,5,'#ffffff50')}${E(912+(y%33),y+15,4,4,'#ffffff50')}`}
 return a}
-function garden(){let a='';for(let x=45;x<960;x+=130){a+=L(x,0,x,443,'#ffffff31',4)}a+=`${P('M210 445V95Q475 -48 748 95V445','none','#c1dad0',18)}${P('M246 443V116Q480 11 713 116V443','none','#d1efee',10)}${L(476,59,476,445,'#ffffff94',8)}${L(239,233,720,233,'#ffffff85',7)}${R(59,340,837,14,'#a78377',7)}${R(60,472,836,17,'#b9937e',8)}`;
-for(let j=0;j<5;j++){let x=135+j*158,y=280+(j%2)*10;a+=`${plant(x,y,.65+(j%3)*.08)}${R(x-28,341,57,9,'#9c816e',5)}`}
-for(let j=0;j<4;j++){let x=193+j*183;a+=`${R(x-33,415,69,50,['#dfa9a3','#c4b2d6','#b6cfbc','#edc8ac'][j],9)}${leaves(x,390)}`}
-a+=`${R(99,486,75,53,'#b8d9dc',10)}${P('M174 499Q213 473 211 516','none','#8db1b4',12)}${P('M99 492L66 484','none','#8db1b4',9)}${E(100,486,34,9,'#cbe7ed')}${P('M825 495L815 394L867 394L854 499Z','#b8b3be')}${P('M825 404Q847 367 863 401','none','#a18d97',11)}${sparkle(614,130)}`;return a}
-function cafe(){let a=`${framed(65,74,192,185)}${R(613,78,272,169,'#756a7e',15,'#eadac5',8)}${T(751,115,'~ SWEET CAFÉ ~',23,'#fff7e3')}${T(749,165,'CAKES  •  TEA',21,'#fbdadb')}${T(750,207,'BAKED WITH LOVE',15,'#f7ece2')}`;
-for(let x of [335,525]){a+=`${L(x,0,x,97,'#ae9aa0',7)}${P(`M${x-60} 106Q${x} 8 ${x+60} 106Z`,'#f4d5b5','#fff5',4)}${E(x,108,60,10,'#fff4de')}`}
-a+=`${R(157,362,646,145,'#d8aa9d',15,'#fff7ed',8)}${R(135,341,689,39,'#fff4e1',17)}${R(175,508,56,68,'#aa8485',10)}${R(733,508,56,68,'#aa8485',10)}${R(239,387,480,91,'#f1d6cc',10)}${T(476,440,'little treats & happy hearts',22,'#b8818e')}`;
-a+=`${E(365,337,122,19,'#dbb5ae')}${R(354,240,19,92,'#c99d92',5)}${E(365,248,105,15,'#f8e8dc')}`;
-for(let j=0;j<5;j++){let x=281+j*43;a+=`${P(`M${x-16} 238Q${x-29} 204 ${x} 201Q${x+30} 202 ${x+16} 238Z`,['#f5c9d4','#c3d8bc','#fae2b0','#c9cbeb','#f5bcb3'][j])}${R(x-17,236,34,25,'#e2a879',5)}`}
-a+=`${R(600,200,110,121,'#dfd6de',18)}${R(617,218,76,38,'#514e61',10)}${E(653,238,19,12,'#b7e3e0')}${R(643,267,20,35,'#c4b0a7')}${E(652,301,51,14,'#f6e8dc')}${cup(736,316,'#f2cbd5',.7)}${sparkle(540,274)}`;return a}
-function palace(){let a='';for(let x of [86,686]){a+=`${P(`M${x} 383V151Q${x+96} 30 ${x+188} 151V383Z`,'url(#glass)','#f9f7ff',12)}${L(x+96,116,x+96,381,'#fff9',9)}${L(x,268,x+188,268,'#fff9',8)}${sparkle(x+52,185)}`}
-a+=`${P('M0 0H160Q154 204 55 367L0 387Z','#b5a2d8','#f5e7ff',9)}${P('M960 0H800Q806 204 904 367L960 387Z','#b5a2d8','#f5e7ff',9)}${P('M390 0V75Q415 103 445 118L515 118Q547 104 570 75V0','#eddbfa','#f9efff',9)}${L(478,0,478,104,'#c3aa84',8)}${E(478,133,79,22,'#e6d4a6')}${[411,438,465,494,522,550].map(x=>`${L(x,139,x,176,'#dac89d',3)}${sparkle(x,181,'#f7e6ff')}`).join('')}`;
-a+=`${E(479,564,324,49,'#e0d8f5')}${R(333,198,292,284,'#d4b6e3',90,'#f9e6fd',14)}${R(350,220,258,222,'#a99acb',70)}${P('M354 330Q475 292 607 330L613 457Q480 482 346 455Z','#d8c4e6','#faf1fd',8)}${R(297,425,365,103,'#c1a9d3',33,'#fff2f8',10)}${R(296,518,60,57,'#d2b4d9',9)}${R(603,518,60,57,'#d2b4d9',9)}${P('M419 251L438 208L462 238L480 191L500 239L523 208L540 251Z','#ffe1a1','#e6b886',6)}${E(480,264,67,12,'#f6c778')}${E(479,336,76,35,'#e5d7f0')}${E(408,486,40,18,'#ead0f4')}${E(550,486,40,18,'#ead0f4')}${sparkle(255,428)}${sparkle(704,386)}${sparkle(782,155)}`;return a}
 const advancedLevels = [{...bathtubLevel, artwork:bathtubArtwork},vanityLevel,bedroomLevel,playroomLevel,
-  kitchenLevel,puppyLevel,artStudioLevel];
-const legacyDrawings = [garden,cafe,palace];
+  kitchenLevel,puppyLevel,artStudioLevel,gardenLevel,cafeLevel,palaceLevel];
 const scenePaintings = [
   'assets/scenes/bath.webp', 'assets/scenes/vanity.webp',
   'assets/scenes/bedroom.webp', 'assets/scenes/playroom.webp',
-  'assets/scenes/kitchen.webp', 'assets/scenes/puppy.webp', 'assets/scenes/artstudio.webp'
+  'assets/scenes/kitchen.webp', 'assets/scenes/puppy.webp', 'assets/scenes/artstudio.webp',
+  'assets/scenes/garden.webp', 'assets/scenes/cafe.webp', 'assets/scenes/palace.webp'
 ];
 
 function renderScene() {
-  svg.innerHTML = advancedLevels[S.level]?.artwork() ?? baseScene(S.level)+legacyDrawings[S.level-advancedLevels.length]();
+  svg.innerHTML = advancedLevels[S.level].artwork();
   svg.setAttribute('aria-label',levels[S.level].title+' illustrated scene');
 
   const painting = $('scenePainting');
@@ -305,7 +292,8 @@ function complete() {
   $('finishMessage').textContent = advanced?.finishMessage || (S.level === 0 ?
     'The porcelain is glossy and the taps are shining. Lovely work!' :
     'A lovely clean makeover! Take your time and enjoy the next one.');
-  $('next').textContent = S.level === 9 ? 'Start again ↻' : 'Next makeover →';
+  $('next').textContent = S.level === 9 ? 'Choose a level' : 'Next makeover →';
+  $('again').textContent = S.level === 9 ? 'Replay this level' : 'Clean this scene again';
   $('finish').classList.remove('hidden');
   S.unlocked = Math.max(S.unlocked, Math.min(10, S.level+2));
   saveSetting('familyArcadeCleaningUnlocked', String(S.unlocked));
@@ -319,7 +307,15 @@ function updateAudioControls() {
   $('volume').value = Math.round(cleaningAudio.volume*100);
 }
 
-$('next').onclick = () => { S.level = (S.level+1)%10; loadLevel(); };
+$('next').onclick = () => {
+  if (S.level === 9) {
+    $('levelMenu').open = true;
+    $('levelMenu').querySelector('summary').focus();
+    return;
+  }
+  S.level++;
+  loadLevel();
+};
 $('again').onclick = () => {
   surface?.resetSavedProgress();
   loadLevel(true);

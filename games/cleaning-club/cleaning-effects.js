@@ -124,7 +124,7 @@ class CleaningEffects {
       this.line(mark,-finish.width*.17,finish.width*.56,finish.sheen,fade*.095,nx,ny);
       this.line(mark,finish.width*.24,area.material === 'chrome' ? 2.0 : 1.3,finish.sheen,fade*.62,nx,ny);
       if (residue) {
-        const film = residue.kind === 'grease' || residue.kind === 'paint';
+        const film = ['grease','paint','icing'].includes(residue.kind);
         this.line(mark,finish.width*.35,film ? 4.6 : 2.4,residue.color,fade*(film ? .34 : .3),nx,ny);
       }
     } else {
@@ -143,7 +143,7 @@ class CleaningEffects {
       ctx.globalAlpha = fade*.76;
       ctx.lineWidth = .65;
       ctx.beginPath();
-      if (residue.kind === 'mud' || residue.kind === 'paint') {
+      if (['mud','paint','crumb'].includes(residue.kind)) {
         const r = particle.r*(residue.kind === 'mud' ? 1.45 : 1);
         ctx.moveTo(px-r,py+.15*r);
         ctx.lineTo(px-.1*r,py-r);

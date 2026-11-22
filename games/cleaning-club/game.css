@@ -262,3 +262,18 @@ body {
   28%,63% { transform: rotate(2deg) scale(1.015); }
   45% { transform: rotate(-1.4deg) scale(1.008); }
 }
+
+.finale-glow,.finale-facet { opacity: 0; }
+.polished .finale-glow { opacity: .75; transition: opacity 2s ease-out; }
+.polished .finale-facet { opacity: .36; }
+@media (prefers-reduced-motion: no-preference) {
+  .polished .finale-facet { animation: crystal-shimmer 2.8s var(--shimmer-delay) ease-in-out both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .polished .finale-glow { transition: none; }
+}
+@keyframes crystal-shimmer {
+  0% { opacity: 0; }
+  48% { opacity: .92; }
+  100% { opacity: .36; }
+}
