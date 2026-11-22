@@ -204,6 +204,7 @@ const legacyHints = {
 function selectTool(tool) {
   if (tool !== S.tool) stopCleaningAudio();
   S.tool = tool;
+  surface?.scheduleHint();
   for (const button of toolButtons) {
     const selected = button.dataset.tool === tool;
     button.classList.toggle('active', selected);
@@ -337,10 +338,14 @@ function cancelCleaningInput() {
   else endStroke();
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) cancelCleaningInput();
+  if (document.hidden) {
+    cancelCleaningInput();
+    surface?.clearHint();
+  } else surface?.scheduleHint();
 });
 window.addEventListener('pagehide', event => {
   cancelCleaningInput();
+  surface?.clearHint();
   surface?.save();
   if (!event.persisted) recordedAudio.dispose();
 });

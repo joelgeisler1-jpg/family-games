@@ -162,6 +162,23 @@ body {
 .scene.has-painting #sceneArt > :not(.polish-glints) { visibility: hidden; }
 #dirtCanvas { touch-action: none; }
 #fxCanvas,#sceneArt,#scenePainting,.cursor { pointer-events: none; }
+.dirt-hint {
+  position: absolute;
+  width: 8.1%;
+  height: 9%;
+  transform: translate(-50%,-50%);
+  border: 2px solid #fff8dc;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #54482fa6, 0 0 12px #fff0bd85;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dirt-hint { animation: dirt-hint-in .65s ease-out both; }
+}
+@keyframes dirt-hint-in {
+  from { opacity: 0; }
+  to { opacity: .9; }
+}
 .cursor {
   position: absolute;
   transform: translate(-50%, -50%);

@@ -40,6 +40,7 @@ class SurfaceCleaning {
   constructor(level, callbacks) {
     this.level = level;
     this.progressKey = level.saveKey || bathtubProgressKey;
+    this.dirtVersion = level.dirtVersion;
     this.audio = callbacks.audio;
     this.callbacks = callbacks;
     this.foam = newLayer();
@@ -89,6 +90,17 @@ class SurfaceCleaning {
         const images = await Promise.all(saved.masks.map(imageFromSave));
         if (!this.active) return;
         if (images.every(image => image?.width === W && image.height === H)) {
+          // Old masks already contain the player's exact strokes. Measure them
+          // against their original baseline and keep their texture until replay.
+          if (this.level.dirtVersion && saved.dirtVersion !== this.level.dirtVersion) {
+            this.dirtVersion = saved.dirtVersion;
+            const random = seeded(this.level.seed);
+            for (const layer of this.layers) {
+              layer.ctx.clearRect(0,0,W,H);
+              layer.material.legacyDraw(layer.ctx,random);
+              layer.original = this.measure(layer.canvas);
+            }
+          }
           [...this.layers, this.foam].forEach(({ctx}, index) => {
             ctx.clearRect(0, 0, W, H);
             ctx.drawImage(images[index], 0, 0);
@@ -101,12 +113,13 @@ class SurfaceCleaning {
     this.ready = true;
     this.draw();
     this.update();
+    this.scheduleHint();
   }
 
   save() {
     clearTimeout(this.saveTimer);
     if (!this.ready || !this.changed) return;
-    const save = { elapsed:this.time };
+    const save = { elapsed:this.time, dirtVersion:this.dirtVersion };
     if (this.level.saveKey && this.finished) save.completed = true;
     else save.masks = [...this.layers,this.foam].map(({canvas}) => canvas.toDataURL());
     saveSetting(this.progressKey,JSON.stringify(save));
@@ -122,6 +135,7 @@ class SurfaceCleaning {
     clearTimeout(this.saveTimer);
     cancelAnimationFrame(this.frame);
     this.active = false;
+    this.clearHint();
     fctx.clearRect(0, 0, W, H);
   }
 
@@ -134,8 +148,52 @@ class SurfaceCleaning {
       this.layers.find(item => item.material.id === id).remaining <= cleanThreshold);
   }
 
+  clearHint() {
+    clearTimeout(this.hintTimer);
+    if (this.level.idleHints) $('dirtHint').classList.add('hidden');
+  }
+
+  scheduleHint() {
+    this.clearHint();
+    if (!this.level.idleHints || !this.ready || !this.active || this.finished || document.hidden || this.pointer !== undefined) return;
+    this.hintTimer = setTimeout(() => this.showHint(),9000);
+  }
+
+  showHint() {
+    if (document.hidden || !this.active || this.finished || this.pointer !== undefined) return;
+    const available = this.layers.filter(layer => this.available(layer) && layer.remaining > cleanThreshold);
+    const matching = available.filter(({material}) => [material.tool,material.prepare].includes(S.tool));
+    const {width,height} = this.sample;
+    let strongest = 0;
+    let point;
+    for (const layer of matching.length ? matching : available) {
+      this.sampleCtx.drawImage(layer.canvas,0,0,width,height);
+      const {data} = this.sampleCtx.getImageData(0,0,width,height);
+      // Select a compact region of the *remaining* mask, including thin seams.
+      for (let y=0;y<height;y+=6) for (let x=0;x<width;x+=6) {
+        let score=0, sumX=0, sumY=0;
+        for (let j=y;j<Math.min(y+9,height);j++) for (let i=x;i<Math.min(x+9,width);i++) {
+          const alpha=data[(j*width+i)*4+3];
+          score+=alpha;
+          sumX+=(i+.5)*alpha;
+          sumY+=(j+.5)*alpha;
+        }
+        if (score <= strongest) continue;
+        strongest=score;
+        point={x:sumX/score/width,y:sumY/score/height};
+      }
+    }
+    if (!point) return;
+    const hint = $('dirtHint');
+    hint.style.left = point.x*100+'%';
+    hint.style.top = point.y*100+'%';
+    hint.classList.remove('hidden');
+    this.hintTimer = setTimeout(() => this.clearHint(),4200);
+  }
+
   pointerDown(event, tool) {
     if (!this.ready || this.finished || this.pointer !== undefined || event.button !== 0) return;
+    this.clearHint();
     this.pointer = event.pointerId;
     this.strokeTool = tool;
     this.previous = sceneCoordinates(event);
@@ -186,6 +244,7 @@ class SurfaceCleaning {
     if (event.type === 'pointerup') this.audio.endGesture();
     else this.audio.stopAll();
     this.update();
+    this.scheduleHint();
     clearTimeout(this.saveTimer);
     this.saveTimer = setTimeout(() => this.save(), 850);
     this.renderSoon();
@@ -275,6 +334,7 @@ class SurfaceCleaning {
       this.elapsed = this.time;
       this.started = null;
       this.finished = true;
+      this.clearHint();
       this.pointer = undefined;
       for (const layer of this.layers) layer.ctx.clearRect(0, 0, W, H);
       this.draw();

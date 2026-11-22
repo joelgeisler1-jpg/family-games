@@ -86,7 +86,66 @@ function vanityArtwork() {
   ${polishGlints([[618,130,15],[315,257,11],[532,319,9],[586,456,8]])}`;
 }
 
+function paintVanityDirt(ctx, random, kind) {
+  const [dark,light] = {
+    powder: ['#8d6278','#fff0e5'],
+    residue: ['#695238','#dec48e'],
+    print: ['#345e66','#f2e9c6'],
+    streak: ['#496c73','#f1f9e8']
+  }[kind];
+  const oil = kind === 'print' || kind === 'streak';
+  const base = ctx.createRadialGradient(-.18,-.12,.04,0,0,1);
+  base.addColorStop(0,dark+(oil ? '96' : 'c2'));
+  base.addColorStop(.55,dark+(oil ? '6a' : '95'));
+  base.addColorStop(1,dark+'00');
+  ctx.fillStyle = base;
+  ctx.beginPath();
+  ctx.ellipse(0,0,1,.92,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.lineCap = 'round';
+
+  if (kind === 'print') {
+    for (let i=0;i<10;i++) {
+      const r = .89-i*.071;
+      const start = -.89+random()*.96;
+      ctx.strokeStyle = i%3 === 0 ? light+'b4' : dark+'9e';
+      ctx.lineWidth = .019+random()*.017;
+      ctx.beginPath();
+      ctx.ellipse(-.12+i*.012,.08,r,r*.81,-.08,start,Math.PI*(1.01+random()*.43));
+      ctx.stroke();
+    }
+  } else if (kind === 'streak') {
+    for (let i=0;i<11;i++) {
+      const y = (i-5)*.122;
+      const start = -.88+random()*.32;
+      const end = .88-random()*.38;
+      ctx.strokeStyle = i%3 ? light+'b6' : dark+'8f';
+      ctx.lineWidth = .034+random()*.037;
+      ctx.beginPath();
+      ctx.moveTo(start,y+.13);
+      ctx.bezierCurveTo(start*.47,y-.24,end*.45,y-.15,end,y);
+      ctx.stroke();
+    }
+  } else {
+    for (let i=0;i<150;i++) {
+      const angle = random()*Math.PI*2;
+      const radius = Math.pow(random(),.76);
+      const x = Math.cos(angle)*radius, y = Math.sin(angle)*radius;
+      const size = .009+random()*.04;
+      ctx.fillStyle = i%3 ? light+'b0' : dark+'b8';
+      ctx.beginPath();
+      ctx.ellipse(x,y,size,size*(.52+random()),angle,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+}
+
+function vanityDirt(settings, zone, marks) {
+  return dirtLayer(settings,zone,marks,paintVanityDirt);
+}
+
 const vanityLevel = {
+  dirtVersion: 2, idleHints: true,
   artwork: vanityArtwork, seed: 15931, saveKey: 'familyArcadeVanityMirrorProgress1',
   description: 'Brush away powder, soften fingerprints and reveal the garden reflected in the mirror.',
   finishTitle: 'A mirror full of light!',
@@ -94,13 +153,13 @@ const vanityLevel = {
   notes: {spray:'Softens fingerprints',sponge:'Wipes and polishes glass',brush:'Lifts powder and residue'},
   audioMaterial: zoneMaterial([vanityGlass,vanityFrame,vanityTop],'dust'),
   layers: [
-    dirtLayer({id:'powder',label:'Powder dust',color:'#aa8497',weight:.21,tool:'brush',action:'Brush the powder off the vanity top.'},vanityTop,
+    vanityDirt({id:'powder',label:'Powder dust',color:'#aa8497',weight:.21,tool:'brush',action:'Brush the powder off the vanity top.'},vanityTop,
       [['powder',303,465,44,17],['powder',421,457,45,18],['powder',516,478,52,15],['powder',607,457,43,18]]),
-    dirtLayer({id:'prints',label:'Fingerprints',color:'#718f9b',weight:.31,tool:'sponge',prepare:'spray',action:'Foam the cloudy fingerprints, then wipe with the sponge.'},vanityGlass,
+    vanityDirt({id:'prints',label:'Fingerprints',color:'#718f9b',weight:.31,tool:'sponge',prepare:'spray',action:'Foam the cloudy fingerprints, then wipe with the sponge.'},vanityGlass,
       [['print',359,214,32,42,-.5],['print',419,257,28,38,-.45],['print',534,173,35,43,.5],['print',575,225,31,37,.38],['print',500,303,42,35,-.3]]),
-    dirtLayer({id:'frame',label:'Frame residue',color:'#aa8351',weight:.22,tool:'brush',action:'Trace the darker patches along the gold rim with the brush.'},vanityFrame,
+    vanityDirt({id:'frame',label:'Frame residue',color:'#aa8351',weight:.22,tool:'brush',action:'Trace the darker patches along the gold rim with the brush.'},vanityFrame,
       [['residue',333,103,34,15,-.85],['residue',474,40,42,13],['residue',625,101,34,15,.85],['residue',676,231,34,13,1.56],['residue',380,396,32,13,.55],['residue',290,274,40,13,1.35]]),
-    dirtLayer({id:'streaks',label:'Glass streaks',color:'#8aa5ac',weight:.26,tool:'sponge',after:['prints'],action:'Follow the pale diagonal streaks with the sponge to polish the glass.'},vanityGlass,
+    vanityDirt({id:'streaks',label:'Glass streaks',color:'#8aa5ac',weight:.26,tool:'sponge',after:['prints'],action:'Follow the pale diagonal streaks with the sponge to polish the glass.'},vanityGlass,
       [['streak',405,162,63,14,-.77],['streak',445,213,72,15,-.77],['streak',541,264,78,17,-.77],['streak',466,337,65,16,-.77]])
   ]
 };
