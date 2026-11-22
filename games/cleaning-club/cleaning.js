@@ -6,7 +6,7 @@ const cleaningTools = {
   brush: { radius: 17, spacing: 6, strength: .78 }
 };
 const cleanThreshold = .055;
-const progressKey = 'familyArcadeBathtubBlissProgress1';
+const bathtubProgressKey = 'familyArcadeBathtubBlissProgress1';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function savedSetting(key) {
@@ -39,6 +39,7 @@ function imageFromSave(url) {
 class SurfaceCleaning {
   constructor(level, callbacks) {
     this.level = level;
+    this.progressKey = level.saveKey || bathtubProgressKey;
     this.audio = callbacks.audio;
     this.callbacks = callbacks;
     this.foam = newLayer();
@@ -80,8 +81,11 @@ class SurfaceCleaning {
 
   async restore() {
     try {
-      const saved = JSON.parse(savedSetting(progressKey));
-      if (saved?.masks?.length === this.layers.length + 1) {
+      const saved = JSON.parse(savedSetting(this.progressKey));
+      if (this.level.saveKey && saved?.completed === true) {
+        for (const layer of this.layers) layer.ctx.clearRect(0,0,W,H);
+        this.elapsed = Number.isFinite(saved.elapsed) ? Math.max(0,saved.elapsed) : 0;
+      } else if (saved?.masks?.length === this.layers.length + 1) {
         const images = await Promise.all(saved.masks.map(imageFromSave));
         if (!this.active) return;
         if (images.every(image => image?.width === W && image.height === H)) {
@@ -102,11 +106,15 @@ class SurfaceCleaning {
   save() {
     clearTimeout(this.saveTimer);
     if (!this.ready || !this.changed) return;
-    saveSetting(progressKey, JSON.stringify({
-      elapsed: this.elapsed + (this.started ? Math.floor((performance.now()-this.started)/1000) : 0),
-      masks: [...this.layers, this.foam].map(({canvas}) => canvas.toDataURL())
-    }));
+    const save = { elapsed:this.time };
+    if (this.level.saveKey && this.finished) save.completed = true;
+    else save.masks = [...this.layers,this.foam].map(({canvas}) => canvas.toDataURL());
+    saveSetting(this.progressKey,JSON.stringify(save));
     this.changed = false;
+  }
+
+  resetSavedProgress() {
+    saveSetting(this.progressKey,'');
   }
 
   dispose(save = true) {

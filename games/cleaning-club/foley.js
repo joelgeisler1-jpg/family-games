@@ -18,7 +18,11 @@ const foleyTone = {
   grout: [2850, .91],
   chrome: [2100, .74],
   glass: [2200, .78],
-  dust: [1450, .74]
+  dust: [1450, .74],
+  wood: [1720, .82],
+  fabric: [1540, .75],
+  plastic: [1930, .83],
+  stone: [1800, .86]
 };
 
 function makeFoleyLoop(context, recording) {
@@ -142,7 +146,7 @@ class RecordedFoley {
     if (!gesture || gesture.tool === 'spray') return;
     const {tool,material,speed} = gesture;
     const files = this.recordings[tool] || {};
-    const preferred = files[material];
+    const preferred = files[material] || (tool === 'brush' && ['dust','wood','fabric','plastic','stone'].includes(material) ? files.dust : null);
     const file = this.buffers.get(preferred)?.buffer ? preferred : files[foleyDefaults[tool]];
     const [cutoff, scale] = foleyTone[material] || foleyTone[foleyDefaults[tool]];
     if (speed > 0 && this.bed?.file !== file && this.buffers.get(file)?.buffer) {
