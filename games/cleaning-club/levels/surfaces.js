@@ -72,9 +72,9 @@ function surfaceDirt(zone, marks, paintMark) {
   };
 }
 
-function dirtLayer({id,label,color,weight,tool,prepare,after,action}, zone, marks, paintMark) {
+function dirtLayer({id,label,color,weight,tool,prepare,after,action,sampleResidue,effectKind}, zone, marks, paintMark) {
   const legacyDraw = surfaceDirt(zone,marks);
-  return { id,label,color,weight,tool,prepare,after,action,
+  return { id,label,color,weight,tool,prepare,after,action,sampleResidue,effectKind,
     draw:paintMark ? surfaceDirt(zone,marks,paintMark) : legacyDraw,legacyDraw,effectAreas:[zone] };
 }
 

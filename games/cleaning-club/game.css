@@ -252,3 +252,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   #fill,.polished .polish-glints { transition: none; }
 }
+
+.puppy-celebration { transform-origin: 762px 217px; }
+@media (prefers-reduced-motion: no-preference) {
+  .polished .puppy-celebration { animation: puppy-happy-tilt 2.4s .25s ease-in-out; }
+}
+@keyframes puppy-happy-tilt {
+  0%,100% { transform: none; }
+  28%,63% { transform: rotate(2deg) scale(1.015); }
+  45% { transform: rotate(-1.4deg) scale(1.008); }
+}

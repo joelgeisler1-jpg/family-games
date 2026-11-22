@@ -123,7 +123,10 @@ class CleaningEffects {
       this.line(mark,0,finish.width,finish.moisture,fade*.075,nx,ny);
       this.line(mark,-finish.width*.17,finish.width*.56,finish.sheen,fade*.095,nx,ny);
       this.line(mark,finish.width*.24,area.material === 'chrome' ? 2.0 : 1.3,finish.sheen,fade*.62,nx,ny);
-      if (residue) this.line(mark,finish.width*.35,2.4,residue.color,fade*.3,nx,ny);
+      if (residue) {
+        const film = residue.kind === 'grease' || residue.kind === 'paint';
+        this.line(mark,finish.width*.35,film ? 4.6 : 2.4,residue.color,fade*(film ? .34 : .3),nx,ny);
+      }
     } else {
       const fabric = area.material === 'fabric';
       for (const offset of [-5,0,5]) {
@@ -140,8 +143,23 @@ class CleaningEffects {
       ctx.globalAlpha = fade*.76;
       ctx.lineWidth = .65;
       ctx.beginPath();
-      ctx.ellipse(px,py,particle.r*(area.material === 'fabric' ? 1.8 : 1),particle.r*.65,.4,0,Math.PI*2);
-      ctx.fill();
+      if (residue.kind === 'mud' || residue.kind === 'paint') {
+        const r = particle.r*(residue.kind === 'mud' ? 1.45 : 1);
+        ctx.moveTo(px-r,py+.15*r);
+        ctx.lineTo(px-.1*r,py-r);
+        ctx.lineTo(px+r,py-.44*r);
+        ctx.lineTo(px+.63*r,py+.68*r);
+        ctx.closePath();
+        ctx.fill();
+      } else if (residue.kind === 'fiber') {
+        ctx.strokeStyle = residue.color;
+        ctx.lineWidth = .85;
+        ctx.moveTo(px-2,py+1);
+        ctx.quadraticCurveTo(px+1,py-3,px+3,py-.5);
+      } else {
+        ctx.ellipse(px,py,particle.r*(area.material === 'fabric' ? 1.8 : 1),particle.r*.65,.4,0,Math.PI*2);
+        ctx.fill();
+      }
       ctx.stroke();
     }
   }

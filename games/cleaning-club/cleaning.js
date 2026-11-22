@@ -114,7 +114,7 @@ class SurfaceCleaning {
             const random = seeded(this.level.seed);
             for (const layer of this.layers) {
               layer.ctx.clearRect(0,0,W,H);
-              const originalDraw = saved.dirtVersion === 2 ? layer.material.previousDraw : layer.material.legacyDraw;
+              const originalDraw = saved.dirtVersion === 2 ? layer.material.previousDraw || layer.material.draw : layer.material.legacyDraw || layer.material.draw;
               originalDraw(layer.ctx,random);
               layer.original = this.measure(layer.canvas);
             }
@@ -288,7 +288,7 @@ class SurfaceCleaning {
             fctx.isPointInPath(candidate.path,contact.x,contact.y,candidate.rule || 'evenodd'));
           if (contactArea) {
             strongest = contact.strength;
-            residue = {color:material.color};
+            residue = {color:contact.color || material.color, kind:material.effectKind};
             area = contactArea;
           }
         }
@@ -325,7 +325,9 @@ class SurfaceCleaning {
       const alpha = data[(j*width+i)*4+3];
       if (alpha <= strength) continue;
       strength = alpha;
-      contact = {x:left+i,y:top+j,strength};
+      const offset=(j*width+i)*4;
+      const color=layer.material.sampleResidue ? `rgb(${data[offset]}, ${data[offset+1]}, ${data[offset+2]})` : undefined;
+      contact = {x:left+i,y:top+j,strength,color};
     }
     return contact;
   }
