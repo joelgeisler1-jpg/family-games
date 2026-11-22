@@ -197,10 +197,126 @@ function drawWatermarks(ctx, random) {
   ctx.restore();
 }
 
+function drawChalkScum(ctx, random, surface, [x,y,rx,ry,angle]) {
+  ctx.save();
+  ctx.clip(new Path2D(surface));
+  ctx.translate(x,y);
+  ctx.rotate(angle);
+  ctx.scale(rx,ry);
+  // A thin, warm deposit around a denser chalk film catches light unevenly.
+  const film = ctx.createRadialGradient(-.18,-.1,.06,0,0,1);
+  film.addColorStop(0,'#eee6c9e8');
+  film.addColorStop(.52,'#e6d8b2d5');
+  film.addColorStop(.78,'#a18a619c');
+  film.addColorStop(1,'#7d664600');
+  ctx.fillStyle = film;
+  ctx.beginPath();
+  for (let i=0;i<=48;i++) {
+    const theta = i*Math.PI/24;
+    const edge = .92+.13*Math.sin(theta*5+x*.11)+.09*Math.cos(theta*9+y*.13);
+    const px = Math.cos(theta)*edge, py = Math.sin(theta)*edge;
+    if (i === 0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.clip();
+  for (let i=0;i<175;i++) {
+    const theta = random()*Math.PI*2;
+    const radius = Math.pow(random(),.75);
+    const px = Math.cos(theta)*radius, py = Math.sin(theta)*radius;
+    const size = .009+random()*.032;
+    const dense = Math.sin(px*11+py*4+x)+Math.cos(py*8-px*2+y) > -.15;
+    ctx.fillStyle = dense ? (i%4 ? '#fff8e1a0' : '#ae926d82') : '#ae926d44';
+    ctx.beginPath();
+    ctx.ellipse(px,py,size,size*(.55+random()),theta,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawGroutBuildup(ctx, random, seam) {
+  drawGrout(ctx,random,seam);
+  const [x,y,length,vertical] = seam;
+  ctx.save();
+  ctx.translate(x,y);
+  if (vertical) ctx.rotate(Math.PI/2);
+  ctx.lineCap = 'round';
+  for (let i=2;i<length;i+=3) {
+    const offset = (random()-.5)*6;
+    ctx.strokeStyle = i%4 === 0 ? '#b4a778a3' : '#40432fbd';
+    ctx.lineWidth = 1+random()*2.8;
+    ctx.beginPath();
+    ctx.moveTo(i,offset);
+    ctx.lineTo(Math.min(length,i+1+random()*5),offset+(random()-.5)*1.7);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawTapDeposits(ctx, random) {
+  ctx.save();
+  ctx.clip(chromeSurface);
+  const haze = ctx.createLinearGradient(624,0,773,0);
+  haze.addColorStop(0,'#b5a48e97');
+  haze.addColorStop(.48,'#a0958594');
+  haze.addColorStop(.68,'#d9ceb3b2');
+  haze.addColorStop(1,'#9a826db4');
+  ctx.fillStyle = haze;
+  ctx.fillRect(623,144,155,151);
+  ctx.lineCap = 'round';
+  // Water runs down the stem and collects around the tap collars.
+  for (const [x,y,length] of [[632,183,29],[645,168,28],[696,178,46],[703,206,60],[712,212,54],[675,252,17],[752,253,16]]) {
+    ctx.strokeStyle = '#f7e6c6be';
+    ctx.lineWidth = 1.5+random()*1.6;
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.quadraticCurveTo(x-2,y+length*.53,x+.6,y+length);
+    ctx.stroke();
+    ctx.strokeStyle = '#856d549e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x+2,y+4);
+    ctx.lineTo(x+2.4,y+length-2);
+    ctx.stroke();
+  }
+  for (const [x,y,width,height] of [[700,283,25,6],[675,274,19,5],[752,274,18,5],[641,214,11,4]]) {
+    ctx.strokeStyle = '#f5e6c8ce';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.ellipse(x,y,width,height,-.02,.18,Math.PI*1.76);
+    ctx.stroke();
+  }
+  for (let i=0;i<115;i++) {
+    const x = 628+random()*147, y = 153+random()*136;
+    const r = .55+random()*1.7;
+    ctx.fillStyle = i%3 ? '#f4e6c3a0' : '#8c765a8f';
+    ctx.beginPath();
+    ctx.ellipse(x,y,r,r*.62,.42,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 const chromeSurface = bathtubChromePath();
 const porcelainSurfaces = [new Path2D(tubBowl), new Path2D(tubApron)];
 
+const scumPatches = [
+  [tubBowl, [[203,333,44,15,.18],[289,358,56,14,.17],[421,372,65,11,.03],[568,363,58,17,-.08],[735,329,46,18,-.26],[315,281,70,12,-.1]]],
+  [tubApron, [[204,433,50,22,.32],[326,475,67,23,.22],[486,454,71,21,-.1],[636,476,73,20,-.17],[772,421,48,27,-.55],[489,532,66,11,.01]]]
+];
+const groutSeams = [[10,248,91],[105,248,96],[209,248,103],[319,248,88],[416,248,82],[520,248,75],[108,186,45,true],[311,131,49,true],[416,186,59,true],[520,186,59,true],[568,186,43],[836,248,107],[936,250,64,true],[832,253,38,true],[8,310,91],[104,257,40,true]];
+
+const scumRenderer = paint => (ctx, random) => {
+  for (const [surface,patches] of scumPatches) {
+    for (const patch of patches) paint(ctx,random,surface,patch);
+  }
+};
+const groutRenderer = paint => (ctx, random) => {
+  for (const seam of groutSeams) paint(ctx,random,seam);
+};
+
 const bathtubLevel = {
+  dirtVersion: 2, idleHints: true,
   audioMaterial(ctx, {x,y}) {
     if (ctx.isPointInPath(chromeSurface,x,y)) return 'chrome';
     if (porcelainSurfaces.some(path => ctx.isPointInPath(path,x,y))) return 'porcelain';
@@ -210,30 +326,19 @@ const bathtubLevel = {
   layers: [
     {
       id: 'scum', label: 'Soap scum', color: '#aa8866', weight: .48,
-      tool: 'sponge', prepare: 'spray', action: 'Foam the tan patches, then wipe with the sponge.',
-      draw(ctx, random) {
-        for (const patch of [[203,333,44,15,.18],[289,358,56,14,.17],[421,372,65,11,.03],[568,363,58,17,-.08],[735,329,46,18,-.26],[315,281,70,12,-.1]]) {
-          drawScum(ctx, random, tubBowl, patch);
-        }
-        for (const patch of [[204,433,50,22,.32],[326,475,67,23,.22],[486,454,71,21,-.1],[636,476,73,20,-.17],[772,421,48,27,-.55],[489,532,66,11,.01]]) {
-          drawScum(ctx, random, tubApron, patch);
-        }
-      }
+      tool: 'sponge', prepare: 'spray', action: 'Foam the chalky patches, then wipe with the sponge.',
+      draw: scumRenderer(drawChalkScum), legacyDraw: scumRenderer(drawScum)
     },
     {
       id: 'grout', label: 'Dirty grout', color: '#66734d', weight: .32,
       tool: 'brush', action: 'Follow the dark tile seams with the detail brush.',
-      draw(ctx, random) {
-        for (const seam of [[10,248,91],[105,248,96],[209,248,103],[319,248,88],[416,248,82],[520,248,75],[108,186,45,true],[311,131,49,true],[416,186,59,true],[520,186,59,true],[568,186,43],[836,248,107],[936,250,64,true],[832,253,38,true],[8,310,91],[104,257,40,true]]) {
-          drawGrout(ctx, random, seam);
-        }
-      }
+      draw: groutRenderer(drawGroutBuildup), legacyDraw: groutRenderer(drawGrout)
     },
     {
       id: 'chrome', label: 'Water marks', color: '#798f91', weight: .20,
       tool: 'sponge', after: ['scum','grout'],
       action: 'Glide the sponge over both handles and the curved tap.',
-      draw: drawWatermarks
+      draw: drawTapDeposits, legacyDraw: drawWatermarks
     }
   ]
 };

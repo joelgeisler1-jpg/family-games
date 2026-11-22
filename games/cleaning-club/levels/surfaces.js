@@ -22,7 +22,7 @@ const dirtColors = {
 
 // Marks are authored in scene coordinates. Their masks remain independent,
 // allowing foam, wiping and brushing to affect only the intended dirt.
-function surfaceDirt(zone, marks) {
+function surfaceDirt(zone, marks, paintMark) {
   return (ctx, random) => {
     ctx.save();
     ctx.clip(zone.path,'evenodd');
@@ -32,6 +32,11 @@ function surfaceDirt(zone, marks) {
       ctx.translate(x,y);
       ctx.rotate(angle);
       ctx.scale(rx,ry);
+      if (paintMark) {
+        paintMark(ctx,random,kind);
+        ctx.restore();
+        continue;
+      }
       const fade = ctx.createRadialGradient(-.15,-.12,.02,0,0,1);
       fade.addColorStop(0,dark+'a6');
       fade.addColorStop(.69,dark+'76');
@@ -67,8 +72,10 @@ function surfaceDirt(zone, marks) {
   };
 }
 
-function dirtLayer({id,label,color,weight,tool,prepare,after,action}, zone, marks) {
-  return { id,label,color,weight,tool,prepare,after,action,draw:surfaceDirt(zone,marks) };
+function dirtLayer({id,label,color,weight,tool,prepare,after,action}, zone, marks, paintMark) {
+  const legacyDraw = surfaceDirt(zone,marks);
+  return { id,label,color,weight,tool,prepare,after,action,
+    draw:paintMark ? surfaceDirt(zone,marks,paintMark) : legacyDraw,legacyDraw };
 }
 
 function polishGlints(points) {
