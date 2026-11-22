@@ -153,7 +153,12 @@ function clock(){if(S.done)return;if(surface)S.elapsed=surface.time;else if(S.st
 setInterval(clock,400);
 function levelButtons(){const n=$('levelList');n.replaceChildren();levels.forEach((l,i)=>{const b=document.createElement('button');b.textContent=i+1;b.disabled=i>=S.unlocked;b.className=i===S.level?'current':'';if(i===S.level)b.setAttribute('aria-current','step');b.setAttribute('aria-label','Level '+(i+1)+(b.disabled?' locked':''));b.onclick=()=>{S.level=i;loadLevel()};n.append(b)})}
 let surface;
-const bathtubAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume);
+const bathtubAudio = new RecordedFoley(bathtubRecordings,cleaningAudio.muted,cleaningAudio.volume,message => {
+  const warning = $('audioWarning');
+  const visible = S.level === 0 && Boolean(message);
+  warning.textContent = visible ? 'Bathtub Bliss audio: ' + message : '';
+  warning.classList.toggle('hidden', !visible);
+});
 
 function stopCleaningAudio() {
   bathtubAudio.stopAll();
@@ -209,6 +214,7 @@ function updateSurfaceProgress(progress, layers) {
 
 function loadLevel(replay = false) {
   stopCleaningAudio();
+  bathtubAudio.reportStatus();
   surface?.dispose(!replay);
   surface = null;
   endStroke();
