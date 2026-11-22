@@ -99,8 +99,15 @@ function bedroomArtwork() {
 
 const bedroomLint = [['dust',355,314,29,18],['dust',568,310,41,18],['dust',341,421,43,24],['dust',447,457,48,20],['dust',570,416,44,20],['dust',652,468,40,22]];
 
+const bedroomBuildup = {
+  dust: [bedroomTables,[['dust',113,407,37,14],['dust',830,407,31,15]]],
+  rings: [bedroomTables,[['ring',157,401,32,17],['ring',792,401,34,18]]],
+  marks: [bedroomTimber,[['grime',352,535,45,8,.18],['grime',565,540,45,8,-.13]]],
+  lint: [bedroomFabric,[['lint',380,434,37,17,.2],['lint',610,436,40,16,-.1]]]
+};
+
 const bedroomLevel = {
-  dirtVersion: 2, idleHints: true,
+  dirtVersion: 3, idleHints: true,
   artwork: bedroomArtwork, seed: 28683, saveKey: 'familyArcadeCosyBedroomProgress1',
   description: 'Lift timber dust, soften drink rings and brush the quilt and cushions.',
   finishTitle: 'Cosy and clean!',
@@ -119,5 +126,8 @@ const bedroomLevel = {
         bedroomLint.map(([, ...geometry]) => ['lint',...geometry]),paintRoomDirt),
       legacyDraw: surfaceDirt(bedroomFabric,bedroomLint)
     }
-  ]
+  ].map(layer => {
+    const [zone,marks] = bedroomBuildup[layer.id];
+    return thickenDirt(layer,.69,surfaceDirt(zone,marks,paintRoomDirt));
+  })
 };

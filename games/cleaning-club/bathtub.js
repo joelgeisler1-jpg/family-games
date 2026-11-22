@@ -315,8 +315,16 @@ const groutRenderer = paint => (ctx, random) => {
   for (const seam of groutSeams) paint(ctx,random,seam);
 };
 
+const groutEffectPath = new Path2D();
+for (const [x,y,length,vertical] of groutSeams) {
+  groutEffectPath.rect(x-(vertical ? 7 : 0),y-(vertical ? 0 : 7),vertical ? 14 : length,vertical ? length : 14);
+}
+const tubEffectAreas = porcelainSurfaces.map(path => ({path,material:'porcelain'}));
+const groutEffectArea = {path:groutEffectPath,material:'grout',rule:'nonzero'};
+const chromeEffectArea = {path:chromeSurface,material:'chrome',rule:'nonzero'};
+
 const bathtubLevel = {
-  dirtVersion: 2, idleHints: true,
+  dirtVersion: 3, idleHints: true,
   audioMaterial(ctx, {x,y}) {
     if (ctx.isPointInPath(chromeSurface,x,y)) return 'chrome';
     if (porcelainSurfaces.some(path => ctx.isPointInPath(path,x,y))) return 'porcelain';
@@ -324,21 +332,26 @@ const bathtubLevel = {
   },
   seed: 4420,
   layers: [
-    {
+    thickenDirt({
       id: 'scum', label: 'Soap scum', color: '#aa8866', weight: .48,
       tool: 'sponge', prepare: 'spray', action: 'Foam the chalky patches, then wipe with the sponge.',
-      draw: scumRenderer(drawChalkScum), legacyDraw: scumRenderer(drawScum)
-    },
-    {
+      draw: scumRenderer(drawChalkScum), legacyDraw: scumRenderer(drawScum), effectAreas:tubEffectAreas
+    },.86,(ctx,random) => {
+      drawChalkScum(ctx,random,tubBowl,[248,351,58,11,.22]);
+      drawChalkScum(ctx,random,tubBowl,[489,375,65,9,-.05]);
+      drawChalkScum(ctx,random,tubApron,[566,473,73,13,-.09]);
+      drawChalkScum(ctx,random,tubApron,[721,456,57,14,-.4]);
+    }),
+    thickenDirt({
       id: 'grout', label: 'Dirty grout', color: '#66734d', weight: .32,
       tool: 'brush', action: 'Follow the dark tile seams with the detail brush.',
-      draw: groutRenderer(drawGroutBuildup), legacyDraw: groutRenderer(drawGrout)
-    },
-    {
+      draw: groutRenderer(drawGroutBuildup), legacyDraw: groutRenderer(drawGrout), effectAreas:[groutEffectArea]
+    },.74),
+    thickenDirt({
       id: 'chrome', label: 'Water marks', color: '#798f91', weight: .20,
       tool: 'sponge', after: ['scum','grout'],
       action: 'Glide the sponge over both handles and the curved tap.',
-      draw: drawTapDeposits, legacyDraw: drawWatermarks
-    }
+      draw: drawTapDeposits, legacyDraw: drawWatermarks, effectAreas:[chromeEffectArea]
+    },.64)
   ]
 };

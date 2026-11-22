@@ -75,7 +75,7 @@ function surfaceDirt(zone, marks, paintMark) {
 function dirtLayer({id,label,color,weight,tool,prepare,after,action}, zone, marks, paintMark) {
   const legacyDraw = surfaceDirt(zone,marks);
   return { id,label,color,weight,tool,prepare,after,action,
-    draw:paintMark ? surfaceDirt(zone,marks,paintMark) : legacyDraw,legacyDraw };
+    draw:paintMark ? surfaceDirt(zone,marks,paintMark) : legacyDraw,legacyDraw,effectAreas:[zone] };
 }
 
 function polishGlints(points) {
@@ -98,7 +98,9 @@ function paintRoomDirt(ctx, random, kind) {
     smudge: ['#694535','#e5b589','b8'],
     print: ['#526c72','#fff1d4','86'],
     sticky: ['#994733','#f5b478','cf'],
-    residue: ['#594a38','#ceb68a','ca']
+    residue: ['#594a38','#ceb68a','ca'],
+    mud: ['#73543b','#bb966d','e3'],
+    grime: ['#504a37','#a79d6f','dc']
   }[kind];
   const phase = random()*Math.PI*2;
   const wash = ctx.createRadialGradient(-.22,-.14,.085,0,0,1);

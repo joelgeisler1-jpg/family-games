@@ -141,11 +141,18 @@ function paintVanityDirt(ctx, random, kind) {
 }
 
 function vanityDirt(settings, zone, marks) {
-  return dirtLayer(settings,zone,marks,paintVanityDirt);
+  const buildup = {
+    powder:[['powder',363,472,35,14],['powder',573,469,31,13]],
+    prints:[['print',385,236,32,29,-.38],['print',559,196,36,27,.48]],
+    frame:[['residue',302,307,22,12,1.04],['residue',663,274,27,12,-1.15]],
+    streaks:[['streak',516,282,71,12,-.79]]
+  }[settings.id];
+  return thickenDirt(dirtLayer(settings,zone,marks,paintVanityDirt),.67,
+    surfaceDirt(zone,buildup,paintVanityDirt));
 }
 
 const vanityLevel = {
-  dirtVersion: 2, idleHints: true,
+  dirtVersion: 3, idleHints: true,
   artwork: vanityArtwork, seed: 15931, saveKey: 'familyArcadeVanityMirrorProgress1',
   description: 'Brush away powder, soften fingerprints and reveal the garden reflected in the mirror.',
   finishTitle: 'A mirror full of light!',
