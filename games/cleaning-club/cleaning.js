@@ -36,6 +36,23 @@ function imageFromSave(url) {
   });
 }
 
+// Reinforce a deposit through its existing edge profile, with optional
+// authored buildup in corners or where material naturally accumulates.
+function thickenDirt(layer, opacity, buildup) {
+  return {
+    ...layer,
+    previousDraw:layer.draw,
+    draw(ctx,random) {
+      layer.draw(ctx,random);
+      ctx.save();
+      ctx.globalAlpha=opacity;
+      ctx.drawImage(ctx.canvas,0,0);
+      ctx.restore();
+      buildup?.(ctx,random);
+    }
+  };
+}
+
 class SurfaceCleaning {
   constructor(level, callbacks) {
     this.level = level;
@@ -59,11 +76,11 @@ class SurfaceCleaning {
     this.scratch = document.createElement('canvas');
     this.scratch.width = this.scratch.height = cleaningTools.spray.radius * 2;
     this.stamp = this.scratch.getContext('2d');
-    this.effects = [];
+    this.effects = new CleaningEffects(fctx,[...new Set(level.layers.flatMap(layer => layer.effectAreas || []))]);
     this.active = true;
     this.ready = false;
     this.lastCheck = 0;
-    this.lastEffect = 0;
+
     this.frame = 0;
     this.elapsed = 0;
     queueMicrotask(() => this.restore());
@@ -97,7 +114,8 @@ class SurfaceCleaning {
             const random = seeded(this.level.seed);
             for (const layer of this.layers) {
               layer.ctx.clearRect(0,0,W,H);
-              layer.material.legacyDraw(layer.ctx,random);
+              const originalDraw = saved.dirtVersion === 2 ? layer.material.previousDraw : layer.material.legacyDraw;
+              originalDraw(layer.ctx,random);
               layer.original = this.measure(layer.canvas);
             }
           }
@@ -241,6 +259,7 @@ class SurfaceCleaning {
   pointerUp(event) {
     if (event.pointerId !== this.pointer) return;
     this.pointer = undefined;
+    this.effects.endStroke();
     if (event.type === 'pointerup') this.audio.endGesture();
     else this.audio.stopAll();
     this.update();
@@ -252,17 +271,35 @@ class SurfaceCleaning {
 
   apply(x, y, tool) {
     const {radius, strength} = cleaningTools[tool];
+    const power = this.dirtVersion === 3 && strength ? strength+.09 : strength;
     if (x < -radius || x > W+radius || y < -radius || y > H+radius) return;
+    let area = this.effects.areaAt(x,y);
+    let residue;
+    let strongest = 0;
     if (tool === 'spray') radialStamp(this.foam.ctx, x, y, radius, .93);
     for (const layer of this.layers) {
-      if (layer.material.tool !== tool || !this.available(layer)) continue;
       const {ctx, material} = layer;
+      const eligible = (material.tool === tool || material.prepare === tool) && this.available(layer);
+      if (!eligible) continue;
+      if (material.effectAreas?.length) {
+        const contact = this.dirtContact(layer,x,y);
+        if (contact && contact.strength > strongest) {
+          const contactArea = material.effectAreas?.find(candidate =>
+            fctx.isPointInPath(candidate.path,contact.x,contact.y,candidate.rule || 'evenodd'));
+          if (contactArea) {
+            strongest = contact.strength;
+            residue = {color:material.color};
+            area = contactArea;
+          }
+        }
+      }
+      if (material.tool !== tool) continue;
       ctx.globalCompositeOperation = 'destination-out';
-      radialStamp(ctx, x, y, radius, material.prepare ? .13 : strength);
+      radialStamp(ctx, x, y, radius, material.prepare ? .13 : power);
       if (material.prepare) {
         const size = radius * 2;
         this.stamp.clearRect(0, 0, size, size);
-        radialStamp(this.stamp, radius, radius, radius, strength);
+        radialStamp(this.stamp, radius, radius, radius, power);
         this.stamp.globalCompositeOperation = 'destination-in';
         this.stamp.drawImage(this.foam.canvas, radius-x, radius-y);
         this.stamp.globalCompositeOperation = 'source-over';
@@ -271,13 +308,26 @@ class SurfaceCleaning {
       ctx.globalCompositeOperation = 'source-over';
     }
 
-    const now = performance.now();
-    if (now-this.lastEffect > 34 && !reducedMotion.matches) {
-      this.lastEffect = now;
-      this.effects.push({ x, y, tool, start: now, drift: Math.random()*12-6 });
-    }
+    this.effects.add(tool,x,y,area,residue);
     this.changed = true;
     this.needsDraw = true;
+  }
+
+  dirtContact(layer,x,y) {
+    const left = Math.max(0,Math.floor(x)-6), top = Math.max(0,Math.floor(y)-6);
+    const width = Math.min(W,Math.floor(x)+7)-left;
+    const height = Math.min(H,Math.floor(y)+7)-top;
+    if (width <= 0 || height <= 0) return null;
+    const {data} = layer.ctx.getImageData(left,top,width,height);
+    let strength = 21;
+    let contact;
+    for (let j=0;j<height;j++) for (let i=0;i<width;i++) {
+      const alpha = data[(j*width+i)*4+3];
+      if (alpha <= strength) continue;
+      strength = alpha;
+      contact = {x:left+i,y:top+j,strength};
+    }
+    return contact;
   }
 
   renderSoon() {
@@ -285,8 +335,7 @@ class SurfaceCleaning {
       this.frame = 0;
       if (!this.finished && now-this.lastCheck > 180) this.update();
       if (this.needsDraw) this.draw();
-      this.drawEffects(now);
-      if (this.effects.length) this.renderSoon();
+      if (this.effects.draw(now)) this.renderSoon();
     });
   }
 
@@ -294,30 +343,6 @@ class SurfaceCleaning {
     this.needsDraw = false;
     ctx.clearRect(0, 0, W, H);
     for (const layer of this.layers) ctx.drawImage(layer.canvas, 0, 0);
-  }
-
-  drawEffects(now) {
-    fctx.clearRect(0, 0, W, H);
-    this.effects = this.effects.filter(effect => now-effect.start < (effect.tool === 'spray' ? 1550 : 650));
-    for (const {x,y,tool,start,drift} of this.effects) {
-      const foam = tool === 'spray';
-      const fade = 1-(now-start)/(foam ? 1550 : 650);
-      fctx.save();
-      fctx.globalAlpha = fade * (foam ? .7 : .48);
-      fctx.fillStyle = foam ? '#fcfff6' : tool === 'brush' ? '#b5a281' : '#ecfff7';
-      fctx.strokeStyle = '#fffdf6';
-      fctx.lineWidth = 1.2;
-      const count = tool === 'sponge' ? 1 : 4;
-      for (let i = 0; i < count; i++) {
-        fctx.beginPath();
-        const rise = (1-fade)*12;
-        const radius = foam ? 5+i*1.8 : tool === 'brush' ? 1.4 : 19;
-        fctx.ellipse(x+i*7-10+drift, y+i*5-rise, radius, foam ? radius : 2.9, -.25, 0, Math.PI*2);
-        fctx.fill();
-        if (foam) fctx.stroke();
-      }
-      fctx.restore();
-    }
   }
 
   update() {

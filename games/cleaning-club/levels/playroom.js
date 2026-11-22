@@ -106,8 +106,15 @@ const toyFingerprints = [['print',220,151,23,19],['print',472,162,28,18],['print
 const toyCornerMarks = [['residue',123,163,12,34],['residue',124,313,13,31],['residue',361,303,10,28],['residue',591,439,11,30],['residue',837,172,12,30],['residue',837,437,12,34]];
 const visibleCornerMarks = toyCornerMarks.map(mark => mark[1] === 591 ? ['residue',591,390,11,17] : mark);
 
+const shelfBuildup = {
+  dust: [toyShelves,[['dust',219,205,46,11],['dust',611,351,41,10],['dust',699,496,37,12]]],
+  prints: [plasticToys,[['print',239,287,20,17,.33],['print',645,263,23,16,-.4]]],
+  sticky: [toyBins,[['sticky',222,450,34,16,-.15],['sticky',739,453,35,17,.24]]],
+  corners: [toyCorners,[['grime',128,335,12,27],['grime',833,453,12,21]]]
+};
+
 const playroomLevel = {
-  dirtVersion: 2, idleHints: true,
+  dirtVersion: 3, idleHints: true,
   artwork: playroomArtwork, seed: 64129, saveKey: 'familyArcadeRainbowToyRoomProgress1',
   description: 'Dust the rainbow shelves, clean the toys and lift sticky marks from the bins.',
   finishTitle: 'The rainbow is back!',
@@ -129,5 +136,8 @@ const playroomLevel = {
         visibleCornerMarks,paintRoomDirt),
       legacyDraw: surfaceDirt(toyCorners,toyCornerMarks)
     }
-  ]
+  ].map(layer => {
+    const [zone,marks] = shelfBuildup[layer.id];
+    return thickenDirt(layer,.7,surfaceDirt(zone,marks,paintRoomDirt));
+  })
 };
