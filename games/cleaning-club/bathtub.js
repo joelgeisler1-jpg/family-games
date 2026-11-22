@@ -157,8 +157,7 @@ function drawGrout(ctx, random, [x, y, length, vertical]) {
   ctx.restore();
 }
 
-function drawWatermarks(ctx, random) {
-  ctx.save();
+function bathtubChromePath() {
   const metal = new Path2D();
   metal.moveTo(685, 282);
   metal.lineTo(685, 196);
@@ -175,7 +174,12 @@ function drawWatermarks(ctx, random) {
     metal.rect(x-8,247,16,25);
     metal.ellipse(x,272,22,8,0,0,Math.PI*2);
   }
-  ctx.clip(metal);
+  return metal;
+}
+
+function drawWatermarks(ctx, random) {
+  ctx.save();
+  ctx.clip(chromeSurface);
   ctx.fillStyle = '#8a81789a';
   ctx.fillRect(623,150,155,144);
   for (let i = 0; i < 88; i++) {
@@ -193,7 +197,15 @@ function drawWatermarks(ctx, random) {
   ctx.restore();
 }
 
+const chromeSurface = bathtubChromePath();
+const porcelainSurfaces = [new Path2D(tubBowl), new Path2D(tubApron)];
+
 const bathtubLevel = {
+  audioMaterial(ctx, {x,y}) {
+    if (ctx.isPointInPath(chromeSurface,x,y)) return 'chrome';
+    if (porcelainSurfaces.some(path => ctx.isPointInPath(path,x,y))) return 'porcelain';
+    return y < 413 ? 'grout' : 'dust';
+  },
   seed: 4420,
   layers: [
     {
