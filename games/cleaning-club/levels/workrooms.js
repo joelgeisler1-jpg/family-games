@@ -13,7 +13,14 @@ const workroomDeposits = {
   teal: ['#296469','#79b5a5',.91],
   violet: ['#64517e','#c39ccb',.90],
   glue: ['#8d7955','#fff0bb',.79],
-  shavings: ['#654834','#e6bc7b',.83]
+  shavings: ['#654834','#e6bc7b',.83],
+  soil: ['#6f5137','#e1c08d',.72],
+  icing: ['#aa496a','#ffd4bb',.85],
+  crumbs: ['#885232','#f0bb75',.67],
+  fingerprint: ['#4d7580','#f6f5db',.62],
+  sugar: ['#a47b42','#fff2cf',.70],
+  mineral: ['#7c829d','#fff6e9',.80],
+  tarnish: ['#69543b','#d7b879',.80]
 };
 
 function paintWorkroomDeposit(ctx, random, kind) {
@@ -67,7 +74,37 @@ function paintWorkroomDeposit(ctx, random, kind) {
       ctx.fill();
     }
   }
-  if (['water','grease','glue','soap'].includes(kind)) {
+  if (kind === 'mineral' || kind === 'icing') {
+    // Crystalline streaks follow gravity; icing catches light along the fold.
+    const count = kind === 'mineral' ? 11 : 4;
+    for (let i=0;i<count;i++) {
+      const offset = (i-(count-1)/2)*(.98/count);
+      ctx.globalAlpha = .32+random()*.39;
+      ctx.strokeStyle = edge;
+      ctx.lineWidth = .028+random()*.047;
+      ctx.beginPath();
+      if (kind === 'mineral') {
+        ctx.moveTo(offset,-.77+random()*.37);
+        ctx.bezierCurveTo(offset+.12,-.28,offset-.07,.21,offset+.08,.59+random()*.24);
+      } else {
+        ctx.moveTo(-.71,offset+.12);
+        ctx.bezierCurveTo(-.4,offset-.35,.28,offset+.27,.71,offset-.13);
+      }
+      ctx.stroke();
+    }
+  }
+  if (kind === 'fingerprint') {
+    for (let i=0;i<10;i++) {
+      const radius = .92-i*.077;
+      ctx.globalAlpha = .36+random()*.4;
+      ctx.strokeStyle = i%4 ? edge : base;
+      ctx.lineWidth = .017+random()*.022;
+      ctx.beginPath();
+      ctx.ellipse(-.09+i*.009,.045,radius,radius*.78,-.17,-.86+random()*.9,3.4+random()*.68);
+      ctx.stroke();
+    }
+  }
+  if (['water','grease','glue','soap','sugar'].includes(kind)) {
     for (let i=0;i<5;i++) {
       ctx.globalAlpha=.40+random()*.43;
       ctx.strokeStyle=i%2 ? base : edge;
