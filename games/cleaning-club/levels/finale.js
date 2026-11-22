@@ -7,14 +7,14 @@ const gardenShelf = cleaningZone('M151 505H804V528H151Z','wood');
 
 const gardenLevel = {
   artwork:()=>polishGlints([[222,306,7],[460,308,9],[761,350,7]]),
-  dirtVersion:3,idleHints:true,seed:84913,saveKey:'familyArcadeSecretGardenProgress1',
+  dirtVersion:4,idleHints:true,seed:84913,saveKey:'familyArcadeSecretGardenProgress1',
   description:'Foam and brush the terracotta, then wipe the bench and tend to the tools.',
   finishTitle:'The greenhouse is glowing!',
   finishMessage:'Warm terracotta and sunlit timber are ready for planting.',
   notes:{spray:'Softens dried mud',sponge:'Wipes soil and water rings',brush:'Lifts mud and shelf grime'},
   audioMaterial:zoneMaterial([gardenPottery,gardenTools,gardenShelf,gardenBench],'dust'),
   layers:[
-    workroomDirt({id:'mud',effectKind:'mud',label:'Dried terracotta mud',color:'#906445',weight:.29,tool:'brush',prepare:'spray',action:'Soften the dark mud on the pots with foam, then brush it away.'},gardenPottery,
+    workroomDirt({id:'mud',effectKind:'mud',crusted:true,label:'Dried terracotta mud',color:'#906445',weight:.29,tool:'brush',prepare:'spray',action:'Soften the dark mud on the pots with foam, then brush it away.'},gardenPottery,
       [['mud',222,277,36,21,-.21],['mud',270,315,30,14,.32],['mud',441,280,44,23,.17],['mud',478,314,27,13,-.2],['mud',614,303,32,20,-.12]]),
     workroomDirt({id:'soil',effectKind:'mud',label:'Loose bench soil',color:'#8c6045',weight:.22,tool:'sponge',action:'Wipe up the loose soil along the front of the bench.'},gardenBench,
       [['mud',145,357,43,13,.16],['mud',334,360,54,12,-.16],['mud',476,357,47,12,.18],['mud',840,357,31,13,-.2]]),

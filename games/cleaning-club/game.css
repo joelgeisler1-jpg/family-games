@@ -277,3 +277,84 @@ body {
   48% { opacity: .92; }
   100% { opacity: .36; }
 }
+
+.collection-summary { margin: 0 0 8px; color: #3e5b49; font-size: 13px; font-weight: 750; }
+.level-list button { position: relative; }
+.level-list button.earned::after {
+  content: '✦';
+  position: absolute;
+  right: 4px;
+  top: 2px;
+  color: #8a602b;
+  font-size: 10px;
+  line-height: 1;
+}
+.level-list button.earned.current::after { color: #f7d896; }
+
+.active-tool {
+  position: absolute;
+  z-index: 1;
+  width: clamp(64px,10cqw,108px);
+  aspect-ratio: 120/100;
+  pointer-events: none;
+  background: center / contain no-repeat;
+  transform: translate(-18%,-62%) rotate(var(--tool-tilt,0deg)) scaleX(var(--tool-facing,1));
+  transform-origin: 18% 62%;
+  filter: drop-shadow(1px 3px 3px #30211559);
+}
+.active-tool.mirrored { --tool-facing: -1; }
+.active-tool[data-active-tool="spray"] { background-image: url('assets/tools/spray.svg'); }
+.active-tool[data-active-tool="sponge"] { background-image: url('assets/tools/sponge.svg'); }
+.active-tool[data-active-tool="brush"] { background-image: url('assets/tools/brush.svg'); }
+.completion-seal {
+  color: #8d662e;
+  background: #f0dbab;
+  border: 1px solid #c8aa6d;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  font-size: 14px;
+}
+.finish-actions { justify-content: center; flex-wrap: wrap; }
+.finish-actions button { font-size: clamp(11px,1.65vw,14px); }
+#beforeCanvas {
+  pointer-events: none;
+  clip-path: inset(0 calc(100% - var(--before-width,50%)) 0 0);
+}
+.comparing.has-painting #sceneArt { clip-path: inset(0 0 0 var(--before-width,50%)); }
+.comparing:not(.has-painting) #sceneArt .polish-glints { visibility: hidden; }
+.compare-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--before-width,50%);
+  width: 2px;
+  transform: translateX(-50%);
+  background: #fff4d6;
+  box-shadow: 0 0 4px #4936229e;
+  pointer-events: none;
+}
+.comparison-panel {
+  position: absolute;
+  z-index: 1;
+  bottom: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(490px,96%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 11px;
+  border: 1px solid #c9b284;
+  border-radius: 12px;
+  background: #faf0dcf5;
+  color: var(--ink);
+  color-scheme: light;
+  font-size: 13px;
+  font-weight: 750;
+  box-shadow: 0 4px 18px #1b272466;
+}
+.comparison-panel input { flex: 1; min-width: 0; height: 44px; accent-color: #3b6652; }
+.comparison-panel button { min-height: 44px; min-width: 44px; padding: 3px 8px; }

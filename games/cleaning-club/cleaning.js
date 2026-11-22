@@ -26,6 +26,24 @@ function radialStamp(ctx, x, y, radius, strength) {
   ctx.fillRect(x-radius, y-radius, radius*2, radius*2);
 }
 
+// The scratch cuts into the saved material itself, so cracks remain visible
+// between strokes and count as removed dirt.
+function scratchMud(ctx,x,y) {
+  const edge = (Math.floor(x+y)%5)-2;
+  ctx.strokeStyle = '#000b';
+  ctx.lineWidth = 1.35;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x-8,y+edge);
+  ctx.lineTo(x-4,y-3);
+  ctx.lineTo(x+1,y-1);
+  ctx.lineTo(x+5,y-5+edge);
+  ctx.moveTo(x+1,y-1);
+  ctx.lineTo(x+4,y+3);
+  ctx.lineTo(x+8,y+4-edge);
+  ctx.stroke();
+}
+
 function imageFromSave(url) {
   if (typeof url !== 'string' || !url.startsWith('data:image/png;base64,')) return Promise.resolve(null);
   return new Promise(resolve => {
@@ -87,6 +105,41 @@ class SurfaceCleaning {
     this.draw();
   }
 
+  originalRenderer(material) {
+    if (this.dirtVersion === this.level.dirtVersion) return material.draw;
+    if (this.dirtVersion === 2 || this.dirtVersion === 3) return material.previousDraw || material.draw;
+    return material.legacyDraw || material.draw;
+  }
+
+  drawOriginalDirt(canvas) {
+    canvas.width = W;
+    canvas.height = H;
+    const target = canvas.getContext('2d');
+    const scratch = newLayer();
+    const random = seeded(this.level.seed);
+    target.clearRect(0,0,W,H);
+    for (const {material} of this.layers) {
+      scratch.ctx.clearRect(0,0,W,H);
+      this.originalRenderer(material)(scratch.ctx,random);
+      target.drawImage(scratch.canvas,0,0);
+    }
+  }
+
+  showTool(point, dx=0, dy=0) {
+    const tool = $('activeTool');
+    tool.dataset.activeTool = this.strokeTool;
+    tool.classList.toggle('mirrored',point.x>W*.73);
+    tool.style.left = point.px+'px';
+    tool.style.top = point.py+'px';
+    const angle = reducedMotion.matches ? 0 : Math.max(-10,Math.min(10,dy*.26-dx*.09));
+    tool.style.setProperty('--tool-tilt',angle+'deg');
+    tool.classList.remove('hidden');
+  }
+
+  hideTool() {
+    $('activeTool').classList.add('hidden');
+  }
+
   measure(canvas) {
     const {width, height} = this.sample;
     this.sampleCtx.globalCompositeOperation = 'copy';
@@ -101,6 +154,7 @@ class SurfaceCleaning {
     try {
       const saved = JSON.parse(savedSetting(this.progressKey));
       if (this.level.saveKey && saved?.completed === true) {
+        if (Number.isInteger(saved.dirtVersion)) this.dirtVersion = saved.dirtVersion;
         for (const layer of this.layers) layer.ctx.clearRect(0,0,W,H);
         this.elapsed = Number.isFinite(saved.elapsed) ? Math.max(0,saved.elapsed) : 0;
       } else if (saved?.masks?.length === this.layers.length + 1) {
@@ -114,8 +168,7 @@ class SurfaceCleaning {
             const random = seeded(this.level.seed);
             for (const layer of this.layers) {
               layer.ctx.clearRect(0,0,W,H);
-              const originalDraw = saved.dirtVersion === 2 ? layer.material.previousDraw || layer.material.draw : layer.material.legacyDraw || layer.material.draw;
-              originalDraw(layer.ctx,random);
+              this.originalRenderer(layer.material)(layer.ctx,random);
               layer.original = this.measure(layer.canvas);
             }
           }
@@ -153,6 +206,7 @@ class SurfaceCleaning {
     clearTimeout(this.saveTimer);
     cancelAnimationFrame(this.frame);
     this.active = false;
+    this.hideTool();
     this.clearHint();
     fctx.clearRect(0, 0, W, H);
   }
@@ -215,6 +269,7 @@ class SurfaceCleaning {
     this.pointer = event.pointerId;
     this.strokeTool = tool;
     this.previous = sceneCoordinates(event);
+    this.showTool(this.previous);
     this.audioTime = event.timeStamp;
     this.audioDistance = 0;
     this.audio.startGesture(tool,this.level.audioMaterial?.(ctx,this.previous));
@@ -227,6 +282,7 @@ class SurfaceCleaning {
   pointerMove(event) {
     if (event.pointerId !== this.pointer) return;
     const tool = this.strokeTool;
+    const start = this.previous;
     const events = event.getCoalescedEvents?.();
     for (const point of events?.length ? events : [event]) {
       const next = sceneCoordinates(point);
@@ -243,12 +299,14 @@ class SurfaceCleaning {
       this.distanceToStamp = offset - distance;
       this.previous = next;
     }
+    this.showTool(this.previous,this.previous.x-start.x,this.previous.y-start.y);
     const elapsed = event.timeStamp-this.audioTime;
     if (elapsed >= 24 && this.audioDistance > 0) {
       this.audio.updateGesture({
         tool,
         speed:this.audioDistance*1000/elapsed,
-        material:this.level.audioMaterial?.(ctx,this.previous)
+        material:this.level.audioMaterial?.(ctx,this.previous),
+        texture:this.residueKind
       });
       this.audioTime = event.timeStamp;
       this.audioDistance = 0;
@@ -259,6 +317,7 @@ class SurfaceCleaning {
   pointerUp(event) {
     if (event.pointerId !== this.pointer) return;
     this.pointer = undefined;
+    this.hideTool();
     this.effects.endStroke();
     if (event.type === 'pointerup') this.audio.endGesture();
     else this.audio.stopAll();
@@ -271,7 +330,7 @@ class SurfaceCleaning {
 
   apply(x, y, tool) {
     const {radius, strength} = cleaningTools[tool];
-    const power = this.dirtVersion === 3 && strength ? strength+.09 : strength;
+    const power = this.dirtVersion >= 3 && strength ? strength+.09 : strength;
     if (x < -radius || x > W+radius || y < -radius || y > H+radius) return;
     let area = this.effects.areaAt(x,y);
     let residue;
@@ -281,8 +340,8 @@ class SurfaceCleaning {
       const {ctx, material} = layer;
       const eligible = (material.tool === tool || material.prepare === tool) && this.available(layer);
       if (!eligible) continue;
-      if (material.effectAreas?.length) {
-        const contact = this.dirtContact(layer,x,y);
+      const contact = material.effectAreas?.length ? this.dirtContact(layer,x,y) : null;
+      if (contact) {
         if (contact && contact.strength > strongest) {
           const contactArea = material.effectAreas?.find(candidate =>
             fctx.isPointInPath(candidate.path,contact.x,contact.y,candidate.rule || 'evenodd'));
@@ -294,8 +353,11 @@ class SurfaceCleaning {
         }
       }
       if (material.tool !== tool) continue;
+      this.needsDraw = true;
       ctx.globalCompositeOperation = 'destination-out';
-      radialStamp(ctx, x, y, radius, material.prepare ? .13 : power);
+      const crust = tool === 'brush' && material.effectKind === 'mud' && contact?.strength > 142;
+      if (crust) scratchMud(ctx,contact.x,contact.y);
+      radialStamp(ctx, x, y, radius, material.prepare ? (crust ? .10 : .13) : crust ? .48 : power);
       if (material.prepare) {
         const size = radius * 2;
         this.stamp.clearRect(0, 0, size, size);
@@ -308,9 +370,9 @@ class SurfaceCleaning {
       ctx.globalCompositeOperation = 'source-over';
     }
 
+    this.residueKind = residue?.kind;
     this.effects.add(tool,x,y,area,residue);
     this.changed = true;
-    this.needsDraw = true;
   }
 
   dirtContact(layer,x,y) {
@@ -361,6 +423,7 @@ class SurfaceCleaning {
       this.elapsed = this.time;
       this.started = null;
       this.finished = true;
+      this.hideTool();
       this.clearHint();
       this.pointer = undefined;
       for (const layer of this.layers) layer.ctx.clearRect(0, 0, W, H);

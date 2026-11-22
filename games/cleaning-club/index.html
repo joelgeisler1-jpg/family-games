@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="../../arcade.css">
   <link rel="stylesheet" href="game.css">
   <link rel="preload" as="image" type="image/webp" href="assets/scenes/bath.webp">
+  <link rel="preload" as="image" href="assets/tools/spray.svg">
+  <link rel="preload" as="image" href="assets/tools/sponge.svg">
+  <link rel="preload" as="image" href="assets/tools/brush.svg">
   <script defer src="audio.js"></script>
   <script defer src="foley.js"></script>
   <script defer src="cleaning-effects.js"></script>
@@ -41,6 +44,7 @@
     <details class="menu" id="levelMenu">
       <summary class="control">Levels</summary>
       <nav class="menu-panel" aria-label="Levels">
+        <p class="collection-summary" id="collectionSummary"></p>
         <div class="level-list" id="levelList"></div>
       </nav>
     </details>
@@ -64,16 +68,27 @@
       <img id="scenePainting" alt="" aria-hidden="true" class="hidden" draggable="false" decoding="async" fetchpriority="high">
       <svg id="sceneArt" viewBox="0 0 960 620" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Illustrated cleaning scene"></svg>
       <canvas id="dirtCanvas" width="960" height="620" aria-label="Drag a finger to clean the dirty areas"></canvas>
+      <canvas id="beforeCanvas" class="hidden" width="1" height="1" aria-hidden="true"></canvas>
       <canvas id="fxCanvas" width="960" height="620" aria-hidden="true"></canvas>
       <span id="dirtHint" class="dirt-hint hidden" aria-hidden="true"></span>
+      <span class="active-tool hidden" id="activeTool" aria-hidden="true"></span>
       <span class="cursor hidden" id="cursor" aria-hidden="true">🧽</span>
       <div class="finish hidden" id="finish">
+        <span class="completion-seal" aria-hidden="true">✦</span>
         <h2 id="finishTitle">So satisfying!</h2>
         <p id="finishMessage">Everything is sparkling clean.</p>
         <div class="finish-actions">
+          <button class="secondary" id="openComparison">Before &amp; after</button>
           <button class="primary" id="next">Next makeover →</button>
           <button class="secondary" id="again">Clean this scene again</button>
         </div>
+      </div>
+      <div class="compare-divider hidden" id="compareDivider" aria-hidden="true"></div>
+      <div class="comparison-panel hidden" id="comparisonPanel">
+        <label for="compareRange">Before</label>
+        <input id="compareRange" type="range" min="0" max="100" value="50" aria-label="How much of the before scene to show">
+        <span>After</span>
+        <button class="secondary" id="closeComparison">Done</button>
       </div>
     </div>
   </div>
