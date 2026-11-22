@@ -65,7 +65,29 @@ a+=`${P('M0 0H160Q154 204 55 367L0 387Z','#b5a2d8','#f5e7ff',9)}${P('M960 0H800Q
 a+=`${E(479,564,324,49,'#e0d8f5')}${R(333,198,292,284,'#d4b6e3',90,'#f9e6fd',14)}${R(350,220,258,222,'#a99acb',70)}${P('M354 330Q475 292 607 330L613 457Q480 482 346 455Z','#d8c4e6','#faf1fd',8)}${R(297,425,365,103,'#c1a9d3',33,'#fff2f8',10)}${R(296,518,60,57,'#d2b4d9',9)}${R(603,518,60,57,'#d2b4d9',9)}${P('M419 251L438 208L462 238L480 191L500 239L523 208L540 251Z','#ffe1a1','#e6b886',6)}${E(480,264,67,12,'#f6c778')}${E(479,336,76,35,'#e5d7f0')}${E(408,486,40,18,'#ead0f4')}${E(550,486,40,18,'#ead0f4')}${sparkle(255,428)}${sparkle(704,386)}${sparkle(782,155)}`;return a}
 const advancedLevels = [{...bathtubLevel, artwork:bathtubArtwork},vanityLevel,bedroomLevel,playroomLevel];
 const legacyDrawings = [kitchen,puppy,artstudio,garden,cafe,palace];
-function renderScene(){svg.innerHTML=advancedLevels[S.level]?.artwork() ?? baseScene(S.level)+legacyDrawings[S.level-advancedLevels.length]();svg.setAttribute('aria-label',levels[S.level].title+' hand illustrated scene')}
+const scenePaintings = ['assets/scenes/bath.webp','assets/scenes/vanity.webp'];
+
+function renderScene() {
+  svg.innerHTML = advancedLevels[S.level]?.artwork() ?? baseScene(S.level)+legacyDrawings[S.level-advancedLevels.length]();
+  svg.setAttribute('aria-label',levels[S.level].title+' illustrated scene');
+
+  const painting = $('scenePainting');
+  scene.classList.remove('has-painting');
+  painting.classList.add('hidden');
+  const file = scenePaintings[S.level];
+  if (!file) {
+    painting.removeAttribute('src');
+    return;
+  }
+  const url = new URL(file, document.baseURI).href;
+  painting.src = url;
+  // Keep the matching SVG visible until the current level's painting decodes.
+  painting.decode().then(() => {
+    if (scenePaintings[S.level] !== file || painting.src !== url) return;
+    scene.classList.add('has-painting');
+    painting.classList.remove('hidden');
+  }).catch(() => {});
+}
 function seeded(n){let k=n|0;return ()=>{k^=k<<13;k^=k>>>17;k^=k<<5;return (k>>>0)/4294967296}}
 function newLayer(){const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;return {canvas,ctx:canvas.getContext('2d',{willReadFrequently:true})}}
 function paintBlob(c,x,y,rx,ry,random,kind){const angle=random()*Math.PI*2;const points=11;let p=[];for(let j=0;j<points;j++){const th=j*Math.PI*2/points;const jitter=.73+random()*.5;p.push([Math.cos(th)*rx*jitter,Math.sin(th)*ry*jitter])}
@@ -210,6 +232,7 @@ function updateSurfaceProgress(progress, layers) {
 }
 
 function loadLevel(replay = false) {
+  for (const menu of gameMenus) menu.open = false;
   stopCleaningAudio();
   recordedAudio.reportStatus();
   surface?.dispose(!replay);
@@ -328,5 +351,22 @@ dirty.addEventListener('touchend', () => {
   const audio = surface ? recordedAudio : cleaningAudio;
   if (audio.context?.state !== 'running') audio.unlock();
 }, {passive:true});
+const gameMenus = [$('levelMenu'),$('taskMenu')];
+for (const menu of gameMenus) {
+  menu.querySelector('summary').addEventListener('click', () => {
+    if (!menu.open) for (const other of gameMenus) if (other !== menu) other.open = false;
+  });
+}
+document.addEventListener('pointerdown', event => {
+  for (const menu of gameMenus) if (menu.open && !menu.contains(event.target)) menu.open = false;
+});
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape') return;
+  for (const menu of gameMenus) {
+    if (!menu.open) continue;
+    menu.open = false;
+    menu.querySelector('summary').focus();
+  }
+});
 updateAudioControls();
 loadLevel();
