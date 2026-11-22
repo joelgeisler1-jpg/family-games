@@ -255,11 +255,11 @@ const cleaningAudio = {
     this.fadeFoam();
   },
 
-  set(muted, volume) {
+  set(muted, volume, {activate = true} = {}) {
     this.muted = muted;
     this.volume = volume;
     if (muted || volume <= 0) this.cancel();
-    else this.unlock();
+    else if (activate) this.unlock();
     if (this.output) this.output.gain.setTargetAtTime(muted ? 0 : volume*.55,this.context.currentTime,.028);
   }
 };
