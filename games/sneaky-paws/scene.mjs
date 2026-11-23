@@ -1,3 +1,4 @@
+import { setMood } from './characters.mjs';
 import { environment, obstacle } from './environments.mjs';
 import { ARM_R } from './constants.mjs';
 import { actors, cameraCone, piece, roomDecor, scannerFX, staticLayer, targetGroup } from './dom.mjs';
@@ -122,6 +123,7 @@ function updateTargets() {
   }
 }
 function updateSpoolArt(i) {
+  setMood('clever', 1800);
   const el = staticLayer.querySelector(`[data-spool="${i}"]`);
   if (el) {
     el.classList.add('finished');

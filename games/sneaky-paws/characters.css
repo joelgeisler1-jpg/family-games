@@ -1,0 +1,187 @@
+.thief-figure {
+  transform-origin: 84px 474px;
+  animation: thief-breathe 3s ease-in-out infinite;
+}
+.thief-head {
+  transform-origin: 84px 412px;
+}
+.thief-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: characterBlink 4.8s steps(1, end) infinite;
+}
+.thief-scarf {
+  transform-origin: 79px 419px;
+  animation: thief-scarf 2.4s ease-in-out infinite alternate;
+}
+.thief-face [data-expression] {
+  display: none;
+}
+#thief[data-expression='ready'] [data-expression='ready'],
+#thief[data-expression='thinking'] [data-expression='thinking'],
+#thief[data-expression='alert'] [data-expression='alert'],
+#thief[data-expression='oops'] [data-expression='oops'],
+#thief[data-expression='clever'] [data-expression='clever'],
+#thief[data-expression='happy'] [data-expression='happy'] {
+  display: inline;
+}
+#thief[data-expression='thinking'] .thief-head {
+  transform: rotate(-7deg);
+}
+#thief[data-expression='alert'] .thief-eyes {
+  animation: none;
+  transform: scaleY(1.17);
+}
+#thief[data-pose='reaching'] .thief-figure {
+  animation: none;
+  transform: rotate(5deg) translateY(2px);
+}
+#thief[data-pose='reaching'] .thief-scarf {
+  animation-duration: 1s;
+}
+#thief[data-pose='recovering'] .thief-figure {
+  animation: none;
+  transform: rotate(-4deg);
+}
+#thief[data-pose='caught'] .thief-figure {
+  animation: thief-caught 0.3s ease-out;
+  transform: rotate(-7deg) translateY(2px);
+}
+#thief[data-pose='victory'] .thief-figure {
+  animation: thief-cheer 0.42s ease-in-out 4 alternate;
+}
+@keyframes thief-breathe {
+  50% {
+    transform: translateY(-2px) scaleY(1.025);
+  }
+}
+@keyframes thief-scarf {
+  to {
+    transform: rotate(-8deg);
+  }
+}
+@keyframes thief-caught {
+  48% {
+    transform: translateY(-5px) rotate(-7deg);
+  }
+}
+@keyframes thief-cheer {
+  to {
+    transform: translateY(-6px) rotate(4deg);
+  }
+}
+
+.guard-eyes {
+  fill: #302840;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: characterBlink 5.1s steps(1, end) infinite;
+}
+.guard-question,
+.guard-surprise {
+  display: none;
+}
+.guard-unit.suspicious .guard-question {
+  display: inline;
+}
+.guard-unit.suspicious .guard-calm,
+.guard-unit.alerted :is(.guard-calm, .guard-question) {
+  display: none;
+}
+.guard-unit.alerted .guard-surprise {
+  display: inline;
+}
+.guard-unit.alerted .guard-eyes {
+  animation: none;
+  transform: scaleY(1.25);
+}
+.guard-unit.walking .guard-body {
+  animation: guard-stride 0.53s ease-in-out infinite alternate;
+}
+.guard-unit.walking .guard-boot {
+  animation: guard-step 0.53s ease-in-out infinite alternate;
+}
+.guard-unit.walking .guard-boot.right {
+  animation-direction: alternate-reverse;
+}
+.guard-unit.walking:where([data-heading='left']) .guard-head {
+  transform: translateX(-2px);
+}
+.guard-unit.walking:where([data-heading='right']) .guard-head {
+  transform: translateX(2px);
+}
+.guard-unit.suspicious .guard-head {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateY(-3px) rotate(-5deg);
+}
+.guard-unit.alerted .guard-body {
+  animation: guardStartle 0.28s ease-out forwards;
+}
+.guard-unit:not(.walking, .sleeping, .suspicious, .alerted) .guard-head {
+  animation: guard-look 3.4s ease-in-out infinite alternate;
+}
+@keyframes guard-look {
+  to {
+    transform: translateX(2px);
+  }
+}
+@keyframes guard-stride {
+  to {
+    transform: translateY(-2px);
+  }
+}
+@keyframes guard-step {
+  to {
+    translate: 0 -5px;
+  }
+}
+
+.companion-face {
+  display: none;
+}
+.character-portrait[data-mood='ready'] [data-expression='ready'],
+.character-portrait[data-mood='thinking'] [data-expression='thinking'],
+.character-portrait[data-mood='alert'] [data-expression='alert'],
+.character-portrait[data-mood='oops'] [data-expression='oops'],
+.character-portrait[data-mood='clever'] [data-expression='clever'],
+.character-portrait[data-mood='happy'] [data-expression='happy'] {
+  display: inline;
+}
+.character-portrait[data-mood='alert'] .character-eye {
+  animation: none;
+}
+.character-portrait[data-mood='happy'] .character-bob {
+  animation-iteration-count: 5;
+}
+.character-portrait[data-mood='alert'] .reaction,
+.character-portrait[data-mood='oops'] .reaction {
+  animation-iteration-count: 4;
+}
+.character-portrait .reaction {
+  font-size: 12px;
+  right: -2px;
+  top: auto;
+  bottom: 0;
+}
+.companion-accent {
+  animation: companion-accent 3.5s ease-in-out infinite;
+}
+@keyframes companion-accent {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thief-figure,
+  .thief-eyes,
+  .thief-scarf,
+  .companion-accent,
+  .guard-unit .guard-body,
+  .guard-unit .guard-boot,
+  .guard-unit .guard-head,
+  .guard-unit .guard-eyes {
+    animation: none !important;
+  }
+}

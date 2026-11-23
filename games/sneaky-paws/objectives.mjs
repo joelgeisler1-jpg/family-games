@@ -52,6 +52,7 @@ function checkSlide(p) {
     state.slideState.done = true;
     state.slideState.gripped = false;
     e?.classList.add('finished');
+    setMood('clever', 1800);
     e?.classList.remove('gripping');
     e?.querySelector('.slide-caption') &&
       (e.querySelector('.slide-caption').textContent = '✓ BOLT OPEN');

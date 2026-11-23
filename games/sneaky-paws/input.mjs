@@ -1,3 +1,4 @@
+import { setThiefPose } from './thief.mjs';
 import { redraw, sampleOnDrag } from './arm-physics.mjs';
 import { playSound } from './audio.mjs';
 import { H, START, W } from './constants.mjs';
@@ -26,6 +27,7 @@ function bindPointerControls({ fail, win }) {
         return;
       }
       state.mode = 'drawing';
+      setThiefPose('reaching');
       state.attempt++;
       state.points = [{ ...START }];
       state.lastInput = { ...START };
@@ -60,6 +62,7 @@ function bindPointerControls({ fail, win }) {
     state.lastInput = { ...START };
     if (state.mode === 'drawing') {
       state.mode = 'ready';
+      setThiefPose('idle');
       state.points = [{ ...START }];
       state.keyTaken = false;
       state.switchOn = false;

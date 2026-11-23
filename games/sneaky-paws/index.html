@@ -49,7 +49,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 .speech .avatar{font-size:23px;line-height:1.25}.speech .words{display:flex;flex-direction:column;gap:4px}.speech b{font-size:9px;letter-spacing:1.2px;color:#8063b7}.speech span.message{font-size:12px;font-weight:850;line-height:1.3}
 .speech.tip{border-color:#f2c264;background:#fff6d8f5}.speech.tip:after{background:#fff6d8;border-color:#f2c264}.speech.tip b{color:#ad7b19}
 @keyframes bubblePop{from{opacity:0;transform:scale(.83) translateY(7px)}to{opacity:1;transform:scale(1)}}
-.watch-cone{fill:#efbd56;opacity:.22;stroke:#e6a348;stroke-width:1.4;pointer-events:none}.guard-unit.suspicious .watch-cone{fill:#f58d5b;opacity:.31}.guard-unit.distracted .watch-cone{fill:#59b8d8;opacity:.09}.guard-unit.suspicious .guard-head{transform:translateY(-3px);transform-box:fill-box;transform-origin:center}
+.watch-cone{fill:#efbd56;opacity:.22;stroke:#e6a348;stroke-width:1.4;pointer-events:none}.guard-unit.suspicious .watch-cone{fill:#f58d5b;opacity:.31}.guard-unit.distracted .watch-cone{fill:#59b8d8;opacity:.09}
 .guard-thought{opacity:0;transition:opacity .15s}.guard-unit.suspicious .guard-thought,.guard-unit.distracted .guard-thought,.guard-unit.alerted .guard-thought{opacity:1}.guard-unit.alerted .guard-thought text{fill:#bb303f}
 .guard-meter{opacity:0;transition:opacity .16s}.guard-unit.suspicious .guard-meter{opacity:1}.guard-unit.alerted .guard-meter{opacity:1}
 .slide-handle{transition:filter .15s}.slide-unit.gripping .slide-handle{filter:drop-shadow(0 0 8px #47d9e0)}.slide-unit.finished .slide-handle{filter:drop-shadow(0 0 8px #54c99d)}
@@ -84,23 +84,12 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 .spool-unit.finished .spool-ring{stroke:#45c98d}
 @keyframes reelIdle{to{transform:rotate(360deg)}}
 @keyframes reelWin{50%{transform:scale(1.28) rotate(24deg)}100%{transform:scale(1)}}
-.guard-unit.walking .guard-boot.left{animation:walkLeft .4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center top}
-.guard-unit.walking .guard-boot.right{animation:walkRight .4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center top}
-@keyframes walkLeft{to{transform:translateY(-9px) rotate(13deg)}}
-@keyframes walkRight{to{transform:translateY(-9px) rotate(-13deg)}}
-.guard-unit:not(.sleeping) .guard-blink{animation:eyeblink 4.2s steps(1,end) infinite}
-@keyframes eyeblink{0%,93%,97%,100%{opacity:0}94%,96%{opacity:1}}
 .guard-unit.sleeping .guard-z{animation-duration:2s}
 .watch-turn{animation:watchTurn 2.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes watchTurn{50%{transform:rotate(-13deg)}}
-#thief .thief-blink{animation:eyeblink 5s steps(1,end) infinite}
-#thief .thief-scarf{animation:scarfFlutter 1.4s ease-in-out infinite alternate;transform-origin:92px 419px}
-#thief.celebrating{animation:thiefDance .42s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center bottom}
-@keyframes scarfFlutter{to{transform:rotate(-7deg)}}
-@keyframes thiefDance{to{transform:translateY(-7px) rotate(5deg)}}
 .museum-cat .tail{animation:tailWag 1.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:left center}
 @keyframes tailWag{to{transform:rotate(19deg)}}
-@media(prefers-reduced-motion:reduce){.spool-core,.spool-halo,.guard-boot,.guard-blink,.watch-turn,.museum-cat .tail,.treasure-spark,.security-blink,.dust-speck,#thief .thief-blink,#thief .thief-scarf,#thief.celebrating{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.spool-core,.spool-halo,.guard-boot,.watch-turn,.museum-cat .tail,.treasure-spark,.security-blink,.dust-speck{animation:none!important}}
 
 /* The story dock is INSIDE the board but OUTSIDE the SVG's touch and arm area. */
 .story-dock{position:relative;z-index:2;display:flex;align-items:center;gap:12px;min-height:86px;padding:6px 17px 7px 13px;background:linear-gradient(115deg,#e9e3ff,#e8f8f6 60%,#fff4dd);border-bottom:2px solid #d4c8eb;pointer-events:none}
@@ -115,14 +104,12 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 .character-portrait .character-bob{animation:characterBob 2.3s ease-in-out infinite;transform-origin:50px 95px}
 .character-portrait .character-tail{animation:characterTail 1.7s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:85% 90%}
 .character-portrait .character-eye{animation:characterBlink 5.6s steps(1,end) infinite;transform-origin:center;transform-box:fill-box}
-.hero-costume{pointer-events:none;animation:heroNod 2.5s ease-in-out infinite;transform-origin:81px 391px}
 .dock-star{position:absolute;right:12px;top:6px;font-size:16px;color:#b3a1cf;opacity:.65}
 @keyframes characterBob{50%{transform:translateY(-4px)}}
 @keyframes characterTail{to{transform:rotate(12deg)}}
 @keyframes characterBlink{0%,95%,100%{transform:scaleY(1)}96%,98%{transform:scaleY(.13)}}
-@keyframes heroNod{50%{transform:rotate(-3deg)}}
 @media(max-width:520px){.story-dock{gap:5px;padding:5px 9px 6px;min-height:64px}.character-portrait{width:54px;height:58px;flex-basis:54px}.character-portrait svg{width:54px;height:58px}.story-dock .speech{left:auto;top:auto;max-width:none;min-width:0;padding:6px 10px;gap:0;min-height:45px;border-radius:12px 12px 12px 4px}.story-dock .speech:after{left:-9px;top:17px;width:12px;height:12px}.story-dock .speech b{font-size:8px}.story-dock .speech span.message{font-size:10px;line-height:1.35}.dock-star{display:none}}
-@media(prefers-reduced-motion:reduce){.character-portrait .character-bob,.character-portrait .character-tail,.character-portrait .character-eye,.hero-costume{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.character-portrait .character-bob,.character-portrait .character-tail,.character-portrait .character-eye{animation:none!important}}
 
 
 /* The guides are companions in the dock, never costumes on top of the thief. */
@@ -140,6 +127,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 @media(prefers-reduced-motion:reduce){.character-portrait .reaction,.character-portrait[data-mood] .character-bob,.beam-unit.charging{animation:none!important}}
 </style>
 <link rel="stylesheet" href="./environments.css">
+<link rel="stylesheet" href="./characters.css">
 </head>
 <body>
 <main class="shell">
@@ -163,15 +151,8 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
     <g id="scannerFX" class="guide"></g>
     <path id="cameraCone" fill="#ffc957" opacity=".27" stroke="#f0ae38" stroke-width="2"/><g id="static"></g><g id="actors" class="guide"></g>
     <g id="dynamic"><g id="armGroup"><path id="armShadow" d=""/><path id="armOutline" d=""/><path id="arm" d=""/><path id="armHighlight" d=""/></g><g id="stolen" class="guide"></g></g>
-    <g id="thief" class="guide"><ellipse cx="97" cy="465" rx="63" ry="12" fill="#3d3154" opacity=".1"/><path d="M83 414 L87 460 M83 458 L59 481 M86 458 L109 480 M83 420 L60 443" fill="none" stroke="#292239" stroke-width="11" stroke-linecap="round"/><circle cx="81" cy="391" r="26" fill="#292239"/><rect x="58" y="390" width="47" height="16" rx="8" fill="#ebe3ff"/><circle cx="76" cy="399" r="3.5" fill="#292239"/><circle cx="93" cy="399" r="3.5" fill="#292239"/><circle cx="81" cy="377" r="4" fill="#ad98e8"/>
-     <g class="thief-blink" opacity="0"><path d="M72 399h8 M90 399h8" stroke="#292239" stroke-width="4" stroke-linecap="round"/></g>
-     <path class="thief-scarf" d="M89 419Q97 411 110 412L126 420L107 425L99 434Z" fill="#71cbb7" stroke="#3b8a84" stroke-width="2"/></g>
-    <g id="handGroup" transform="translate(119 425)">
-     <circle id="glow" r="38" fill="#96e9cc" opacity=".29"/>
-     <path d="M-12 -13 Q-7 -19 2 -15 L12 -19 Q20 -16 15 -8 L25 -9 Q35 -3 28 6 L17 15 Q9 20 -4 17 L-13 10 Z" fill="#bd9af9" stroke="#29243c" stroke-width="4.5" stroke-linejoin="round"/>
-     <path d="M11 -9Q18 -4 16 3 M17 0L24 1" fill="none" stroke="#795ec7" stroke-width="2.7" stroke-linecap="round"/>
-     <rect x="-17" y="-13" width="9" height="26" rx="4" fill="#5b4a97" stroke="#29243c" stroke-width="2.5"/>
-    </g>
+    <g id="thief" class="guide" aria-hidden="true"></g>
+    <g id="handGroup" transform="translate(119 425)" aria-hidden="true"></g>
     <g id="targetGroup" class="guide"></g><g id="effects"></g>
    </svg>
   </div>

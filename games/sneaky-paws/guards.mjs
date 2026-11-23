@@ -1,3 +1,4 @@
+import { guardBody } from './guard-art.mjs';
 import { playSound } from './audio.mjs';
 import { setMood } from './characters.mjs';
 import { H, W } from './constants.mjs';
@@ -15,21 +16,7 @@ function drawGuards(L) {
     const unit =
       piece(`<g class="guard-unit ${asleep ? 'sleeping' : ''} ${walking ? 'walking' : ''}" data-guard="${i}">
    ${asleep ? `<circle r="${g.r}" fill="#ff6f81" opacity=".115"/><circle r="${g.r}" fill="none" stroke="#eb7380" stroke-width="4" stroke-dasharray="9 8"/>` : `<path class="watch-cone" d=""/><circle r="35" fill="#ff877c" opacity=".10"/>`}
-   <g class="guard-body">
-    <ellipse cy="35" rx="38" ry="10" fill="#463b61" opacity=".18"/>
-    <g class="guard-boot left"><path d="M-16 19v18m-1 -2h-13" fill="none" stroke="#303c60" stroke-width="9" stroke-linecap="round"/></g>
-    <g class="guard-boot right"><path d="M15 19v18m-1 -2h14" fill="none" stroke="#303c60" stroke-width="9" stroke-linecap="round"/></g>
-    <path d="M-26 25Q-31 2 -20 -9L20 -9Q32 3 26 25Z" fill="${walking ? '#417fa0' : '#566d96'}" stroke="#27344d" stroke-width="4"/>
-    <path d="M-23 5L-35 19M23 5L34 19" stroke="#27344d" stroke-width="9" stroke-linecap="round"/>
-    <rect x="-28" y="22" width="56" height="7" rx="3" fill="#303d59"/>
-    <g class="guard-head"><rect x="-17" y="-15" width="34" height="27" rx="11" fill="#f5c5a2" stroke="#383e54" stroke-width="2.5"/>
-    <path d="M-27 -22Q-30 -41 0 -41Q30 -41 27 -22L32 -18Q0 -12 -32 -18Z" fill="#38476d" stroke="#26334e" stroke-width="3"/>
-    <rect x="-11" y="-37" width="22" height="12" rx="5" fill="#f8d77e"/><path d="M-8 -31h16" stroke="#ab8d3e" stroke-width="2"/>
-    ${asleep ? `<path d="M-13 -3q6 -5 11 0M5 -3q5 -5 10 0" stroke="#563f53" stroke-width="3" fill="none" stroke-linecap="round"/>` : `<g class="guard-eyes"><circle cx="-8" cy="-3" r="3" fill="#30314c"/><circle cx="9" cy="-3" r="3" fill="#30314c"/></g><g class="guard-blink"><path d="M-13 -3h10M5 -3h10" stroke="#5b3d47" stroke-width="3.5" stroke-linecap="round"/></g>`}
-    <path d="M-2 7h6" stroke="#95635b" stroke-width="2.5" stroke-linecap="round"/>
-    <rect x="-11" y="11" width="11" height="8" rx="2" fill="#eacb72"/>
-    <circle cx="22" cy="4" r="5" fill="#eddaa1"/></g>
-   </g>
+   ${guardBody({ asleep, walking })}
    ${asleep ? `<g class="guard-z" fill="#8066c3" font-family="system-ui" font-weight="900"><text x="32" y="-53" font-size="18">Z</text><text x="49" y="-69" font-size="26">z</text></g>` : ''}
    ${walking ? `<g class="watch-turn"><path d="M25 -12q15 -13 27 1" fill="none" stroke="#e5b66d" stroke-width="5"/><circle cx="53" cy="-13" r="7" fill="#fff4b6"/></g>` : ''}
    <g class="guard-thought"><rect x="14" y="${-g.r - 54}" width="71" height="33" rx="14" fill="#fffef9" stroke="#d8b3a0" stroke-width="3"/><path d="M25 ${-g.r - 21}l-3 11 14 -11" fill="#fffef9" stroke="#d8b3a0" stroke-width="2"/><text class="thought-text" x="49" y="${-g.r - 32}" text-anchor="middle" font-size="16" font-weight="900" fill="#b97437">?</text></g>
