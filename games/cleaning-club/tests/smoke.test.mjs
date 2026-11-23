@@ -45,7 +45,7 @@ test('all three cleaning tools have visible controls and meaningful settings', (
 
 test('mud cracking and tactile cleaning effects remain wired', () => {
   assert.match(cleaning, /function scratchMud\s*\(/);
-  assert.match(cleaning, /crusted/);
+  assert.match(cleaning, /const crust = tool === 'brush'/);
   assert.match(read('levels/workrooms.js'), /crusted:true/);
   assert.match(read('levels/finale.js'), /crusted:true/);
   assert.match(effects, /class CleaningEffects/);
