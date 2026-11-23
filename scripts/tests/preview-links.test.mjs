@@ -22,5 +22,5 @@ test('summary enumerates games without presenting links as already deployed', ()
   assert.match(summary, /GitHub Pages/);
   assert.match(summary, /deployment must finish successfully/);
   assert.match(summary, /does not.*merge/);
-  assert.doesNotMatch(summary, /raw\\.githack\\.com/);
+  assert.doesNotMatch(summary, /raw\.githack\.com/);
 });
