@@ -1,51 +1,56 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-export function previewUrl(repo, revision, slug) {
+// GitHub Pages publishes the main arcade plus a distinct directory for each
+// open, same-repository PR. No independent proxy or public file mirroring.
+export function previewUrl(repo, number, slug) {
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error('Invalid repository');
-  if (!/^[a-f0-9]{40}$/.test(revision)) throw new Error('A full 40-character commit SHA is required');
+  if (!Number.isSafeInteger(Number(number)) || Number(number) < 0 || !/^\d+$/.test(String(number))) throw new Error('Invalid PR number');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Invalid game directory');
-  return `https://raw.githack.com/${repo}/${revision}/games/${slug}/index.html`;
+  const [owner, name] = repo.split('/');
+  const folder = Number(number) === 0 ? '' : `previews/pr-${number}/`;
+  return `https://${owner}.github.io/${name}/${folder}games/${slug}/`;
 }
 
-export function previewSummary(repo, revision, base='games') {
-  const games=readdirSync(base, {withFileTypes:true})
-    .filter(entry=>entry.isDirectory() && existsSync(join(base,entry.name,'index.html')))
-    .map(entry=>entry.name).sort();
-  const lines=[
-    '## iPhone / iPad Safari previews',
+export function previewSummary(repo, number, base = 'games') {
+  const games = readdirSync(base, { withFileTypes: true })
+    .filter(entry => entry.isDirectory() && existsSync(join(base, entry.name, 'index.html')))
+    .map(entry => entry.name).sort();
+  const lines = [
+    '## iPhone / iPad Safari previews — GitHub Pages',
     '',
-    'These preview links open the **exact commit** being checked, not the live arcade. Open a link in Safari on your iPhone or iPad. No app installation is required.',
+    'These links use **GitHub Pages**, hosted by GitHub instead of a third-party file proxy. Open a link in Safari on iPhone or iPad.',
     '',
     '| Game | Preview |',
     '| --- | --- |',
   ];
-  for(const slug of games) {
-    const html=readFileSync(join(base,slug,'index.html'),'utf8');
-    const title=html.match(/<title>([^<]+)<\/title>/i)?.[1]?.replace(/\|/g,'–') || slug;
-    lines.push(`| ${title} | [Play in Safari](${previewUrl(repo,revision,slug)}) |`);
+  for (const slug of games) {
+    const html = readFileSync(join(base, slug, 'index.html'), 'utf8');
+    const title = html.match(/<title>([^<]+)<\/title>/i)?.[1]?.replace(/\|/g, '–') || slug;
+    lines.push(`| ${title} | [Play in Safari](${previewUrl(repo, number, slug)}) |`);
   }
   if (!games.length) lines.push('| No game entry points found | — |');
-  lines.push('','### Important preview limitations',
-    '- Links are served by **raw.githack.com**, an independent third-party proxy for **public** GitHub source files, not by GitHub Pages. Do not use for private code or production hosting.',
-    '- You may see a one-time HTML safety confirmation before the game opens. Confirm only URLs you trust.',
-    '- CDN caching and availability may delay or prevent previews; the workflow verifies links have the expected format, not that Safari has played them.',
-    '- A preview is **not** a deployment and does not change the Family Arcade homepage. Keep manual review and release approval in place.',
-    '- Progress uses the preview origin and may differ from the live site. Avoid expecting saved games to carry across.',
-    '- If you are reviewing a pull request, select the **Preview links** job for the latest run in the PR Checks tab.',
+  lines.push('',
+    '### Preview requirements and limitations',
+    '- Repository owner must first enable **Settings → Pages → Build and deployment → GitHub Actions** and merge the Pages workflow PR.',
+    '- The **Family Arcade Pages previews** deployment must finish successfully before these links work. The link-generator check alone does not publish anything.',
+    '- Open same-repository PR previews update to the latest PR commit after a deployment. They are not immutable snapshots; the deployed \`revision.txt\` identifies the source commit.',
+    '- On merge or closure, the preview disappears after the next successful deployment; the main arcade remains available.',
+    '- GitHub Pages is public hosting. Never include secrets or private data; only review trusted PRs. Preview and live games share an origin, so local-storage keys may carry across.',
+    '- The link does **not** approve, merge, or add a game to the main arcade homepage. Always playtest on a physical iPhone before merging.',
     '',
-    `Source commit: \`${revision}\``,
+    `Preview: ${Number(number) > 0 ? `PR #${number}` : 'main arcade'}`,
     ''
   );
   return lines.join('\n');
 }
 
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
-  const [repo,revision] = process.argv.slice(2);
-  if (!repo || !revision) {
-    console.error('Usage: node scripts/preview-links.mjs owner/repo FULL_COMMIT_SHA');
-    process.exitCode=1;
+  const [repo, number] = process.argv.slice(2);
+  if (!repo || number === undefined) {
+    console.error('Usage: node scripts/preview-links.mjs owner/repo PR_NUMBER (0 for main)');
+    process.exitCode = 1;
   } else {
-    console.log(previewSummary(repo,revision));
+    console.log(previewSummary(repo, number));
   }
 }

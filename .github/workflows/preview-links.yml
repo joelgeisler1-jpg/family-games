@@ -29,5 +29,5 @@ jobs:
       - name: Add game previews to job summary
         env:
           PREVIEW_REPO: ${{ github.repository }}
-          PREVIEW_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: node scripts/preview-links.mjs "$PREVIEW_REPO" "$PREVIEW_SHA" >> "$GITHUB_STEP_SUMMARY"
+          PREVIEW_PR: ${{ github.event.pull_request.number || 0 }}
+        run: node scripts/preview-links.mjs "$PREVIEW_REPO" "$PREVIEW_PR" >> "$GITHUB_STEP_SUMMARY"

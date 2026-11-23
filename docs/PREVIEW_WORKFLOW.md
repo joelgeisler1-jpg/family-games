@@ -1,29 +1,44 @@
-# Safari game previews — iPhone-only workflow
+# iPhone Safari previews — GitHub Pages
 
-## How to review any game PR
+The previous `raw.githack.com` proxy URLs were unreliable and could return HTTP 403. Family Arcade now uses **GitHub Pages**, with the main arcade and each open same-repository pull request published under different paths.
 
-1. Open the proposed pull request in the GitHub mobile app or Safari, then open **Checks**.
-2. Open **Family Arcade preview links** → **Preview links / Safari** → the run summary (on mobile, GitHub may require **View workflow run** in Safari).
-3. Tap **Play in Safari** beside the game you want to review.
-4. The link points to the exact commit the workflow checked. A one-time safety confirmation may appear on the proxy site. Check the address before continuing.
-5. Play the requested scenarios on your real iPhone and iPad, review the automated QA results and leave feedback in the PR.
-6. Merge only after your manual approval. The preview itself does not merge, deploy or add games to the arcade homepage.
+## One-time owner setup (required after merging this PR)
 
-## How it works
+1. Open [repository Settings → Pages](https://github.com/joelgeisler1-jpg/family-games/settings/pages) in Safari (desktop website mode may be easier on iPhone).
+2. Under **Build and deployment**, set **Source → GitHub Actions**.
+3. Open **Actions → Family Arcade Pages previews** and select **Run workflow** on `main`. If GitHub starts the first deployment automatically after merging, you can simply review its result.
+4. Confirm the build and publish jobs succeed. If GitHub shows an approval prompt for the `github-pages` environment, approve it as the repository owner.
+5. Open the [main Family Arcade GitHub Pages site](https://joelgeisler1-jpg.github.io/family-games/) after the successful deploy.
 
-`.github/workflows/preview-links.yml` uses a tiny dependency-free Node script to list game folders with `index.html` and place public preview links in the GitHub Actions run summary. Each link uses a **40-character commit SHA**, so different PRs do not overwrite each other's previews. The script does not upload website files, modify the main site, deploy anything, request write privileges or use credentials.
+**The GitHub Pages links are not live merely because this PR is created or merged.** Until Source is set to GitHub Actions and a deployment succeeds, a preview can return 404.
 
-The links are served by `raw.githack.com`, an independent third-party service that proxies public GitHub files with browser-friendly content types. It is not affiliated with GitHub or OpenAI and is only suitable for low-volume **development previews**. Content may be cached and there is no uptime guarantee. A third-party proxy can view requests, and publicly visible source is essential. Never place secrets or personal data in a game repository or test link. The service may show an HTML safety confirmation, particularly on the first visit.
+## How to review a PR in Safari
 
-Previews include the assets relative to the chosen game and current commit. Note that browser storage is scoped to this preview origin and might not match the live Family Arcade site; two games on the same preview origin could also share origin storage. This is not a sandbox or a guarantee of security for untrusted scripts. Only open previews from trusted code.
+1. Open the PR's **Checks → Family Arcade preview links → Preview links / Safari** job summary to find its game URLs.
+2. Look at **Actions → Family Arcade Pages previews**. Wait for the **Publish first-party Safari previews** job for the relevant PR's latest commit to finish successfully.
+3. Open e.g. [Airport Control — PR #38](https://joelgeisler1-jpg.github.io/family-games/previews/pr-38/games/airport-control/) on iPhone or iPad Safari.
+4. Test dragging, route release, landing, menu, completion state, audio, pause, screen orientation and saved progress.
+5. Check CI, review the PR, and **merge manually only when approved**.
 
-## Manual QA
+The preview URL `https://joelgeisler1-jpg.github.io/family-games/previews/pr-NUMBER/games/GAME/` tracks the **latest deployed head of that open PR**, not an immutable commit snapshot. Check `/previews/pr-NUMBER/revision.txt` to identify the currently deployed 40-character commit SHA if you suspect caching. The deployment runs on PR open, update, reopen or close, as well as main pushes and a manual dispatch. When the PR closes, its preview is removed on the next successful deployment.
 
-Check start, drag/touch interactions, pointer release/cancel, level success, reset and progress persistence as relevant; test portrait and landscape, visual effects, controls and audio. The generated link is **not** proof that the game works on iPhone Safari. Keep using `docs/QA_CHECKLIST.md`.
+The standard arcade remains accessible at `https://joelgeisler1-jpg.github.io/family-games/`, and the version on `main` at `.../games/airport-control/`. PR previews don't add or remove homepage tiles.
 
-## Limitations and possible next upgrade
+## Implementation and security
 
-- No permanent preview deployment, authentication or rollback is managed by this workflow.
-- Since the URL uses an immutable commit, a new push requires a new run summary/link.
-- Previews rely on an external service; if it is unavailable, use a configured first-party static hosting provider.
-- For fully managed branch previews with predictable hosting and privacy controls, a dedicated Cloudflare Pages/Netlify/Vercel preview project is the next upgrade. It requires account setup and possibly access tokens; that is intentionally not added here.
+- `.github/workflows/pages-previews.yml` runs only the **trusted default-branch workflow** and uses GitHub's supported upload/deploy Pages actions.
+- The build uses the `main` arcade and includes only selected static game files from **open PRs originating in the same repository**, placed in `dist/previews/pr-NUMBER/`. It does not run untrusted PR scripts, install PR dependencies or automatically merge.
+- GitHub Pages is public hosting. A PR preview can still include executable game JavaScript **when a human opens its URL**, so only preview code you trust. All games share the GitHub Pages origin; localStorage keys can also be shared across main and PR preview paths.
+- Fork-based PRs are not deployed automatically. Games are always public; never commit API keys, passwords or private family data.
+- The build uses GitHub's `GITHUB_TOKEN` permissions scoped to read contents, while the publish job has `pages:write` and `id-token:write`. No personal-access token or paid hosting account is required.
+- GitHub Pages supports one currently published site per repo. Every successful deployment rebuilds the main site and **all currently open, same-repo PR previews together**, preventing one preview from unintentionally overwriting another.
+
+## Troubleshooting
+
+- **404 on Pages:** Check that Settings → Pages uses **GitHub Actions**, and the latest Pages deploy job succeeded. A link generator passing tests does not constitute a deployment.
+- **Old version appears:** Open `revision.txt` for that PR to check deployed head, and ensure the latest Pages job completed.
+- **A PR is closed or merged:** Its preview is intentionally removed; open the main site's version or review a new PR.
+- **Pages deployment denied:** Check Pages settings and any required environment approval. The Pages job must have `pages:write` and `id-token:write`.
+- **Not opening from iPhone:** Try Safari directly, not a GitHub embedded web view.
+
+Automated tests do not replace a real-device Safari review. Follow `docs/QA_CHECKLIST.md`.
