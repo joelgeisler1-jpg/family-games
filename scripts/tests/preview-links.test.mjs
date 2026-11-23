@@ -16,5 +16,5 @@ test('preview summary discovers known games without editing the homepage',()=>{
   const summary=previewSummary('example/family-games',sha);
   for(const slug of ['star-post','sneaky-paws','cleaning-club']) assert.match(summary,new RegExp('/games/'+slug+'/index.html'));
   assert.match(summary,/third-party proxy/);
-  assert.match(summary,/not a deployment/);
+  assert.match(summary,/does not change the Family Arcade homepage/);
 });
