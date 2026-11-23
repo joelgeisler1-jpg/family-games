@@ -1,6 +1,6 @@
 # Airport Control — campaign roadmap
 
-> **Status:** Level 1 completion and Endless Challenge are available for owner playtesting. Levels 2–5 are proposals.
+> **Status:** Coastal Airport, Regional Junction and Endless Challenge are playable. Levels 3–5 are proposed.
 
 ## Design objectives
 - Accessible for the family's 6- and 9-year-old players; intuitive first level and growing tactical depth.

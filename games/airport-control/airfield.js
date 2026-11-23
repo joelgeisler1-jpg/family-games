@@ -2,17 +2,25 @@ export const width = 680
 export const height = 780
 export const step = 1 / 60
 
-export const runways = {
-  jet: {
-    name: 'Runway 09', number: '09', label: 'Airliner', color: '#ffb36a',
-    ink: '#4d240c', x: 237, y: 360, heading: 0, length: 359, width: 54,
-    radius: 37, angle: 0.93, speed: 34, turn: 1.25, size: 1.18, collisionRadius: 15,
-  },
-  prop: {
-    name: 'Runway 27', number: '27', label: 'Light plane', color: '#80e6ff',
-    ink: '#113b50', x: 491, y: 531, heading: Math.PI, length: 283, width: 37,
-    radius: 35, angle: 1.08, speed: 26, turn: 1.9, size: 0.92, collisionRadius: 12,
-  },
+export const aircraftTypes = {
+  jet: { label: 'Airliner', speed: 34, turn: 1.25, size: 1.18, collisionRadius: 15 },
+  prop: { label: 'Light plane', speed: 26, turn: 1.9, size: 0.92, collisionRadius: 12 },
+  turbo: { label: 'Turboprop', speed: 30, turn: 1.53, size: 1.06, collisionRadius: 14 },
+}
+
+export const runwaySnapRadius = 65
+
+export function runway(id, label, shape, color, x, y, heading, length, width, radius, angle) {
+  return { id, label, shape, color, x, y, heading, length, width, radius, angle, type: 'runway', snapRadius: runwaySnapRadius }
+}
+
+export const coastalDestinations = {
+  '09': runway('09', 'Main runway', 'diamond', '#ffb36a', 237, 360, 0, 359, 54, 37, 0.93),
+  '27': runway('27', 'Short runway', 'circle', '#80e6ff', 491, 531, Math.PI, 283, 37, 35, 1.08),
+}
+
+export function destinationGate(destination) {
+  return offset(destination, destination.heading, -17)
 }
 
 export const clamp = (value, low, high) => Math.max(low, Math.min(high, value))

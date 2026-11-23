@@ -1,8 +1,7 @@
-import { angleDelta, clamp, distance, offset, projection, runways } from './airfield.js'
+import { angleDelta, clamp, distance, offset, projection, aircraftTypes } from './airfield.js'
 
-export function matchingApproach(plane, previous, candidate = plane.kind) {
-  const runway = runways[candidate]
-  if (candidate !== plane.kind || !plane.route?.cleared || plane.landing) return false
+export function matchingApproach(plane, previous, runway) {
+  if (!runway || runway.id !== plane.destinationId || plane.route?.destinationId !== runway.id || plane.landing) return false
   if (Math.abs(angleDelta(plane.heading, runway.heading)) > runway.angle) return false
   const before = offset(runway, runway.heading, -21)
   const after = offset(runway, runway.heading, 25)
@@ -14,8 +13,7 @@ export function matchingApproach(plane, previous, candidate = plane.kind) {
   return distance(along, closest) <= runway.radius * 0.66
 }
 
-export function advanceLanding(plane, dt) {
-  const runway = runways[plane.kind]
+export function advanceLanding(plane, dt, runway) {
   const landing = plane.landing
   landing.time += dt
   const progress = clamp(landing.time / 1.55, 0, 1)
@@ -23,7 +21,7 @@ export function advanceLanding(plane, dt) {
   const target = offset(runway, runway.heading, forward)
   const align = Math.min(progress * 3, 1)
   const blend = align * align * (3 - 2 * align)
-  const drift = offset(landing, landing.heading, runway.speed * landing.time)
+  const drift = offset(landing, landing.heading, aircraftTypes[plane.kind].speed * landing.time)
   plane.x = drift.x + (target.x - drift.x) * blend
   plane.y = drift.y + (target.y - drift.y) * blend
   plane.heading = landing.heading + angleDelta(landing.heading, runway.heading) * blend

@@ -1,8 +1,8 @@
-import { angleBetween, angleDelta, clamp, distance, offset, projection, runways } from './airfield.js'
+import { angleBetween, angleDelta, clamp, distance, offset, projection, aircraftTypes } from './airfield.js'
 
-export function newAircraft(id, kind, entry) {
+export function newAircraft(id, kind, destinationId, entry) {
   return {
-    id, kind, ...entry, route: null, warning: 0, escape: false,
+    id, kind, destinationId, ...entry, route: null, warning: 0, escape: false,
     landing: null, missed: false, age: 0,
   }
 }
@@ -38,7 +38,7 @@ function routeTarget(plane, route, type) {
 }
 
 export function moveAircraft(plane, dt) {
-  const type = runways[plane.kind]
+  const type = aircraftTypes[plane.kind]
   const previous = { x: plane.x, y: plane.y }
   if (plane.route) {
     const target = routeTarget(plane, plane.route, type)

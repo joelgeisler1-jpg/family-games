@@ -1,11 +1,14 @@
-import { height, offset, runways, width } from './airfield.js'
+import { aircraftTypes, destinationGate, height, offset, width } from './airfield.js'
 import { createScenery, paintBoat } from './scenery.js'
+import { paintRegionalTrain } from './regional.js'
 
 const silhouettes = {
+  turbo: 'M 23 0 Q 25 -5 13 -6 L 0 -6 L -2 -24 L -7 -25 L -11 -22 L -11 -6 L -22 -4 L -27 -13 L -32 -13 L -29 0 L -32 13 L -27 13 L -22 4 L -11 6 L -11 22 L -7 25 L -2 24 L 0 6 L 13 6 Q 25 5 23 0 Z',
   jet: 'M 23 0 Q 24 -3 16 -5 L 1 -6 L -12 -23 L -18 -23 L -11 -6 L -21 -5 L -27 -11 L -31 -11 L -28 0 L -31 11 L -27 11 L -21 5 L -11 6 L -18 23 L -12 23 L 1 6 L 16 5 Q 24 3 23 0 Z',
   prop: 'M 20 0 Q 20 -4 14 -5 L 4 -5 L 2 -19 Q -2 -22 -5 -18 L -5 -5 L -15 -3 L -20 -10 L -23 -10 L -21 0 L -23 10 L -20 10 L -15 3 L -5 5 L -5 18 Q -2 22 2 19 L 4 5 L 14 5 Q 20 4 20 0 Z',
 }
 const trimPaths = {
+  turbo: 'M -5 -6 L -7 -21 L -10 -20 L -10 -6 Z M -5 6 L -7 21 L -10 20 L -10 6 Z M -30 -10 L -27 -10 L -25 -5 H -29 Z M -30 10 L -27 10 L -25 5 H -29 Z',
   jet: 'M -8 -7 L -14 -21 H -17 L -11 -6 Z M -8 7 L -14 21 H -17 L -11 6 Z',
   prop: 'M 1 -7 L 0 -18 Q -3 -20 -4 -17 V -7 Z M 1 7 L 0 18 Q -3 20 -4 17 V 7 Z',
 }
@@ -52,13 +55,14 @@ function trail(ctx, points, color, draft = false) {
   ring(ctx, points.at(-1).x, points.at(-1).y, draft ? 7 : 5, color)
 }
 
-function paintRunwayGate(ctx, runway, kind, armed) {
-  const gate = offset(runway, runway.heading, -17)
+function paintRunwayGate(ctx, runway, armed) {
+  const gate = destinationGate(runway)
   ctx.save()
   ctx.translate(gate.x, gate.y)
   ctx.rotate(runway.heading)
   ctx.beginPath()
-  if (kind === 'prop') ctx.arc(0, 0, 20, 0, Math.PI * 2)
+  if (runway.shape === 'circle') ctx.arc(0, 0, 20, 0, Math.PI * 2)
+  else if (runway.shape === 'square') ctx.roundRect(-20, -20, 40, 40, 5)
   else {
     ctx.moveTo(0, -24)
     ctx.lineTo(24, 0)
@@ -81,21 +85,22 @@ function paintRunwayGate(ctx, runway, kind, armed) {
   ctx.lineWidth = 3
   ctx.stroke()
   ctx.restore()
-  badge(ctx, gate.x, gate.y + 38, runway.number, runway.color, 16)
+  const vertical = Math.abs(Math.sin(runway.heading)) > 0.6
+  badge(ctx, gate.x + (vertical ? 39 : 0), gate.y + (vertical ? 0 : 38), runway.id, runway.color, 16)
 }
 
-function paintAircraft(ctx, plane, time, selected, reducedMotion, { silhouette, trim }) {
-  const type = runways[plane.kind]
+function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, { silhouette, trim }) {
+  const type = aircraftTypes[plane.kind]
   const progress = (plane.landing?.time ?? 0) / 1.55
   const scale = type.size * (1 - progress * 0.24)
   const warning = plane.warning || (plane.escape ? 1 : 0)
   const x = Math.max(14, Math.min(width - 14, plane.x))
   const y = Math.max(14, Math.min(height - 14, plane.y))
-  if (selected) ring(ctx, x, y, 36, type.color, 3)
+  if (selected) ring(ctx, x, y, 36, destination.color, 3)
   if (!warning && !selected && plane.age < 2 && !plane.landing) {
     ctx.save()
     ctx.globalAlpha = reducedMotion ? 0.8 : 1 - plane.age / 2
-    ring(ctx, x, y, 32 + (reducedMotion ? 0 : plane.age * 5), type.color, 2.5)
+    ring(ctx, x, y, 32 + (reducedMotion ? 0 : plane.age * 5), destination.color, 2.5)
     ctx.restore()
   }
   if (warning) {
@@ -123,7 +128,7 @@ function paintAircraft(ctx, plane, time, selected, reducedMotion, { silhouette, 
   ctx.lineWidth = 2
   ctx.fill(silhouette)
   ctx.stroke(silhouette)
-  ctx.fillStyle = type.color
+  ctx.fillStyle = destination.color
   ctx.fill(trim)
   ctx.fillStyle = '#305066'
   ctx.beginPath()
@@ -134,6 +139,19 @@ function paintAircraft(ctx, plane, time, selected, reducedMotion, { silhouette, 
     ctx.fillRect(-9, -12, 7, 4)
     ctx.fillRect(-9, 8, 7, 4)
     for (let x = -14; x <= 5; x += 4) ctx.fillRect(x, -2, 1.5, 4)
+  } else if (plane.kind === 'turbo') {
+    ctx.fillStyle = '#607982'
+    ctx.fillRect(-9, -17, 12, 6)
+    ctx.fillRect(-9, 11, 12, 6)
+    ctx.strokeStyle = '#eef5d5'
+    ctx.lineWidth = 2
+    ctx.globalAlpha *= reducedMotion ? 0.65 : 0.46 + Math.sin(time * 42) * 0.18
+    ctx.beginPath()
+    for (const engine of [-14, 14]) {
+      ctx.moveTo(4, engine - 6)
+      ctx.lineTo(4, engine + 6)
+    }
+    ctx.stroke()
   } else {
     ctx.strokeStyle = '#e6f8ef'
     ctx.globalAlpha *= reducedMotion ? 0.65 : 0.43 + Math.sin(time * 44) * 0.18
@@ -150,14 +168,13 @@ function paintAircraft(ctx, plane, time, selected, reducedMotion, { silhouette, 
     ctx.fillRect(-13, 14, 3, 3)
   }
   ctx.restore()
-  if (!plane.landing && !plane.escape && !plane.warning) badge(ctx, x, y + 32, type.number, type.color, 14)
+  if (!plane.landing && !plane.escape && !plane.warning) badge(ctx, x, y + 32, destination.id, destination.color, 14)
 }
 
 export class AirportView {
   constructor(canvas) {
     this.canvas = canvas
     this.ctx = canvas.getContext('2d', { alpha: false })
-    this.scenery = createScenery()
     this.paths = Object.fromEntries(Object.entries(silhouettes).map(([kind, path]) => [
       kind, { silhouette: new Path2D(path), trim: new Path2D(trimPaths[kind]) },
     ]))
@@ -174,11 +191,15 @@ export class AirportView {
       canvas.height = pixelHeight
     }
     ctx.setTransform(pixelWidth / width, 0, 0, pixelHeight / height, 0, 0)
+    if (this.airport !== session.airport) {
+      this.airport = session.airport
+      this.scenery = createScenery(this.airport)
+    }
     ctx.drawImage(this.scenery, 0, 0, width, height)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
 
-    if (!reducedMotion) {
+    if (!reducedMotion && this.airport.scenery === 'coast') {
       const sweep = session.time * 0.7
       ctx.beginPath()
       ctx.moveTo(542, 424)
@@ -190,22 +211,24 @@ export class AirportView {
       if (boat > 29 && boat < 163) paintBoat(ctx, 34 + boat * 0.3, 370 + boat, 1.25)
     }
 
-    for (const [kind, runway] of Object.entries(runways)) {
-      paintRunwayGate(ctx, runway, kind, session.planes.some((plane) => plane.kind === kind && plane.route?.cleared))
+    if (!reducedMotion && this.airport.scenery === 'regional') paintRegionalTrain(ctx, session.time)
+    for (const destination of Object.values(this.airport.destinations)) {
+      paintRunwayGate(ctx, destination, session.planes.some((plane) => plane.route?.destinationId === destination.id))
     }
 
-    if (session.mode === 'playing' && session.arrivals === 1 && session.score === 0 && !draft && !session.planes[0]?.route) {
-      const plane = session.planes[0]
-      const gate = offset(runways.jet, 0, -17)
+    const first = session.planes[0]
+    if (session.mode === 'playing' && session.arrivals === 1 && session.score === 0 && !draft && first && !first.route) {
+      const plane = first
+      const gate = destinationGate(session.destinationFor(plane))
       if (plane.x < gate.x - 28) trail(ctx, [{ x: plane.x + 27, y: plane.y }, gate], '#ffe9ad')
     }
     for (const plane of session.planes) {
       if (plane.route && plane !== draft?.plane) {
-        trail(ctx, [plane, ...plane.route.points.slice(plane.route.cursor)], runways[plane.kind].color)
+        trail(ctx, [plane, ...plane.route.points.slice(plane.route.cursor)], session.destinationFor(plane).color)
       }
     }
-    if (draft) trail(ctx, draft.points, runways[draft.plane.kind].color, true)
-    for (const plane of session.planes) paintAircraft(ctx, plane, session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind])
+    if (draft) trail(ctx, draft.points, session.destinationFor(draft.plane).color, true)
+    for (const plane of session.planes) paintAircraft(ctx, plane, session.destinationFor(plane), session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind])
 
     for (const effect of effects) {
       const age = session.time - effect.time

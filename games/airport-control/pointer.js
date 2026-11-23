@@ -1,4 +1,4 @@
-import { distance, height, runways, width } from './airfield.js'
+import { distance, height, width } from './airfield.js'
 import { extendDraft, planRoute } from './routes.js'
 
 export function installPointer(canvas, session, onSelect) {
@@ -57,7 +57,7 @@ export function installPointer(canvas, session, onSelect) {
     extendDraft(points, point(event))
     cancel()
     if (session.mode !== 'playing' || plane.landing || points.length < 3) return
-    const route = planRoute(plane, points, runways[plane.kind])
+    const route = planRoute(plane, points, session.destinationFor(plane))
     if (route) {
       plane.route = route
       plane.missed = false

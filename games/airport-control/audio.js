@@ -6,6 +6,7 @@ const sampleRate = 24000
 export function landingSoundProfile(kind) {
   if (kind === 'jet') return { base: 145, end: 72, duration: 1.55, brightness: 0.27 }
   if (kind === 'prop') return { base: 115, end: 60, duration: 1.17, brightness: 0.22 }
+  if (kind === 'turbo') return { base: 132, end: 65, duration: 1.34, brightness: 0.25 }
   return null
 }
 
@@ -26,7 +27,7 @@ export function buildLandingTexture(context, kind) {
   const count = Math.ceil(profile.duration * sampleRate)
   const buffer = context.createBuffer(1, count, sampleRate)
   const data = buffer.getChannelData(0)
-  const random = randomSource(kind === 'jet' ? 314159 : 271828)
+  const random = randomSource(({ jet: 314159, prop: 271828, turbo: 161803 })[kind])
   let low = 0
   let mid = 0
   let tyre = 0
@@ -45,8 +46,8 @@ export function buildLandingTexture(context, kind) {
       ? low * 2.2 + (mid - low) * 0.28
       : low * 1.15 + (mid - low) * 0.43
     let movement = 1
-    if (kind === 'prop') {
-      const rotorHz = 24 - progress * 11
+    if (kind !== 'jet') {
+      const rotorHz = (kind === 'turbo' ? 33 : 24) - progress * 11
       rotorPhase += rotorHz / sampleRate
       // Uneven blade pulses beneath the broadband airflow.
       movement = 0.52 + 0.48 * Math.pow(Math.max(0, Math.sin(rotorPhase * Math.PI * 2)), 2)

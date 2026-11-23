@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { angleDelta, distance, height, offset, runways, step, width } from '../airfield.js'
+import { aircraftTypes, angleDelta, distance, height, offset, coastalDestinations, step, width } from '../airfield.js'
 import { buildLandingTexture, landingSoundProfile, TowerAudio } from '../audio.js'
 import { moveAircraft, newAircraft } from '../aircraft.js'
 import { matchingApproach } from '../landing.js'
@@ -8,6 +8,9 @@ import { extendDraft, planRoute } from '../routes.js'
 import { boundary, separation } from '../separation.js'
 import { Session } from '../session.js'
 import { arrivalInterval, chooseArrival, entryCandidate, safeEntry } from '../traffic.js'
+
+const runways = { jet: coastalDestinations['09'], prop: coastalDestinations['27'] }
+const coastalAircraft = (id, kind, entry) => newAircraft(id, kind, runways[kind].id, entry)
 
 function draw(plane, ...waypoints) {
   const draft = [{ x: plane.x, y: plane.y }]
@@ -21,7 +24,7 @@ function until(game, condition, seconds = 25) {
 }
 
 test('undirected aircraft move, and routes rotate them gradually at constant speed', () => {
-  const plane = newAircraft(1, 'jet', { x: 90, y: 150, heading: 0 })
+  const plane = coastalAircraft(1, 'jet', { x: 90, y: 150, heading: 0 })
   moveAircraft(plane, 1)
   assert.equal(plane.x, 124)
   draw(plane, { x: 225, y: 150 }, { x: 265, y: 300 })
@@ -29,8 +32,8 @@ test('undirected aircraft move, and routes rotate them gradually at constant spe
   for (let i = 0; i < 420; i++) {
     const heading = plane.heading
     const before = moveAircraft(plane, step)
-    assert.ok(Math.abs(angleDelta(heading, plane.heading)) <= runways.jet.turn * step + 0.000001)
-    assert.ok(Math.abs(distance(before, plane) - runways.jet.speed * step) < 0.000001)
+    assert.ok(Math.abs(angleDelta(heading, plane.heading)) <= aircraftTypes.jet.turn * step + 0.000001)
+    assert.ok(Math.abs(distance(before, plane) - aircraftTypes.jet.speed * step) < 0.000001)
     maximumHeading = Math.max(maximumHeading, plane.heading)
   }
   assert.ok(plane.x > 210 && plane.y > 215)
@@ -38,7 +41,7 @@ test('undirected aircraft move, and routes rotate them gradually at constant spe
 })
 
 test('sparse samples are interpolated and a moving aircraft can be rerouted', () => {
-  const plane = newAircraft(1, 'prop', { x: 200, y: 300, heading: 0 })
+  const plane = coastalAircraft(1, 'prop', { x: 200, y: 300, heading: 0 })
   const draft = [{ x: plane.x, y: plane.y }]
   extendDraft(draft, { x: 350, y: 300 })
   assert.ok(draft.length > 14)
@@ -71,25 +74,25 @@ test('both opening aircraft land on matching approaches and leave active traffic
 
 test('wrong runway, wrong direction and unfiled approaches never score', () => {
   const runway = runways.prop
-  const plane = newAircraft(1, 'jet', { x: 580, y: 540, heading: Math.PI })
+  const plane = coastalAircraft(1, 'jet', { x: 580, y: 540, heading: Math.PI })
   draw(plane, offset(runway, runway.heading, -17))
   assert.equal(plane.route.cleared, false)
   for (let i = 0; i < 270; i++) {
     const before = moveAircraft(plane, step)
-    assert.equal(matchingApproach(plane, before, 'prop'), false)
-    assert.equal(matchingApproach(plane, before), false)
+    assert.equal(matchingApproach(plane, before, runways.prop), false)
+    assert.equal(matchingApproach(plane, before, runways.jet), false)
   }
-  Object.assign(plane, { x: 235, y: 360, heading: Math.PI, route: { cleared: true } })
-  assert.equal(matchingApproach(plane, { x: 236, y: 360 }), false)
+  Object.assign(plane, { x: 235, y: 360, heading: Math.PI, route: { cleared: true, destinationId: '09' } })
+  assert.equal(matchingApproach(plane, { x: 236, y: 360 }, runways.jet), false)
   Object.assign(plane, { heading: 0, route: null })
-  assert.equal(matchingApproach(plane, { x: 234, y: 360 }), false)
-  plane.route = { cleared: true }
-  assert.equal(matchingApproach(plane, { x: 234, y: 360 }), true)
+  assert.equal(matchingApproach(plane, { x: 234, y: 360 }, runways.jet), false)
+  plane.route = { cleared: true, destinationId: '09' }
+  assert.equal(matchingApproach(plane, { x: 234, y: 360 }, runways.jet), true)
 })
 
 test('swept separation detects a crossing between snapshots and escalates as planes close', () => {
-  const a = newAircraft(1, 'jet', { x: 35, y: 60, heading: 0 })
-  const b = newAircraft(2, 'prop', { x: 125, y: 60, heading: Math.PI })
+  const a = coastalAircraft(1, 'jet', { x: 35, y: 60, heading: 0 })
+  const b = coastalAircraft(2, 'prop', { x: 125, y: 60, heading: Math.PI })
   assert.equal(separation(a, b, a, b), 1)
   b.x = 78
   assert.equal(separation(a, b, a, b), 2)
@@ -110,15 +113,15 @@ test('collisions end the shift and undirected aircraft get an edge warning befor
   game.reset()
   game.start()
   const [first] = game.planes
-  game.planes.push(newAircraft(2, 'prop', { x: first.x + 28, y: first.y, heading: Math.PI }))
+  game.planes.push(coastalAircraft(2, 'prop', { x: first.x + 28, y: first.y, heading: Math.PI }))
   until(game, () => game.mode === 'over', 1)
   assert.equal(game.events.at(-1).reason, 'collision')
-  assert.equal(boundary(newAircraft(3, 'prop', { x: -40, y: 300, heading: 0 })), 2)
+  assert.equal(boundary(coastalAircraft(3, 'prop', { x: -40, y: 300, heading: 0 })), 2)
 })
 
 test('entries require clear positions and clear projected inbound corridors', () => {
   const entry = { x: 30, y: 250, heading: 0 }
-  const plane = newAircraft(1, 'jet', { x: 210, y: 250, heading: Math.PI })
+  const plane = coastalAircraft(1, 'jet', { x: 210, y: 250, heading: Math.PI })
   assert.equal(safeEntry(entry, 'jet', [plane]), false)
   assert.equal(safeEntry(entry, 'jet', [{ ...plane, x: 70, heading: 0 }]), false)
   assert.equal(safeEntry(entry, 'jet', [{ ...plane, y: 555 }]), true)
@@ -126,7 +129,7 @@ test('entries require clear positions and clear projected inbound corridors', ()
     const arrival = chooseArrival(index, [plane])
     assert.ok(arrival)
     assert.equal(safeEntry(arrival.entry, arrival.kind, [plane]), true)
-    const future = offset(arrival.entry, arrival.entry.heading, runways[arrival.kind].speed * 8)
+    const future = offset(arrival.entry, arrival.entry.heading, aircraftTypes[arrival.kind].speed * 8)
     assert.ok(future.x > 35 && future.x < width - 35 && future.y > 35 && future.y < height - 35)
   }
 })
@@ -158,7 +161,7 @@ test('all blocked entries defer and retry without consuming the arrival', () => 
   while (true) {
     const next = chooseArrival(game.arrivals, blocks)
     if (!next) break
-    blocks.push(newAircraft(blocks.length + 10, next.kind, next.entry))
+    blocks.push(coastalAircraft(blocks.length + 10, next.kind, next.entry))
   }
   assert.ok(blocks.length > 1)
   game.planes = blocks
@@ -170,7 +173,7 @@ test('all blocked entries defer and retry without consuming the arrival', () => 
 })
 
 test('arrival spacing tightens, then caps at a positive interval', () => {
-  assert.deepEqual([0, 60, 120, 180, 240, 300, 360, 420, 1200].map(arrivalInterval), [12, 10, 8.5, 7.5, 6.5, 6, 5.5, 5, 5])
+  assert.deepEqual([0, 60, 120, 180, 240, 300, 360, 420, 1200].map((seconds) => arrivalInterval(seconds)), [12, 10, 8.5, 7.5, 6.5, 6, 5.5, 5, 5])
 })
 
 test('pause holds the clock and aircraft, while reset preserves the local best', () => {
