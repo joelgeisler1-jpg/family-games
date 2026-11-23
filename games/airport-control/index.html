@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101f29">
+  <meta name="description" content="Draw routes and bring aircraft safely home at Coastal Airport.">
+  <title>Airport Control · Family Arcade</title>
+  <link rel="stylesheet" href="./game.css">
+  <script type="module" src="./game.js"></script>
+</head>
+<body>
+  <header class="mast">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">✈︎</span>
+      <div><div class="eyebrow">Family Arcade</div><h1>Airport Control</h1></div>
+    </div>
+    <div class="controls">
+      <button id="sound" type="button" aria-pressed="false" aria-label="Sound off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z"/><path class="audio-off" d="m16 10 5 5m0-5-5 5"/><path class="audio-on" d="M16 9a4 4 0 0 1 0 6m2-8a7 7 0 0 1 0 10"/></svg>
+      </button>
+      <button id="pause" type="button" aria-label="Pause" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14m6-14v14"/></svg>
+      </button>
+    </div>
+  </header>
+  <main class="console">
+    <section class="scope" aria-label="Coastal Airport airspace">
+      <canvas id="airspace" width="680" height="780" aria-label="Airport map. Drag a plane to its matching numbered approach.">
+        Your browser needs canvas support to display the airspace.
+      </canvas>
+      <div class="map-title" aria-hidden="true">
+        <span class="map-light"></span><span>Coastal Airport</span>
+      </div>
+      <div class="overlay" id="overlay">
+        <div class="panel" role="dialog" aria-labelledby="panel-title" aria-describedby="panel-message">
+          <span class="panel-icon" id="panel-icon" aria-hidden="true">✈︎</span>
+          <h2 id="panel-title">Ready for your shift?</h2>
+          <p id="panel-message">Drag from a plane to the approach with its matching number. Give each aircraft room to turn.</p>
+          <div class="results" id="results" hidden>
+            <div><span>Landings</span><strong id="result-score">0</strong></div>
+            <div><span>Personal best</span><strong id="result-best">0</strong></div>
+          </div>
+          <button class="primary" id="action" type="button">Start shift <span aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+    <aside class="tower" aria-label="Tower instruments">
+      <div class="tower-head"><span class="station-icon" aria-hidden="true">◉</span><h2>Control tower</h2></div>
+      <div class="instruments">
+        <div class="instrument score"><span>Landings</span><strong id="score">0</strong></div>
+        <div class="instrument"><span>Best</span><strong id="best">0</strong></div>
+        <div class="instrument traffic"><span>Traffic</span><strong id="traffic">0</strong></div>
+      </div>
+      <div class="runways">
+        <h3>Runway assignments</h3>
+        <div class="assignment jet"><span class="runway-icon"><b>09</b></span><div><b>Airliner</b><small>Main runway</small></div></div>
+        <div class="assignment prop"><span class="runway-icon"><b>27</b></span><div><b>Light plane</b><small>Short runway</small></div></div>
+      </div>
+      <div class="radio">
+        <span class="radio-icon" aria-hidden="true">⌁</span>
+        <p id="radio" aria-live="polite">Match each plane to its runway.</p>
+      </div>
+    </aside>
+  </main>
+</body>
+</html>

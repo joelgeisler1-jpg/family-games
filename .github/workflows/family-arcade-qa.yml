@@ -55,3 +55,29 @@ jobs:
 
       - name: Run existing Sneaky Paws tests
         run: node --test games/sneaky-paws/tests/*.test.mjs
+
+  airport-control-node:
+    name: Airport Control / Node tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check Airport Control script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          find games/airport-control -name '*.js' -type f -print0 | while IFS= read -r -d '' file; do
+            node --check "$file"
+          done
+
+      - name: Run Airport Control flight and shift tests
+        run: node --test games/airport-control/tests/*.test.mjs
