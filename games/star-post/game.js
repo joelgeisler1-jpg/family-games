@@ -55,7 +55,7 @@ function draw(){
     group.addEventListener('pointerdown',e=>{
       if(pointer!==null)return;
       e.preventDefault(); selected=star.id; pointer=e.pointerId;
-      try{group.setPointerCapture(e.pointerId);}catch{}
+      try{board.setPointerCapture(e.pointerId);}catch{}
       say(col.label+' star selected. Drag it home or tap its matching circle.');
       draw();
     });
