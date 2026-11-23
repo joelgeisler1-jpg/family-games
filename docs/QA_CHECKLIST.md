@@ -46,5 +46,17 @@ Use this checklist for each feature PR. Tick only what was actually verified.
 - [ ] Provide simple iOS review steps
 - [ ] Leave PR unmerged for owner approval
 
-## Proposed CI follow-up (not implemented by this checklist)
-Inspect actual repository test scripts and platform structure first. Add a minimal GitHub Actions workflow to run available dependency-free Node tests on pull requests. Add browser screenshot/gameplay jobs only once browser installation/runtime is verified. Do not weaken existing checks or add dependencies unnecessarily.
+## GitHub Actions automated coverage
+
+The `Family Arcade QA` workflow (`.github/workflows/family-arcade-qa.yml`) runs on pull requests and can also be started manually with `workflow_dispatch`.
+
+- **Sneaky Paws / Node tests:** GitHub-hosted Ubuntu runner, Node.js 22, from the repository root:
+  ```sh
+  node --test games/sneaky-paws/tests/*.test.mjs
+  ```
+  This is the documented command in `games/sneaky-paws/README.md`; it requires no npm install or build step.
+- **PR checks:** Open the PR's **Checks** tab on GitHub Mobile or the mobile website and inspect the `Sneaky Paws / Node tests` job. A failed test makes the check fail. A green check does not mean physical-device testing has passed.
+- **Limitations:** No automated Cleaning Club gameplay tests, native Safari checks, or browser screenshot comparisons are configured in this workflow. The manual sections above still apply.
+- **Future work:** Add browser jobs only after verifying the runner setup, executable browser test suite and artifact handling. Do not claim CI passing until the first actual run has succeeded.
+
+This workflow has no deploy or auto-merge permissions. Repo branch protection/rulesets must be configured separately if test success is to be required before merging.
