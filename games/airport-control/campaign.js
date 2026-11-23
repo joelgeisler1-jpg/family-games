@@ -1,4 +1,4 @@
-import { coastalDestinations, runway } from './airfield.js'
+import { coastalDestinations, helipad, runway } from './airfield.js'
 
 const coastalTraffic = {
   rotation: [{ kind: 'jet', destinationId: '09' }, { kind: 'prop', destinationId: '27' }],
@@ -32,7 +32,28 @@ export const regionalJunction = {
   },
 }
 
-export const campaignLevels = [coastalAirport, regionalJunction]
+export const islandRescue = {
+  id: 3, name: 'Island Rescue', scenery: 'island', minLandings: 13, minSeconds: 180,
+  destinations: {
+    '09': { ...coastalDestinations['09'], x: 170, y: 358, length: 420 },
+    '27': { ...coastalDestinations['27'], x: 500, y: 545, length: 308 },
+    '18': runway('18', 'Island runway', 'square', '#f6acf8', 502, 173, Math.PI / 2, 129, 43, 35, 1),
+    H: helipad('H', 'Rescue helipad', '#b7f59f', 313, 666),
+  },
+  traffic: {
+    rotation: [...coastalTraffic.rotation, { kind: 'heli', destinationId: 'H' }, { kind: 'turbo', destinationId: '18' }],
+    opening: [
+      { x: 47, y: 341, heading: 0.12 },
+      { x: 647, y: 553, heading: Math.PI + 0.04 },
+      { x: 316, y: 752, heading: -Math.PI / 2 },
+      { x: 487, y: 28, heading: Math.PI / 2 - 0.12 },
+    ],
+    openingGaps: [11, 11, 13],
+    intervals: [12, 10, 8.5, 7.5, 6.5, 6, 5.5, 5],
+  },
+}
+
+export const campaignLevels = [coastalAirport, regionalJunction, islandRescue]
 
 export function nextLevel(id) {
   const index = campaignLevels.findIndex((level) => level.id === id)

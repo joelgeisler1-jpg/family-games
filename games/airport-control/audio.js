@@ -7,6 +7,7 @@ export function landingSoundProfile(kind) {
   if (kind === 'jet') return { base: 145, end: 72, duration: 1.55, brightness: 0.27 }
   if (kind === 'prop') return { base: 115, end: 60, duration: 1.17, brightness: 0.22 }
   if (kind === 'turbo') return { base: 132, end: 65, duration: 1.34, brightness: 0.25 }
+  if (kind === 'heli') return { base: 31, end: 19, duration: 1.48, brightness: 0.19 }
   return null
 }
 
@@ -19,6 +20,29 @@ function randomSource(seed) {
   }
 }
 
+function writeHelicopterTexture(data, profile) {
+  const random = randomSource(382871)
+  let rotor = 0
+  let wash = 0
+  let skid = 0
+  let phase = 0
+  for (let i = 0; i < data.length; i++) {
+    const time = i / sampleRate
+    const progress = i / data.length
+    const noise = random() * 2 - 1
+    rotor += (noise - rotor) * 0.075
+    wash += (noise - wash) * 0.021
+    skid += (noise - skid) * 0.18
+    phase += (profile.base + (profile.end - profile.base) * progress) / sampleRate
+    const blade = Math.max(0, Math.cos(phase * Math.PI * 2)) ** 3
+    const contact = Math.exp(-(((time - 1.19) * 16) ** 2))
+    const envelope = Math.min(time / 0.09, 1) * (1 - progress) ** 0.72
+    const sample = (rotor * (0.45 + 1.5 * blade) + wash * 0.95 +
+      Math.sin(phase * Math.PI * 2) * 0.042 + skid * contact * 0.65) * envelope
+    data[i] = Math.max(-1, Math.min(1, sample))
+  }
+}
+
 // Composite moving air, rolling tyres, and turbine or propeller texture. A
 // changing noisy spectrum avoids the electronic notes of oscillator-based FX.
 export function buildLandingTexture(context, kind) {
@@ -27,6 +51,10 @@ export function buildLandingTexture(context, kind) {
   const count = Math.ceil(profile.duration * sampleRate)
   const buffer = context.createBuffer(1, count, sampleRate)
   const data = buffer.getChannelData(0)
+  if (kind === 'heli') {
+    writeHelicopterTexture(data, profile)
+    return buffer
+  }
   const random = randomSource(({ jet: 314159, prop: 271828, turbo: 161803 })[kind])
   let low = 0
   let mid = 0
@@ -116,7 +144,7 @@ export class TowerAudio {
     const envelope = context.createGain()
     const lowpass = context.createBiquadFilter()
     lowpass.type = 'lowpass'
-    lowpass.frequency.value = kind === 'jet' ? 1450 : 1150
+    lowpass.frequency.value = kind === 'jet' ? 1450 : kind === 'heli' ? 900 : 1150
     envelope.gain.value = 0.46
     source.buffer = buffer
     source.connect(lowpass).connect(envelope).connect(context.destination)
@@ -132,8 +160,12 @@ export class TowerAudio {
 
   play(event, aircraftKind = null) {
     if (!this.enabled || !this.context || this.context.state !== 'running') return
+    if (event === 'settle') {
+      this.landingAircraft('heli')
+      return
+    }
     if (event === 'landing') {
-      this.landingAircraft(aircraftKind)
+      if (aircraftKind !== 'heli') this.landingAircraft(aircraftKind)
       // Keep a quiet success cue underneath the aircraft's more natural sound.
       for (const [index, frequency] of [587, 740].entries()) {
         this.tone(frequency, this.context.currentTime + index * 0.11, 0.2, 0.013)

@@ -113,6 +113,7 @@ function syncMode() {
   const heading = document.createElement('h3')
   heading.textContent = 'Destination assignments'
   assignments.replaceChildren(heading)
+  assignments.toggleAttribute('data-expanded', session.airport.traffic.rotation.length >= 4)
   for (const { kind, destinationId } of session.airport.traffic.rotation) {
     const destination = session.airport.destinations[destinationId]
     const row = document.createElement('div')
@@ -168,9 +169,17 @@ function processEvents() {
   for (const event of session.events.splice(0)) {
     if (event.type === 'arrival' && session.arrivals > 2 && session.time >= messageUntil) {
       const destination = session.airport.destinations[event.destinationId]
-      message = `${aircraftTypes[event.kind].label} inbound for runway ${destination.id}.`
+      message = destination.type === 'helipad'
+        ? 'Rescue helicopter inbound. Guide it to H.'
+        : `${aircraftTypes[event.kind].label} inbound for runway ${destination.id}.`
       messageUntil = session.time + 2.5
       messageTone = ''
+    }
+    if (event.type === 'settle') {
+      message = 'Rescue helicopter settling on H.'
+      messageUntil = session.time + aircraftTypes.heli.landingDuration
+      messageTone = 'success'
+      audio.play('settle')
     }
     if (event.type === 'landing') {
       effects.push({ x: event.plane.x, y: event.plane.y, time: session.time, color: session.destinationFor(event.plane).color })

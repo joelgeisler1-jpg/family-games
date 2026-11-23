@@ -161,6 +161,22 @@ canvas {
 .runway-icon[data-shape="diamond"] { border-radius: 5px; transform: rotate(45deg) scale(0.84); }
 .runway-icon[data-shape="diamond"] b { transform: rotate(-45deg) scale(1.19); }
 .runway-icon[data-shape="square"] { border-radius: 5px; }
+.runway-icon[data-shape="octagon"] {
+  border: 0;
+  border-radius: 0;
+  background: currentColor;
+  clip-path: polygon(28% 0, 72% 0, 100% 28%, 100% 72%, 72% 100%, 28% 100%, 0 72%, 0 28%);
+  position: relative;
+  isolation: isolate;
+}
+.runway-icon[data-shape="octagon"]::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  background: #172c36;
+  clip-path: inherit;
+}
 .radio { min-height: 50px; padding: 9px 10px; display: flex; align-items: flex-start; gap: 7px; color: #e7ead6; background: #14252e; border-radius: 9px; }
 .radio p { font-size: 12px; line-height: 1.35; }
 .radio-icon { color: #a6d5c1; font-weight: 850; line-height: 1; }
@@ -231,6 +247,8 @@ canvas {
   .instruments[data-campaign] .instrument { display: grid; justify-content: start; }
   .instrument strong { font-size: 18px; }
   .runways { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2px 7px; padding: 3px 0; }
+  .runways[data-expanded] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .runways[data-expanded] .assignment { justify-self: center; }
   .assignment { min-height: 32px; font-size: 12px; gap: 7px; }
   .runway-icon { width: 22px; height: 22px; font-size: 11px; }
   .radio { min-height: 35px; padding: 5px 7px; }
@@ -250,6 +268,7 @@ canvas {
   .instruments[data-campaign] strong { font-size: 14px; }
   .runways { padding: 8px 0; }
   .assignment { min-height: 33px; }
+  .runways[data-expanded] .assignment { min-height: 29px; line-height: 1.1; }
   .panel { padding: 11px; }
   .panel-icon { display: none; }
   .panel p { font-size: 12px; margin: 6px 0 9px; }
