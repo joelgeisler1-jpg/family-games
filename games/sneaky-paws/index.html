@@ -43,12 +43,26 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 .guard-unit.alerted .alert-sign{opacity:1}
 @media(prefers-reduced-motion:reduce){#glow,.guard-body,.guard-z,.edge-ripple,.edge-label,#armGroup.edge-bump{animation:none}}
 #board.alarm{animation:blink .4s ease-in-out 2}@keyframes blink{50%{filter:sepia(.8) hue-rotate(315deg) saturate(2)}}
-.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 6px 2px;flex-wrap:wrap}.story h2{font-size:16px;margin:0 0 2px}.story p{font-size:12px;margin:0;color:#716889}.right{display:flex;gap:8px}
+/* In-scene instructions and animated guard awareness */
+.speech{position:absolute;z-index:7;left:3%;top:14%;max-width:42%;min-width:160px;display:flex;align-items:flex-start;gap:9px;padding:10px 13px;background:#fffcf6f2;border:2px solid #8d78d3;border-radius:18px 18px 18px 4px;box-shadow:0 7px 0 #b5a5dd45,0 13px 20px #423d6525;color:#3d335e;pointer-events:none;transform-origin:20px bottom;animation:bubblePop .35s ease-out}
+.speech:after{content:"";position:absolute;left:13px;bottom:-13px;width:17px;height:17px;background:#fffcf6;border-left:2px solid #8d78d3;border-bottom:2px solid #8d78d3;transform:skewY(-31deg) rotate(-18deg)}
+.speech .avatar{font-size:23px;line-height:1.25}.speech .words{display:flex;flex-direction:column;gap:4px}.speech b{font-size:9px;letter-spacing:1.2px;color:#8063b7}.speech span.message{font-size:12px;font-weight:850;line-height:1.3}
+.speech.tip{border-color:#f2c264;background:#fff6d8f5}.speech.tip:after{background:#fff6d8;border-color:#f2c264}.speech.tip b{color:#ad7b19}
+@keyframes bubblePop{from{opacity:0;transform:scale(.83) translateY(7px)}to{opacity:1;transform:scale(1)}}
+.watch-cone{fill:#efbd56;opacity:.22;stroke:#e6a348;stroke-width:1.4;pointer-events:none}.guard-unit.suspicious .watch-cone{fill:#f58d5b;opacity:.31}.guard-unit.distracted .watch-cone{fill:#59b8d8;opacity:.09}.guard-unit.suspicious .guard-head{transform:translateY(-3px);transform-box:fill-box;transform-origin:center}
+.guard-thought{opacity:0;transition:opacity .15s}.guard-unit.suspicious .guard-thought,.guard-unit.distracted .guard-thought,.guard-unit.alerted .guard-thought{opacity:1}.guard-unit.alerted .guard-thought text{fill:#bb303f}
+.guard-meter{opacity:0;transition:opacity .16s}.guard-unit.suspicious .guard-meter{opacity:1}.guard-unit.alerted .guard-meter{opacity:1}
+.slide-handle{transition:filter .15s}.slide-unit.gripping .slide-handle{filter:drop-shadow(0 0 8px #47d9e0)}.slide-unit.finished .slide-handle{filter:drop-shadow(0 0 8px #54c99d)}
+.decoy-unit.playing .decoy-halo{animation:decoyPulse .62s ease-in-out infinite alternate}.decoy-note{animation:noteFloat .9s ease-out forwards}
+@keyframes decoyPulse{to{opacity:.7;transform:scale(1.12)}}@keyframes noteFloat{to{opacity:0;transform:translateY(-24px)}}
+@media(prefers-reduced-motion:reduce){.speech,.decoy-unit.playing .decoy-halo,.decoy-note{animation:none}}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 6px 2px;flex-wrap:wrap}.story h2{font-size:16px;margin:0 0 2px}.story p{display:none}.right{display:flex;gap:8px}
 .btn{border:0;padding:11px 15px;border-radius:13px;font-size:13px;font-weight:900;background:#e9e5f8;color:#443a70}.btn.sound{padding:11px 12px;min-width:44px;background:#f7f4ff}.btn.primary{background:#6254c8;color:#fff}.btn:disabled{opacity:.46;cursor:default}
-.notice{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;font-size:13px;font-weight:800;color:#574c80}.notice.fail{color:#c84a53}.notice.win{color:#228b68}.notice.edge{color:#7a5cc7}.board-tip{position:absolute;top:14px;right:16px;background:#ffffffdf;border:1px solid #cfc8ee;color:#534977;border-radius:99px;padding:6px 10px;font-size:11px;font-weight:900;box-shadow:0 4px 12px #2f27541a;pointer-events:none}
+.notice{min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px;font-size:13px;font-weight:800;color:#574c80}.notice{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;padding:0!important;margin:-1px!important;border:0!important}
+.notice.fail{color:#c84a53}.notice.win{color:#228b68}.notice.edge{color:#7a5cc7}.board-tip{display:none}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;padding:7px;color:#716887;font-size:11px;font-weight:800}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.dot.purple{background:#8c7ac8}.dot.red{background:#f26b7b}.dot.yellow{background:#f5bc4a}.dot.cyan{background:#31aabb}
-.winpanel{display:none;align-items:center;justify-content:space-between;gap:10px;border:1px solid #c7e7dc;background:#eefff8;padding:12px;border-radius:14px;margin:9px 2px 2px}.winpanel.show{display:flex}.winpanel b{color:#247e61;font-size:15px}.winpanel p{margin:3px 0 0;color:#65877b;font-size:12px}
-@media(max-width:520px){.shell{padding:11px 7px 18px}.brand{font-size:10px}.intro{align-items:start}.heading h1{font-size:23px}.badge{font-size:10px}.play{padding:5px;border-radius:15px}.hud{padding:11px 5px 2px}.right{width:100%}.btn{flex:1;padding:12px 8px}.btn.sound{flex:0 0 44px;padding:12px 8px}.board-tip{top:9px;right:9px;font-size:9px;padding:5px 8px}.winpanel{flex-wrap:wrap}.winpanel button{width:100%}.legend{font-size:10px}}
+.winpanel{display:none;align-items:center;justify-content:space-between;gap:10px;border:1px solid #c7e7dc;background:#eefff8;padding:12px;border-radius:14px;margin:9px 2px 2px}.winpanel.show{display:flex}.winpanel b{color:#247e61;font-size:15px}.winpanel p{margin:3px 0 0;color:#65877b;font-size:12px}.btn.next{display:none}.btn.next.available{display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:520px){.shell{padding:11px 7px 18px}.brand{font-size:10px}.intro{align-items:start}.heading h1{font-size:23px}.badge{font-size:10px}.play{padding:5px;border-radius:15px}.hud{padding:11px 5px 2px}.right{width:100%}.btn{flex:1;padding:12px 8px}.btn.sound{flex:0 0 44px;padding:12px 8px}.board-tip{top:9px;right:9px;font-size:9px;padding:5px 8px}.winpanel{flex-wrap:wrap}.speech{top:10%;left:2%;max-width:53%;min-width:0;padding:7px 9px;gap:5px;border-radius:13px 13px 13px 4px}.speech .avatar{font-size:17px}.speech b{font-size:8px}.speech span.message{font-size:10px}.right{gap:6px}.btn{font-size:11px}.legend{font-size:10px}}
 @media(prefers-reduced-motion:reduce){#board.alarm{animation:none}}
 /* Animated characters, security reels and tactile puzzle feedback */
 .spool-core{animation:reelIdle 6s linear infinite;transform-box:fill-box;transform-origin:center}
@@ -120,33 +134,33 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
     </g>
     <g id="targetGroup" class="guide"></g><g id="effects"></g>
    </svg>
-  <div class="board-tip" id="boardTip">↗ Draw around the traps</div></div>
-  <div class="hud"><div class="story"><h2 id="levelTitle">Level 1</h2><p id="levelClue">Find a way to the treasure.</p></div><div class="right"><button id="reset" class="btn" type="button">↻ Try again</button><button id="hint" class="btn primary" type="button">💡 Hint</button><button id="soundToggle" class="btn sound" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button></div></div>
+  <div class="speech" id="speech" role="status" aria-live="polite"><div class="avatar">🕵️</div><div class="words"><b id="bubbleSpeaker">SNEAKY SAYS</b><span class="message" id="bubbleText">Draw from my glove!</span></div></div></div>
+  <div class="hud"><div class="story"><h2 id="levelTitle">Level 1</h2></div><div class="right"><button id="reset" class="btn" type="button">↻ Try again</button><button id="next" class="btn primary next" type="button">Next mission →</button><button id="hint" class="btn primary" type="button">💡 Hint</button><button id="soundToggle" class="btn sound" type="button" aria-label="Mute sound" aria-pressed="false">🔊</button></div></div>
   <div class="notice" id="notice" role="status" aria-live="polite"><span id="noticeText">👆 Start on the glowing hand and drag to the treasure.</span><span id="attempts"></span></div>
-  <div class="winpanel" id="winpanel"><div><b id="winTitle">✨ Treasure secured!</b><p id="winText">Your sneaky arm did it.</p></div><button class="btn primary" id="next" type="button">Next mission →</button></div>
+  <div class="winpanel" id="winpanel"><div><b id="winTitle">✨ Treasure secured!</b><p id="winText">Your sneaky arm did it. Choose Next Mission above!</p></div></div>
  </section>
- <div class="legend"><span><i class="dot purple"></i> Purple = solid object</span><span><i class="dot red"></i> Red = security / guard</span><span><i class="dot yellow"></i> Gold = treasure / key</span><span><i class="dot cyan"></i> Hug blue reels to wind the arm</span><span>✨ Edges bounce — keep drawing!</span></div>
+ <div class="legend"><span><i class="dot purple"></i> Purple = solid object</span><span><i class="dot red"></i> Red = security / guard</span><span><i class="dot yellow"></i> Gold = treasure / key</span><span><i class="dot cyan"></i> Wind reels, slide bolts &amp; ring decoys</span><span>✨ Edges bounce — keep drawing!</span></div>
 </main>
 <script>
 (()=>{'use strict';
 const NS='http://www.w3.org/2000/svg',W=780,H=510,START={x:119,y:425},ARM_R=14,EDGE=25,SAVE='familyArcadeSneakyUnlocked';
 const LEVELS=[
- {name:'The Crate Caper',clue:'More crates and lockers! Find the safe lane to the gem.',hint:'Go BELOW the large centre crate, then go around the final locker to the gem.',goal:{x:686,y:401},walls:[{x:298,y:290,w:177,h:148,type:'crate'},{x:181,y:155,w:96,h:88,type:'locker'},{x:508,y:245,w:87,h:92,type:'crate'},{x:536,y:366,w:57,h:52,type:'locker'}],lasers:[{x1:518,y1:451,x2:604,y2:451}]},
- {name:'Laser Zigzag',clue:'Red beams sound the alarm. Find the gaps!',hint:'Above the first beam, BELOW the second, above the third.',goal:{x:697,y:106},walls:[{x:98,y:115,w:57,h:73,type:'crate'},{x:346,y:364,w:71,h:69,type:'locker'},{x:520,y:90,w:67,h:65,type:'crate'},{x:660,y:316,w:70,h:94,type:'locker'}],lasers:[{x1:274,y1:168,x2:274,y2:469},{x1:460,y1:44,x2:460,y2:304},{x1:623,y1:247,x2:623,y2:476}]},
- {name:'Shhh… Sleeping Guard',clue:"Don't enter the guard's red listening circle.",hint:'Sneak underneath the guard, then around the tall locker.',goal:{x:695,y:132},walls:[{x:235,y:113,w:92,h:184,type:'locker'},{x:522,y:278,w:101,h:185,type:'locker'},{x:338,y:404,w:82,h:59,type:'crate'},{x:634,y:312,w:75,h:118,type:'locker'}],guards:[{x:405,y:269,r:87}]},
- {name:'The Sweeping Eye',clue:'The camera moves! Time your stretchy reach.',hint:'Go above the tall crate, then hide below the smaller one until the spotlight turns away.',goal:{x:704,y:391},walls:[{x:252,y:248,w:142,h:230,type:'crate'},{x:449,y:169,w:131,h:136,type:'crate'},{x:110,y:126,w:83,h:80,type:'locker'},{x:405,y:379,w:86,h:75,type:'locker'}],camera:{x:606,y:102,r:235,base:1.83,sweep:.64,half:.22,speed:.00125}},
- {name:'The Grand Vault',clue:'Collect the gold key FIRST, then snatch the ruby.',hint:'Go under the first red beam, over the first wall, then beneath the second wall.',goal:{x:697,y:408},key:{x:412,y:143},walls:[{x:251,y:207,w:72,h:276,type:'locker'},{x:525,y:46,w:73,h:269,type:'locker'},{x:343,y:290,w:76,h:66,type:'crate'},{x:350,y:400,w:81,h:67,type:'locker'},{x:627,y:132,w:65,h:53,type:'crate'}],lasers:[{x1:178,y1:44,x2:178,y2:313},{x1:644,y1:92,x2:744,y2:92}],guards:[{x:650,y:228,r:55}]},
- {name:'The First Loop',clue:'The glove sticks to the reel. Trace its outside to unlock treasure!',hint:'Move beside the reel to snap onto its outer edge, then curl around until the ring fills.',goal:{x:692,y:125},walls:[{x:497,y:295,w:102,h:166,type:'crate'},{x:188,y:90,w:82,h:82,type:'locker'},{x:616,y:251,w:83,h:61,type:'crate'}],spools:[{x:351,y:258,r:25,turn:3.15}],guards:[]},
- {name:'Patrol Parade',clue:'The security guard WALKS. Hide your arm above or below their route!',hint:'Sneak above the first locker, then stay clear of the patrolling guard.',goal:{x:686,y:111},walls:[{x:270,y:112,w:90,h:230,type:'locker'},{x:586,y:337,w:112,h:120,type:'crate'},{x:401,y:379,w:92,h:76,type:'crate'},{x:521,y:129,w:74,h:63,type:'locker'}],guards:[{x:483,y:265,r:69,kind:'patrol',patrol:{dx:120,dy:0,speed:.00105}}]},
- {name:'Flick the Switch',clue:'Hit the green switch to disable the red security gate.',hint:'Reach the switch at the top first, then travel through the now-green laser line.',goal:{x:699,y:405},switch:{x:456,y:105},walls:[{x:270,y:274,w:106,h:190,type:'crate'},{x:421,y:201,w:81,h:91,type:'locker'},{x:93,y:158,w:78,h:101,type:'locker'},{x:589,y:312,w:78,h:60,type:'crate'}],lasers:[{x1:557,y1:202,x2:557,y2:474,gate:true}],guards:[{x:670,y:240,r:55,kind:'watch'}]},
- {name:'Double Wrap',clue:'Hug BOTH reel edges, weave around furniture, and avoid security.',hint:'Follow the outer edge of the left reel, then the right. Green rings mean unlocked.',goal:{x:706,y:423},spools:[{x:318,y:250,r:25,turn:3.15},{x:526,y:256,r:25,turn:3.15}],walls:[{x:269,y:75,w:85,h:82,type:'crate'},{x:411,y:391,w:103,h:73,type:'locker'},{x:142,y:161,w:73,h:68,type:'crate'},{x:602,y:380,w:61,h:63,type:'locker'}],lasers:[{x1:655,y1:48,x2:655,y2:232}],guards:[{x:666,y:320,r:51,kind:'watch'}]},
- {name:'Midnight Museum',clue:'Wrap the reel, switch off security, grab the key, then take the diamond!',hint:'Loop the blue post, touch the green switch up top and collect the key below. Then follow the open passage ABOVE the final display to the diamond.',goal:{x:698,y:318},key:{x:453,y:363},switch:{x:488,y:102},spools:[{x:355,y:248,r:26,turn:3.15}],walls:[{x:241,y:70,w:87,h:79,type:'crate'},{x:531,y:210,w:88,h:86,type:'locker'},{x:598,y:351,w:71,h:105,type:'crate'}],lasers:[{x1:562,y1:344,x2:562,y2:480,gate:true}],guards:[{x:630,y:149,r:47,kind:'patrol',patrol:{dx:53,dy:0,speed:.00085}}]}
+ {name:'The Crate Caper',bubble:'Slip around the crates!',clue:'More crates and lockers! Find the safe lane to the gem.',hint:'Go BELOW the large centre crate, then go around the final locker to the gem.',goal:{x:686,y:401},walls:[{x:298,y:290,w:177,h:148,type:'crate'},{x:181,y:155,w:96,h:88,type:'locker'},{x:508,y:245,w:87,h:92,type:'crate'},{x:536,y:366,w:57,h:52,type:'locker'}],lasers:[{x1:518,y1:451,x2:604,y2:451}]},
+ {name:'Laser Zigzag',bubble:'Weave between red lasers!',clue:'Red beams sound the alarm. Find the gaps!',hint:'Above the first beam, BELOW the second, above the third.',goal:{x:697,y:106},walls:[{x:98,y:115,w:57,h:73,type:'crate'},{x:346,y:364,w:71,h:69,type:'locker'},{x:520,y:90,w:67,h:65,type:'crate'},{x:660,y:316,w:70,h:94,type:'locker'}],lasers:[{x1:274,y1:168,x2:274,y2:469},{x1:460,y1:44,x2:460,y2:304},{x1:623,y1:247,x2:623,y2:476}]},
+ {name:'Shhh… Sleeping Guard',bubble:'Shhh… slide the bolt right!',clue:"Don't enter the guard's red listening circle.",hint:'Stay ABOVE the sleeping guard; pull the green handle right along its rail to unlock the treasure.',slider:{x:445,y:91,to:524},goal:{x:695,y:132},walls:[{x:235,y:113,w:92,h:184,type:'locker'},{x:522,y:278,w:101,h:185,type:'locker'},{x:338,y:404,w:82,h:59,type:'crate'},{x:634,y:312,w:75,h:118,type:'locker'}],guards:[{x:405,y:269,r:87}]},
+ {name:'The Sweeping Eye',bubble:'Wait for the camera to turn!',clue:'The camera moves! Time your stretchy reach.',hint:'Go above the tall crate, then hide below the smaller one until the spotlight turns away.',goal:{x:704,y:391},walls:[{x:252,y:248,w:142,h:230,type:'crate'},{x:449,y:169,w:131,h:136,type:'crate'},{x:110,y:126,w:83,h:80,type:'locker'},{x:405,y:379,w:86,h:75,type:'locker'}],camera:{x:606,y:102,r:235,base:1.83,sweep:.64,half:.22,speed:.00125}},
+ {name:'The Grand Vault',bubble:'Find the key. Avoid the guard!',clue:'Collect the gold key FIRST, then snatch the ruby.',hint:'Collect the key first, then loop around the guard while it scans the upper vault.',goal:{x:697,y:408},key:{x:412,y:143},walls:[{x:251,y:207,w:72,h:276,type:'locker'},{x:525,y:46,w:73,h:269,type:'locker'},{x:343,y:290,w:76,h:66,type:'crate'},{x:350,y:400,w:81,h:67,type:'locker'},{x:627,y:132,w:65,h:53,type:'crate'}],lasers:[{x1:178,y1:44,x2:178,y2:313},{x1:644,y1:92,x2:744,y2:92}],guards:[{x:650,y:228,r:55,kind:'watch',vision:{range:125,half:.42,look:-2.35,sweep:.3}}]},
+ {name:'The First Loop',bubble:'Trace the reel to unlock!',clue:'The glove sticks to the reel. Trace its outside to unlock treasure!',hint:'Move beside the reel to snap onto its outer edge, then curl around until the ring fills.',goal:{x:692,y:125},walls:[{x:497,y:295,w:102,h:166,type:'crate'},{x:188,y:90,w:82,h:82,type:'locker'},{x:616,y:251,w:83,h:61,type:'crate'}],spools:[{x:351,y:258,r:25,turn:3.15}],guards:[]},
+ {name:'Patrol Parade',bubble:'Ring the bell. Dodge patrols!',clue:'The security guard WALKS. Hide your arm above or below their route!',hint:'Reach the yellow music button above the locker; it distracts the patrol. Then slip along the upper path.',decoy:{x:430,y:96,duration:4600},goal:{x:686,y:111},walls:[{x:270,y:112,w:90,h:230,type:'locker'},{x:586,y:337,w:112,h:120,type:'crate'},{x:401,y:379,w:92,h:76,type:'crate'},{x:521,y:129,w:74,h:63,type:'locker'}],guards:[{x:483,y:265,r:69,kind:'patrol',patrol:{dx:120,dy:0,speed:.00105},vision:{range:128,half:.4}}]},
+ {name:'Flick the Switch',bubble:'Switch off the laser gate!',clue:'Hit the green switch to disable the red security gate.',hint:'Reach the switch at the top first, then travel through the now-green laser line.',goal:{x:699,y:405},switch:{x:456,y:105},walls:[{x:270,y:274,w:106,h:190,type:'crate'},{x:421,y:201,w:81,h:91,type:'locker'},{x:93,y:158,w:78,h:101,type:'locker'},{x:589,y:312,w:78,h:60,type:'crate'}],lasers:[{x1:557,y1:202,x2:557,y2:474,gate:true}],guards:[{x:670,y:240,r:55,kind:'watch',vision:{range:135,half:.4,look:-2.55,sweep:.45}}]},
+ {name:'Double Wrap',bubble:'Two reels, then slide the bolt!',clue:'Hug BOTH reel edges, weave around furniture, and avoid security.',hint:'Wind both reels, then pull the green bolt right along its track near the top before taking the loot.',slider:{x:565,y:89,to:628},goal:{x:706,y:423},spools:[{x:318,y:250,r:25,turn:3.15},{x:526,y:256,r:25,turn:3.15}],walls:[{x:269,y:75,w:85,h:82,type:'crate'},{x:411,y:391,w:103,h:73,type:'locker'},{x:142,y:161,w:73,h:68,type:'crate'},{x:602,y:380,w:61,h:63,type:'locker'}],lasers:[{x1:655,y1:48,x2:655,y2:232}],guards:[{x:666,y:320,r:51,kind:'watch',vision:{range:72,half:.42,look:-2.45,sweep:.4}}]},
+ {name:'Midnight Museum',bubble:'Reel → switch → key → gem!',clue:'Wrap the reel, switch off security, grab the key, then take the diamond!',hint:'Loop the blue post, touch the green switch up top and collect the key below. Then follow the open passage ABOVE the final display to the diamond.',goal:{x:698,y:318},key:{x:453,y:363},switch:{x:488,y:102},spools:[{x:355,y:248,r:26,turn:3.15}],walls:[{x:241,y:70,w:87,h:79,type:'crate'},{x:531,y:210,w:88,h:86,type:'locker'},{x:598,y:351,w:71,h:105,type:'crate'}],lasers:[{x1:562,y1:344,x2:562,y2:480,gate:true}],guards:[{x:630,y:149,r:47,kind:'patrol',patrol:{dx:53,dy:0,speed:.00085},vision:{range:115,half:.4}}]}
 
 ];
 const $=id=>document.getElementById(id),scene=$('scene'),board=$('board'),staticLayer=$('static'),actors=$('actors'),roomDecor=$('roomDecor'),cameraCone=$('cameraCone'),arm=$('arm'),armOutline=$('armOutline'),armShadow=$('armShadow'),highlight=$('armHighlight'),handGroup=$('handGroup'),targetGroup=$('targetGroup'),effects=$('effects'),stolen=$('stolen');
 let unlocked=1;try{unlocked=Math.max(1,Math.min(LEVELS.length,Number(localStorage.getItem(SAVE))||1))}catch{}
 let lastInput={...START},wheelContact=null,lastGripSound=0,lastWindSound=0;
-let level=0,points=[],mode='ready',attempt=0,keyTaken=false,switchOn=false,spoolStates=[],grabbed=false,activePointer=null,cameraAngle=0,lastTime=0,edgeSide='',lastEdgeSound=0,winAnimation=0,clock=0;
+let level=0,points=[],mode='ready',attempt=0,keyTaken=false,switchOn=false,spoolStates=[],slideState={progress:0,gripped:false,done:false,tick:0},decoyTriggered=false,distractedUntil=0,guardStates=[],grabbed=false,activePointer=null,cameraAngle=0,lastTime=0,edgeSide='',lastEdgeSound=0,winAnimation=0,clock=0,bubbleTimer=0;
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),segDist=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,d=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/d));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)};
 const svg=(tag,attrs={})=>{let e=document.createElementNS(NS,tag);for(let [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e};
 const piece=(content,attrs)=>{let el=svg('g',attrs);el.innerHTML=content;return el};
@@ -191,7 +205,7 @@ function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';actors.innerH
  for(let [i,g] of (L.guards||[]).entries()){
   const asleep=g.kind==='sleep'||(level===2&&!g.kind),walking=Boolean(g.patrol);
   const unit=piece(`<g class="guard-unit ${asleep?'sleeping':''} ${walking?'walking':''}" data-guard="${i}">
-   <circle r="${g.r}" fill="#ff6f81" opacity=".115"/><circle r="${g.r}" fill="none" stroke="#eb7380" stroke-width="4" stroke-dasharray="9 8"/>
+   ${asleep?`<circle r="${g.r}" fill="#ff6f81" opacity=".115"/><circle r="${g.r}" fill="none" stroke="#eb7380" stroke-width="4" stroke-dasharray="9 8"/>`:`<path class="watch-cone" d=""/><circle r="35" fill="#ff877c" opacity=".10"/>`}
    <g class="guard-body">
     <ellipse cy="35" rx="38" ry="10" fill="#463b61" opacity=".18"/>
     <g class="guard-boot left"><path d="M-16 19v18m-1 -2h-13" fill="none" stroke="#303c60" stroke-width="9" stroke-linecap="round"/></g>
@@ -199,21 +213,23 @@ function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';actors.innerH
     <path d="M-26 25Q-31 2 -20 -9L20 -9Q32 3 26 25Z" fill="${walking?'#417fa0':'#566d96'}" stroke="#27344d" stroke-width="4"/>
     <path d="M-23 5L-35 19M23 5L34 19" stroke="#27344d" stroke-width="9" stroke-linecap="round"/>
     <rect x="-28" y="22" width="56" height="7" rx="3" fill="#303d59"/>
-    <rect x="-17" y="-15" width="34" height="27" rx="11" fill="#f5c5a2" stroke="#383e54" stroke-width="2.5"/>
+    <g class="guard-head"><rect x="-17" y="-15" width="34" height="27" rx="11" fill="#f5c5a2" stroke="#383e54" stroke-width="2.5"/>
     <path d="M-27 -22Q-30 -41 0 -41Q30 -41 27 -22L32 -18Q0 -12 -32 -18Z" fill="#38476d" stroke="#26334e" stroke-width="3"/>
     <rect x="-11" y="-37" width="22" height="12" rx="5" fill="#f8d77e"/><path d="M-8 -31h16" stroke="#ab8d3e" stroke-width="2"/>
     ${asleep?`<path d="M-13 -3q6 -5 11 0M5 -3q5 -5 10 0" stroke="#563f53" stroke-width="3" fill="none" stroke-linecap="round"/>`:`<g class="guard-eyes"><circle cx="-8" cy="-3" r="3" fill="#30314c"/><circle cx="9" cy="-3" r="3" fill="#30314c"/></g><g class="guard-blink"><path d="M-13 -3h10M5 -3h10" stroke="#5b3d47" stroke-width="3.5" stroke-linecap="round"/></g>`}
     <path d="M-2 7h6" stroke="#95635b" stroke-width="2.5" stroke-linecap="round"/>
     <rect x="-11" y="11" width="11" height="8" rx="2" fill="#eacb72"/>
-    <circle cx="22" cy="4" r="5" fill="#eddaa1"/>
+    <circle cx="22" cy="4" r="5" fill="#eddaa1"/></g>
    </g>
    ${asleep?`<g class="guard-z" fill="#8066c3" font-family="system-ui" font-weight="900"><text x="32" y="-53" font-size="18">Z</text><text x="49" y="-69" font-size="26">z</text></g>`:''}
    ${walking?`<g class="watch-turn"><path d="M25 -12q15 -13 27 1" fill="none" stroke="#e5b66d" stroke-width="5"/><circle cx="53" cy="-13" r="7" fill="#fff4b6"/></g>`:''}
+   <g class="guard-thought"><rect x="14" y="${-g.r-54}" width="71" height="33" rx="14" fill="#fffef9" stroke="#d8b3a0" stroke-width="3"/><path d="M25 ${-g.r-21}l-3 11 14 -11" fill="#fffef9" stroke="#d8b3a0" stroke-width="2"/><text class="thought-text" x="49" y="${-g.r-32}" text-anchor="middle" font-size="16" font-weight="900" fill="#b97437">?</text></g>
+   <g class="guard-meter"><rect x="-35" y="${g.r+39}" width="70" height="9" rx="5" fill="#fff" stroke="#be8b8d" stroke-width="2"/><rect class="meter-fill" x="-32" y="${g.r+42}" width="0" height="3" rx="2" fill="#f47e57"/></g>
    <g class="alert-sign" opacity="0"><circle cx="43" cy="-51" r="20" fill="#ffebc5" stroke="#fa9767" stroke-width="4"/><text x="43" y="-42" text-anchor="middle" fill="#dd5a55" font-size="29" font-weight="900">!</text></g>
    <rect x="-42" y="${g.r+12}" rx="8" width="84" height="21" fill="#fff" opacity=".94" stroke="#e5c5ce"/>
    <text y="${g.r+27}" text-anchor="middle" font-size="11" font-weight="900" fill="#ab5b6a">${asleep?'SLEEPING':walking?'PATROLLING':'ON DUTY'}</text>
   </g>`);
-  unit.setAttribute('transform',`translate(${g.x} ${g.y})`);
+  // Patrol positioning is applied only to the inner guard group.
   actors.append(unit);
  }
  if(level===LEVELS.length-1){actors.append(piece(`<g class="museum-cat" transform="translate(717 208)" opacity=".88"><path class="tail" d="M-14 20Q-50 17 -39 -15Q-33 -24 -28 -15" fill="none" stroke="#d39b68" stroke-width="13" stroke-linecap="round"/><ellipse cy="19" rx="27" ry="22" fill="#d6ac7c"/><path d="M-22 -11L-24 -35L-7 -22L7 -22L23 -35L21 -11" fill="#d6ac7c" stroke="#987457" stroke-width="2"/><ellipse cy="-3" rx="25" ry="21" fill="#d6ac7c"/><circle cx="-8" cy="-3" r="3" fill="#303347"/><circle cx="8" cy="-3" r="3" fill="#303347"/><path d="M-3 7l3 4 3 -4" fill="#a65d6b"/><path d="M-9 12l-23 -4M9 12l23 -4" stroke="#8b705d" stroke-width="2"/></g>`))}
@@ -230,6 +246,17 @@ function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';actors.innerH
   </g>`);
   staticLayer.append(e);
  }
+ if(L.slider){let q=L.slider,w=q.to-q.x;staticLayer.append(piece(`<g class="slide-unit" data-slide="1">
+  <rect x="${q.x-20}" y="${q.y-27}" width="${w+40}" height="69" rx="19" fill="#d2e9ed" stroke="#9fbfc8" stroke-width="3"/>
+  <path d="M${q.x} ${q.y}H${q.to}" stroke="#587e9b" stroke-width="17" stroke-linecap="round"/>
+  <path d="M${q.x} ${q.y}H${q.to}" stroke="#b9f6e5" stroke-width="7" stroke-linecap="round" stroke-dasharray="8 8"/>
+  <path class="slide-fill" d="M${q.x} ${q.y}H${q.x}" stroke="#4bd39d" stroke-width="12" stroke-linecap="round"/>
+  <g class="slide-handle" transform="translate(${q.x} ${q.y})"><circle r="22" fill="#4ebdb4" stroke="#356b83" stroke-width="5"/><circle r="11" fill="#fff2bf"/><path d="M-4 -1l5 5 8 -10" stroke="#447c73" stroke-width="3" fill="none"/></g>
+  <text x="${(q.x+q.to)/2}" y="${q.y+31}" font-size="11" text-anchor="middle" font-weight="900" fill="#477e91" class="slide-caption">➜ PULL RIGHT</text>
+ </g>`))}
+ if(L.decoy){let k=L.decoy;staticLayer.append(piece(`<g class="decoy-unit" data-decoy="1"><circle class="decoy-halo" cx="${k.x}" cy="${k.y}" r="36" fill="#ffd482" opacity=".3"/>
+ <circle cx="${k.x}" cy="${k.y}" r="27" fill="#ffdc75" stroke="#a67b36" stroke-width="4"/>
+ <text x="${k.x}" y="${k.y+11}" text-anchor="middle" font-size="29">🔔</text><text x="${k.x}" y="${k.y+47}" text-anchor="middle" fill="#a47b38" font-size="11" font-weight="900">RING DECOY</text></g>`))}
  if(L.camera){let c=L.camera;staticLayer.append(piece(`<path d="M${c.x-29} ${c.y-32}h58v48h-58z" rx="8" fill="#4f597f" stroke="#313652" stroke-width="3"/>
  <rect x="${c.x-20}" y="${c.y-22}" width="40" height="9" rx="4" fill="#a6b3d1"/>
  <circle cx="${c.x}" cy="${c.y}" r="19" fill="#d2d7ed" stroke="#515579" stroke-width="6"/>
@@ -240,7 +267,7 @@ function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';actors.innerH
 }
 function updateTargets(){
  let L=LEVELS[level];targetGroup.innerHTML='';let t=L.goal;
- let locked=(L.key&&!keyTaken)||(L.switch&&!switchOn)||(L.spools&&spoolStates.some(x=>!x.done));
+ let locked=(L.key&&!keyTaken)||(L.switch&&!switchOn)||(L.spools&&spoolStates.some(x=>!x.done))||(L.slider&&!slideState.done)||(L.decoy&&!decoyTriggered);
  targetGroup.append(piece(`<g class="treasure-spark"><path d="M${t.x-29} ${t.y-35}l4 -10 4 10 10 4 -10 4 -4 10 -4 -10 -10 -4Z" fill="#f5ba45"/><circle cx="${t.x+37}" cy="${t.y-24}" r="4" fill="#ffe98a"/></g><circle cx="${t.x}" cy="${t.y}" r="36" fill="${locked?'#c8bfe3':'#f9d76d'}" opacity=".31"/><circle cx="${t.x}" cy="${t.y}" r="29" fill="${locked?'#eceaf5':'#fff6d3'}" stroke="${locked?'#b1a8cb':'#e7c65e'}" stroke-width="3"/><text x="${t.x}" y="${t.y+13}" font-size="37" text-anchor="middle">${locked?'🔒':level===4||level===9?'💎':'💰'}</text>`));
  if(L.key&&!keyTaken){let k=L.key;targetGroup.append(piece(`<circle cx="${k.x}" cy="${k.y}" r="30" fill="#fff0a5" stroke="#e2c762" stroke-width="3"/><text x="${k.x}" y="${k.y+12}" font-size="35" text-anchor="middle">🔑</text>`))}
  if(level===LEVELS.length-1&&!locked){targetGroup.append(piece(`<g opacity=".76"><path d="M552 322 Q621 320 666 317" fill="none" stroke="#4ebf94" stroke-width="5" stroke-linecap="round" stroke-dasharray="5 12"/><path d="M656 304l14 13 -15 13" fill="none" stroke="#4ebf94" stroke-width="5" stroke-linejoin="round"/></g>`))}
@@ -248,20 +275,78 @@ function updateTargets(){
 }
 function pendingTasks(){let L=LEVELS[level],todo=[];
  if(L.spools&&spoolStates.some(p=>!p.done))todo.push(`reels ${spoolStates.filter(p=>p.done).length}/${spoolStates.length}`);
- if(L.switch&&!switchOn)todo.push('switch');if(L.key&&!keyTaken)todo.push('key');return todo;
+ if(L.slider&&!slideState.done)todo.push('slide bolt');if(L.decoy&&!decoyTriggered)todo.push('ring bell');if(L.switch&&!switchOn)todo.push('switch');if(L.key&&!keyTaken)todo.push('key');return todo;
 }
 function taskMessage(){let todo=pendingTasks();return todo.length?'🔒 Still needed: '+todo.join(' · '):'🔓 All security cleared! Grab the treasure.'}
 function guardPos(g,t){let p=g.patrol;if(!p)return{x:g.x,y:g.y};return{x:g.x+Math.sin(t*p.speed+(p.phase||0))*p.dx,y:g.y+(Math.cos(t*p.speed+(p.phase||0))-1)*(p.dy||0)}}
+function guardFacing(g,t){const v=g.vision||{},s=g.patrol;
+ if(s){const forward=Math.cos(t*s.speed+(s.phase||0))>0;return(forward?0:Math.PI)+.12*Math.sin(t*.002)}
+ return (v.look??Math.PI)+Math.sin(t*.0009)*(.35+(v.sweep||0));
+}
+function lineOfSight(a,b){const steps=Math.ceil(dist(a,b)/8);for(let i=1;i<steps;i++){
+ const x=a.x+(b.x-a.x)*i/steps,y=a.y+(b.y-a.y)*i/steps;
+ if(LEVELS[level].walls.some(w=>x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h))return false;
+ }return true}
+function guardSeesPoint(g,p,t){if(!g.vision||t<distractedUntil)return false;
+ const loc=guardPos(g,t),d=dist(loc,p);if(d>g.vision.range||d<1)return false;
+ const facing=guardFacing(g,t),a=Math.atan2(p.y-loc.y,p.x-loc.x),delta=Math.atan2(Math.sin(a-facing),Math.cos(a-facing));
+ return Math.abs(delta)<g.vision.half&&lineOfSight(loc,p);
+}
 function updatePatrols(t){let L=LEVELS[level];for(let [i,g] of (L.guards||[]).entries()){
- if(!g.patrol)continue;let p=guardPos(g,t),node=actors.querySelector(`[data-guard="${i}"]`);
- if(node){node.setAttribute('transform',`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);node.setAttribute('data-heading',Math.cos(t*g.patrol.speed)>0?'right':'left')}
+ let p=guardPos(g,t),node=actors.querySelector(`[data-guard="${i}"]`);if(!node)continue;
+ node.setAttribute('transform',`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+ if(g.patrol)node.setAttribute('data-heading',Math.cos(t*g.patrol.speed)>0?'right':'left');
+ if(g.vision){const cone=node.querySelector('.watch-cone'),dir=guardFacing(g,t),fov=g.vision.half,r=g.vision.range;
+  let d='M0 0';for(let j=0;j<=18;j++){let a=dir-fov+2*fov*j/18;let end=r;
+   for(let k=8;k<=r;k+=8){let x=p.x+k*Math.cos(a),y=p.y+k*Math.sin(a);
+    if(x<20||x>W-20||y<20||y>H-20||L.walls.some(w=>x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h)){end=k-8;break}
+   }d+=`L${(end*Math.cos(a)).toFixed(1)} ${(end*Math.sin(a)).toFixed(1)}`;
+  }cone.setAttribute('d',d+'Z');
+  const distracted=t<distractedUntil;node.classList.toggle('distracted',distracted);
+  if(distracted)node.querySelector('.thought-text').textContent='♫ ?';
+ }
 }}
+function updateAwareness(t,dt){if(mode!=='drawing')return;
+ for(let [i,g] of (LEVELS[level].guards||[]).entries()){
+  if(!g.vision)continue;const st=guardStates[i],node=actors.querySelector(`[data-guard="${i}"]`);
+  let visible=false;const stride=Math.max(2,Math.ceil(points.length/240));
+  for(let j=points.length-1;j>=0;j-=stride){if(guardSeesPoint(g,points[j],t)){visible=true;break}}
+  st.alert=Math.max(0,Math.min(1.08,st.alert+(visible?dt/820:-dt/640)));
+  node?.classList.toggle('suspicious',st.alert>.12&&t>=distractedUntil);
+  const meter=node?.querySelector('.meter-fill');if(meter)meter.setAttribute('width',String(Math.round(64*Math.min(1,st.alert))));
+  const thought=node?.querySelector('.thought-text');if(thought&&t>=distractedUntil)thought.textContent=st.alert>.62?'WHO?!':'?';
+  if(visible&&st.alert>.13&&!st.noticed){st.noticed=true;playSound('notice');say('A guard noticed something! Slip out of the spotlight.',true,2300)}
+  if(st.alert<.08)st.noticed=false;
+  if(st.alert>=1){fail('A watchful guard sounded the alarm!','guard',guardPos(g,t));return}
+ }
+}
 function updateGates(){let L=LEVELS[level];for(let [i,gate] of (L.lasers||[]).entries())if(gate.gate){let n=staticLayer.querySelector(`[data-laser="${i}"]`);if(!n)continue;
  n.style.opacity=switchOn?'.32':'1';n.querySelectorAll('line').forEach(el=>el.setAttribute('stroke',switchOn?'#48ba8b':el.getAttribute('stroke')));
  n.querySelectorAll('circle').forEach(el=>el.setAttribute('fill',switchOn?'#80dcc6':el.getAttribute('fill')));
 }}
 function updateSpoolArt(i){const el=staticLayer.querySelector(`[data-spool="${i}"]`);if(el){el.classList.add('finished');const cap=el.querySelector('.spool-caption');if(cap)cap.textContent='✓ LINKED'}}
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+function guideToSlide(p){let k=LEVELS[level].slider;if(!k||slideState.done)return p;
+ const inRail=Math.abs(p.y-k.y)<37&&p.x>=k.x-25&&p.x<=k.to+30;
+ if(!slideState.gripped&&Math.hypot(p.x-(k.x+(k.to-k.x)*slideState.progress),p.y-k.y)<31){
+  slideState.gripped=true;staticLayer.querySelector('.slide-unit')?.classList.add('gripping');playSound('grip');say('Got it! Pull the bolt to the right ➜',true,2000);
+ }
+ if(!slideState.gripped)return p;
+ if(!inRail){slideState.gripped=false;staticLayer.querySelector('.slide-unit')?.classList.remove('gripping');return p}
+ return{x:clamp(p.x,k.x,k.to),y:k.y};
+}
+function checkSlide(p){let k=LEVELS[level].slider;if(!k||slideState.done||!slideState.gripped)return;
+ const progress=clamp((p.x-k.x)/(k.to-k.x),0,1);if(progress>slideState.progress)slideState.progress=progress;
+ let e=staticLayer.querySelector('.slide-unit');e?.querySelector('.slide-handle')?.setAttribute('transform',`translate(${(k.x+(k.to-k.x)*slideState.progress).toFixed(1)} ${k.y})`);
+ e?.querySelector('.slide-fill')?.setAttribute('d',`M${k.x} ${k.y}H${(k.x+(k.to-k.x)*slideState.progress).toFixed(1)}`);
+ if(Math.floor(progress*5)>slideState.tick){slideState.tick=Math.floor(progress*5);playSound('slide')}
+ if(slideState.progress>.975){slideState.done=true;slideState.gripped=false;e?.classList.add('finished');e?.classList.remove('gripping');e?.querySelector('.slide-caption')&&(e.querySelector('.slide-caption').textContent='✓ BOLT OPEN');playSound('latch');burst(k.to,k.y,'#56ce9e');updateTargets();say('Click! The bolt is open. Sneak to the treasure!',true,2900);status(`🔓 Bolt unlocked! ${taskMessage()}`)}
+}
+function ringDecoy(p){const k=LEVELS[level].decoy;if(!k||dist(p,k)>28||decoyTriggered)return;
+ decoyTriggered=true;distractedUntil=clock+(k.duration||4300);guardStates.forEach(st=>{st.alert=0;st.noticed=false});
+ staticLayer.querySelector('.decoy-unit')?.classList.add('playing');playSound('decoy');burst(k.x,k.y,'#edbc5b');updateTargets();
+ say('Ding-ding! The guards are distracted. Go!',true,2800);status(`🔔 Distraction started! ${taskMessage()}`);
+}
 function guideToWheel(raw){
  const reels=LEVELS[level].spools||[];
  let chosen=-1,best=Infinity;
@@ -310,7 +395,7 @@ function checkSpools(p,prev){let L=LEVELS[level];if(!L.spools)return;
   st.last=angle;
   if(Math.abs(st.arc)>=sp.turn){
    st.done=true;updateSpoolArt(i);updateTargets();playSound('reel');burst(sp.x,sp.y,'#53c99f');
-   status(`🌀 Reel ${i+1} unlocked! ${taskMessage()}`);
+   status(`🌀 Reel ${i+1} unlocked! ${taskMessage()}`);say(`Reel ${i+1} unlocked! ${taskMessage()}`,true,2450);
   }
  }
 }
@@ -348,10 +433,14 @@ function redraw(){
 function status(msg,kind=''){ $('noticeText').textContent=msg;$('notice').className='notice '+kind;$('attempts').textContent=attempt?`${attempt} ${attempt===1?'try':'tries'}`:''}
 function choose(n){if(n>=unlocked)return;level=n;attempt=0;load()}
 function updateLevelButtons(){let e=$('levels');e.innerHTML='';LEVELS.forEach((L,i)=>{let b=document.createElement('button');b.type='button';b.className='level'+(level===i?' active':'');b.disabled=i>=unlocked;b.textContent=i<unlocked?`✦ ${i+1}`:`🔒 ${i+1}`;b.setAttribute('aria-label',`Level ${i+1}: ${L.name}${i>=unlocked?' locked':''}`);if(i===level)b.setAttribute('aria-current','step');b.onclick=()=>choose(i);e.append(b)});requestAnimationFrame(()=>{let b=e.children[level];if(b)e.scrollLeft=Math.max(0,b.offsetLeft-e.offsetLeft-e.clientWidth/2+b.clientWidth/2)})}
-function load(){if(winAnimation)cancelAnimationFrame(winAnimation);winAnimation=0;points=[{...START}];lastInput={...START};wheelContact=null;$('thief').classList.remove('celebrating');mode='ready';keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));grabbed=false;activePointer=null;edgeSide='';stolen.innerHTML='';effects.innerHTML='';board.classList.remove('alarm');$('winpanel').classList.remove('show');$('levelTitle').textContent=`${level+1} / ${LEVELS.length} · ${LEVELS[level].name}`;$('levelClue').textContent=LEVELS[level].clue;status(LEVELS[level].spools?'👆 Drag from your glove, then curl AROUND each blue reel.':'👆 Start on the glowing glove. Touching an edge just bounces!');$('boardTip').textContent=(LEVELS[level].spools?'🧲 Arm hugs the blue reel':'↗ Draw around the traps');drawStatic();redraw();updateLevelButtons();$('next').textContent=level===LEVELS.length-1?'Play again ↻':'Next mission →'}
+function say(message,tip=false,duration=0){
+ const bubble=$('speech');bubble.classList.toggle('tip',tip);$('bubbleSpeaker').textContent=tip?'💡 SNEAKY TIP':'🕵️ SNEAKY SAYS';$('bubbleText').textContent=message;
+ clearTimeout(bubbleTimer);if(duration)bubbleTimer=setTimeout(()=>{if(mode!=='win'&&mode!=='failed')say(LEVELS[level].bubble||LEVELS[level].clue)},duration);
+}
+function load(){if(winAnimation)cancelAnimationFrame(winAnimation);winAnimation=0;points=[{...START}];lastInput={...START};wheelContact=null;$('thief').classList.remove('celebrating');mode='ready';keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));slideState={progress:0,gripped:false,done:false,tick:0};decoyTriggered=false;distractedUntil=0;guardStates=(LEVELS[level].guards||[]).map(()=>({alert:0,noticed:false}));grabbed=false;activePointer=null;edgeSide='';stolen.innerHTML='';effects.innerHTML='';board.classList.remove('alarm');$('winpanel').classList.remove('show');$('next').classList.remove('available');$('levelTitle').textContent=`${level+1} / ${LEVELS.length} · ${LEVELS[level].name}`;say(LEVELS[level].bubble||LEVELS[level].clue);status(LEVELS[level].spools?'👆 Drag from your glove, then curl AROUND each blue reel.':'👆 Start on the glowing glove. Touching an edge just bounces!');drawStatic();redraw();updateLevelButtons();$('next').textContent=level===LEVELS.length-1?'Play again ↻':'Next mission →'}
 function fail(reason,kind='obstacle',location=points.at(-1)||START){
  if(mode!=='drawing')return;
- mode='failed';activePointer=null;edgeSide='';
+ mode='failed';activePointer=null;edgeSide='';say(reason,true); 
  const alarm=kind!=='wall';status(`${alarm?'🚨':'🧱'} ${reason} Tap Try again.`, 'fail');
  if(alarm){board.classList.remove('alarm');void board.offsetWidth;board.classList.add('alarm')}
  if(kind==='guard'){
@@ -372,11 +461,11 @@ function hit(p,L){
  for(let w of L.walls)if(p.x>w.x-ARM_R&&p.x<w.x+w.w+ARM_R&&p.y>w.y-ARM_R&&p.y<w.y+w.h+ARM_R)return{msg:'The arm bumped a solid object!',kind:'wall'};
  for(let sp of L.spools||[])if(dist(p,sp)<sp.r+ARM_R)return{msg:'The reel is solid! Loop AROUND its blue ring.',kind:'wall'};
  for(let laser of L.lasers||[])if(!(laser.gate&&switchOn)&&segDist(p,{x:laser.x1,y:laser.y1},{x:laser.x2,y:laser.y2})<ARM_R+8)return{msg:'A laser beam set off the alarm!',kind:'laser'};
- for(let g of L.guards||[])if(dist(p,guardPos(g,clock))<g.r+ARM_R)return{msg:'A guard caught your sneaky arm!',kind:'guard'};
+ for(let g of L.guards||[])if(dist(p,guardPos(g,clock))<(g.vision?31:g.r)+ARM_R)return{msg:'A guard caught your sneaky arm!',kind:'guard'};
  if(L.camera&&inCamera(p,L.camera))return{msg:'The camera spotted your arm!',kind:'camera'};
  return null;
 }
-function hitGuardsOnly(p){for(let g of LEVELS[level].guards||[])if(dist(p,guardPos(g,clock))<g.r+ARM_R)return{msg:'The patrolling guard spotted your arm!',kind:'guard'};return null}
+function hitGuardsOnly(p){for(let g of LEVELS[level].guards||[])if(dist(p,guardPos(g,clock))<(g.vision?31:g.r)+ARM_R)return{msg:'You touched a guard!','kind':'guard'};return null}
 function edgeBump(p,side){
  const now=performance.now();
  if(edgeSide===side && now-lastEdgeSound<650)return;
@@ -386,7 +475,7 @@ function edgeBump(p,side){
  let n=piece(`<circle class="edge-ripple" cx="${p.x}" cy="${p.y}" r="21" fill="none" stroke="#a47afb" stroke-width="5"/>
  <g class="edge-label"><text x="${Math.max(68,Math.min(W-68,p.x))}" y="${Math.max(45,p.y-23)}" font-size="22" font-weight="900" text-anchor="middle" fill="#7955c7" stroke="white" stroke-width="4" paint-order="stroke">boing!</text></g>`);
  effects.append(n);setTimeout(()=>n.remove(),710);
- $('boardTip').textContent='✨ Edge bounce! Keep going';status('✨ Boing! That edge is harmless — keep stretching.', 'edge');
+ say('Boing! The edges are safe. Keep stretching!',true,1600);status('✨ Boing! That edge is harmless — keep stretching.', 'edge');
  playSound('boing');
  arm.closest('#armGroup').classList.remove('edge-bump');void arm.closest('#armGroup').getBoundingClientRect();arm.closest('#armGroup').classList.add('edge-bump');
 }
@@ -394,7 +483,7 @@ function clampToRoom(p){
  const x=Math.max(EDGE,Math.min(W-EDGE,p.x)),y=Math.max(EDGE,Math.min(H-EDGE,p.y));
  const side=(p.x<EDGE?'L':p.x>W-EDGE?'R':'')+(p.y<EDGE?'T':p.y>H-EDGE?'B':'');
  if(side)edgeBump({x,y},side);
- else if(edgeSide){edgeSide='';$('boardTip').textContent=LEVELS[level].spools?'🌀 Loop around blue reels':'↗ Draw around the traps'};
+ else if(edgeSide){edgeSide=''};
  return{x,y};
 }
 function inCamera(p,c){let d=dist(p,c);if(d>c.r+ARM_R)return false;let angle=Math.atan2(p.y-c.y,p.x-c.x);if(Math.abs(Math.atan2(Math.sin(angle-cameraAngle),Math.cos(angle-cameraAngle)))>=c.half+.025)return false;const walls=LEVELS[level].walls,steps=Math.ceil(d/10);for(let i=1;i<steps;i++){let x=c.x+(p.x-c.x)*i/steps,y=c.y+(p.y-c.y)*i/steps;if(walls.some(w=>x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h))return false}return true}
@@ -404,26 +493,26 @@ function sampleOnDrag(raw){
  for(let i=1;i<=steps;i++){
   if(mode!=='drawing')break;
   const input={x:from.x+(aim.x-from.x)*i/steps,y:from.y+(aim.y-from.y)*i/steps};
-  const prev=points.at(-1),next=guideToWheel(input);
+  const prev=points.at(-1),next=guideToSlide(guideToWheel(input));
   if(dist(prev,next)<.8)continue;
   let problem=segmentBlocked(prev,next);
   if(problem){fail(problem.msg,problem.kind,problem.point);redraw();break}
-  points.push(next);checkSpools(next,prev);
+  points.push(next);checkSpools(next,prev);checkSlide(next);ringDecoy(next);
   if(points.length>3800){points=points.filter((_,j)=>j===0||j===points.length-1||j%2===0)}
   let L=LEVELS[level];
-  if(L.key&&!keyTaken&&dist(next,L.key)<29){keyTaken=true;updateTargets();status(`🔑 Key collected! ${taskMessage()}`);playSound('key');burst(L.key.x,L.key.y)}
-  if(L.switch&&!switchOn&&dist(next,L.switch)<30){switchOn=true;updateGates();updateTargets();status(`🟢 Security gate OFF! ${taskMessage()}`);playSound('switch');burst(L.switch.x,L.switch.y)}
-  if(dist(next,L.goal)<28){if(pendingTasks().length){status(taskMessage())}else{redraw();win();break}}
+  if(L.key&&!keyTaken&&dist(next,L.key)<29){keyTaken=true;updateTargets();status(`🔑 Key collected! ${taskMessage()}`);say(`Got the key! ${taskMessage()}`,true,2300);playSound('key');burst(L.key.x,L.key.y)}
+  if(L.switch&&!switchOn&&dist(next,L.switch)<30){switchOn=true;updateGates();updateTargets();status(`🟢 Security gate OFF! ${taskMessage()}`);say('Gate switched off! '+taskMessage(),true,2400);playSound('switch');burst(L.switch.x,L.switch.y)}
+  if(dist(next,L.goal)<28){if(pendingTasks().length){status(taskMessage());say(taskMessage(),true,1800)}else{redraw();win();break}}
  }
  lastInput={...aim};redraw();
 }
 function position(ev){let r=scene.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*W,y:(ev.clientY-r.top)/r.height*H}}
-scene.addEventListener('pointerdown',ev=>{if(mode==='win')return;let p=position(ev);if(mode==='failed'){status('↻ Tap Try again to reset your arm.','fail');return}if(mode==='ready'){if(dist(p,START)>65){status('👆 Touch the glowing glove beside the thief to start.');return}mode='drawing';attempt++;points=[{...START}];lastInput={...START};wheelContact=null;playSound('start');status('🤫 Weave around obstacles and security. Edges just bounce!')}else if(mode!=='drawing')return;activePointer=ev.pointerId;scene.setPointerCapture(ev.pointerId);sampleOnDrag(p);ev.preventDefault()});
+scene.addEventListener('pointerdown',ev=>{if(mode==='win')return;let p=position(ev);if(mode==='failed'){status('↻ Tap Try again to reset your arm.','fail');return}if(mode==='ready'){if(dist(p,START)>65){status('👆 Touch the glowing glove beside the thief to start.');return}mode='drawing';attempt++;points=[{...START}];lastInput={...START};wheelContact=null;playSound('start');say('Careful... guards will notice if you stay in their sight!',false,2800);status('🤫 Weave around obstacles and security. Edges just bounce!')}else if(mode!=='drawing')return;activePointer=ev.pointerId;scene.setPointerCapture(ev.pointerId);sampleOnDrag(p);ev.preventDefault()});
 scene.addEventListener('pointermove',ev=>{if(mode!=='drawing'||activePointer!==ev.pointerId)return;sampleOnDrag(position(ev));ev.preventDefault()});
-function release(ev){if(ev.pointerId!==activePointer)return;activePointer=null;edgeSide='';wheelContact=null;lastInput={...START};if(mode==='drawing'){mode='ready';points=[{...START}];keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));drawStatic();redraw();status('↻ You let go! Start at the glove and draw in ONE motion.')}}
+function release(ev){if(ev.pointerId!==activePointer)return;activePointer=null;edgeSide='';wheelContact=null;lastInput={...START};if(mode==='drawing'){mode='ready';points=[{...START}];keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));drawStatic();redraw();slideState={progress:0,gripped:false,done:false,tick:0};decoyTriggered=false;distractedUntil=0;guardStates=(LEVELS[level].guards||[]).map(()=>({alert:0,noticed:false}));say('Draw in one motion to reach the treasure!',true,2500);status('↻ You let go! Start at the glove and draw in ONE motion.')}}
 scene.addEventListener('pointerup',release);scene.addEventListener('pointercancel',release);
 function win(){board.classList.remove('success');void board.offsetWidth;board.classList.add('success');mode='win';grabbed=true;activePointer=null;let last=points.at(-1);let loot=svg('text',{x:last.x,y:last.y+9,'text-anchor':'middle','font-size':29});loot.textContent=level===4||level===9?'💎':'💰';stolen.append(loot);targetGroup.innerHTML='';let duration=1150,start=performance.now(),original=points.slice();function retract(t){let fraction=Math.max(0,Math.min(1,(t-start)/duration)),idx=Math.max(0,Math.min(original.length-1,Math.floor((1-fraction)*(original.length-1)))),p=original[idx];let shortened=original.slice(0,idx+1);points=shortened;redraw();loot.setAttribute('x',p.x);loot.setAttribute('y',p.y+9);if(fraction<1){winAnimation=requestAnimationFrame(retract)}else{winAnimation=0;stolen.innerHTML='';complete()}}winAnimation=requestAnimationFrame(retract);playSound('win')}
-function complete(){$('thief').classList.add('celebrating');burst(120,388,'#e9b44c');if(level===unlocked-1&&unlocked<LEVELS.length){unlocked++;try{localStorage.setItem(SAVE,String(unlocked))}catch{}}updateLevelButtons();let final=level===LEVELS.length-1;status(final?'🏆 You mastered every Sneaky Paws mission!':'✨ Treasure secured. Nobody noticed!', 'win');$('winTitle').textContent=final?'🏆 Master thief!':'✨ Perfectly sneaky!';$('winText').textContent=final?'You solved all ten puzzles!':'The treasure is safe in your pocket.';$('winpanel').classList.add('show')}
+function complete(){$('thief').classList.add('celebrating');burst(120,388,'#e9b44c');if(level===unlocked-1&&unlocked<LEVELS.length){unlocked++;try{localStorage.setItem(SAVE,String(unlocked))}catch{}}updateLevelButtons();let final=level===LEVELS.length-1;status(final?'🏆 You mastered every Sneaky Paws mission!':'✨ Treasure secured. Nobody noticed!', 'win');$('winTitle').textContent=final?'🏆 Master thief!':'✨ Perfectly sneaky!';$('winText').textContent=final?'You solved all ten puzzles!':'The treasure is safe in your pocket.';$('winpanel').classList.add('show');$('next').classList.add('available');say(final?'All missions complete! You are a master thief!':'Treasure secured! Next mission is beside Try Again.',false)}
 let audioContext=null;let soundEnabled=true;
 function playSound(name){
  if(!soundEnabled)return;
@@ -442,7 +531,11 @@ function playSound(name){
    reel:{notes:[410,600,840],type:'triangle',volume:.046,step:.095,duration:.19},
    start:{notes:[290],type:'sine',volume:.019,step:0,duration:.095},
    reset:{notes:[320,220],type:'triangle',volume:.028,step:.075,duration:.13},
-   hint:{notes:[660,780],type:'sine',volume:.027,step:.07,duration:.13}
+   hint:{notes:[660,780],type:'sine',volume:.027,step:.07,duration:.13},
+   notice:{notes:[380,495],type:'triangle',volume:.026,step:.10,duration:.15},
+   slide:{notes:[345],type:'sine',volume:.016,step:0,duration:.07,sweep:1.08},
+   latch:{notes:[590,760,910],type:'triangle',volume:.04,step:.07,duration:.16},
+   decoy:{notes:[690,860,690],type:'sine',volume:.05,step:.17,duration:.24}
   };
   const sound=options[name]||options.start,t=audioContext.currentTime;
   sound.notes.forEach((f,i)=>{
@@ -455,8 +548,20 @@ function playSound(name){
   });
  }catch{}
 }
-function animate(t){clock=t;updatePatrols(t);if(mode==='drawing'&&t-lastTime>75&&(LEVELS[level].guards||[]).some(g=>g.patrol)){for(let i=0;i<points.length;i+=2){let issue=hitGuardsOnly(points[i]);if(issue){fail(issue.msg,issue.kind,points[i]);break}}}let c=LEVELS[level].camera;if(c){cameraAngle=c.base+Math.sin(t*c.speed)*c.sweep;let r=c.r,a=cameraAngle-c.half,b=cameraAngle+c.half;let sx=c.x+r*Math.cos(a),sy=c.y+r*Math.sin(a),ex=c.x+r*Math.cos(b),ey=c.y+r*Math.sin(b);cameraCone.setAttribute('d',`M${c.x} ${c.y} L${sx} ${sy} A${r} ${r} 0 0 1 ${ex} ${ey} Z`);if(mode==='drawing'&&t-lastTime>75){for(let i=0;i<points.length;i+=2){if(inCamera(points[i],c)){fail('The moving spotlight found you!','camera',points[i]);break}}}}if(t-lastTime>75)lastTime=t;requestAnimationFrame(animate)}
-$('soundToggle').onclick=()=>{soundEnabled=!soundEnabled;$('soundToggle').textContent=soundEnabled?'🔊':'🔇';$('soundToggle').setAttribute('aria-label',soundEnabled?'Mute sound':'Turn sound on');$('soundToggle').setAttribute('aria-pressed',String(!soundEnabled));if(soundEnabled)playSound('boing')};$('reset').onclick=()=>{playSound('reset');load()};$('hint').onclick=()=>{playSound('hint');status(`💡 ${LEVELS[level].hint}`)};$('next').onclick=()=>{if(level===LEVELS.length-1){level=0;attempt=0;load()}else{level++;attempt=0;load()}};window.addEventListener('keydown',ev=>{if(ev.key==='Escape')load();if(ev.key==='Enter'&&mode==='win')$('next').click()});
+function animate(t){
+ const dt=Math.min(100,Math.max(0,t-(clock||t)));clock=t;updatePatrols(t);
+ if(mode==='drawing'&&t-lastTime>52){
+  if((LEVELS[level].guards||[]).some(g=>g.patrol))for(let i=0;i<points.length;i+=Math.max(1,Math.floor(points.length/240))){let issue=hitGuardsOnly(points[i]);if(issue){fail(issue.msg,issue.kind,points[i]);break}}
+  if(mode==='drawing')updateAwareness(t,Math.min(130,t-lastTime));
+ }
+ let c=LEVELS[level].camera;if(c){cameraAngle=c.base+Math.sin(t*c.speed)*c.sweep;let r=c.r,a=cameraAngle-c.half,b=cameraAngle+c.half;
+ let sx=c.x+r*Math.cos(a),sy=c.y+r*Math.sin(a),ex=c.x+r*Math.cos(b),ey=c.y+r*Math.sin(b);
+ cameraCone.setAttribute('d',`M${c.x} ${c.y} L${sx} ${sy} A${r} ${r} 0 0 1 ${ex} ${ey} Z`);
+ if(mode==='drawing'&&t-lastTime>52){for(let i=0;i<points.length;i+=2){if(inCamera(points[i],c)){fail('The moving spotlight found you!','camera',points[i]);break}}}}
+ if(t-lastTime>52)lastTime=t;
+ requestAnimationFrame(animate);
+}
+$('soundToggle').onclick=()=>{soundEnabled=!soundEnabled;$('soundToggle').textContent=soundEnabled?'🔊':'🔇';$('soundToggle').setAttribute('aria-label',soundEnabled?'Mute sound':'Turn sound on');$('soundToggle').setAttribute('aria-pressed',String(!soundEnabled));if(soundEnabled)playSound('boing')};$('reset').onclick=()=>{playSound('reset');load()};$('hint').onclick=()=>{playSound('hint');say(LEVELS[level].hint,true,6500)};$('next').onclick=()=>{if(level===LEVELS.length-1){level=0;attempt=0;load()}else{level++;attempt=0;load()}};window.addEventListener('keydown',ev=>{if(ev.key==='Escape')load();if(ev.key==='Enter'&&mode==='win')$('next').click()});
 load();requestAnimationFrame(animate);
 })();
 </script>
