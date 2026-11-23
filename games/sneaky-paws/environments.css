@@ -1,0 +1,92 @@
+/* Decorative motion uses opacity and transform. All scenery is behind play. */
+#roomDecor {
+  pointer-events: none;
+}
+.env-signal {
+  animation: env-signal 4.8s ease-in-out infinite;
+}
+.env-signal:nth-of-type(even) {
+  animation-delay: -2.3s;
+}
+.env-gear {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: env-turn 25s linear infinite;
+}
+#roomDecor > g:nth-of-type(even) .env-gear {
+  animation-direction: reverse;
+}
+.env-dust {
+  animation: env-drift 7s ease-in-out infinite alternate;
+}
+@keyframes env-signal {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  45% {
+    opacity: 0.48;
+  }
+}
+@keyframes env-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes env-drift {
+  to {
+    transform: translate(5px, -5px);
+  }
+}
+
+/* Existing mechanism state controls the feedback. */
+.spool-unit.finished .spool-ring {
+  stroke: #168562;
+  stroke-dasharray: none;
+}
+.slide-unit.finished .slide-handle circle:first-child {
+  fill: #8bedb9;
+  stroke: #286650;
+}
+.slide-unit.finished .slide-fill {
+  stroke: #278b67;
+}
+.switch-unit.powered .switch-face {
+  animation: env-confirm 0.45s ease-out;
+}
+.laser-gate line[stroke='#48ba8b'] {
+  stroke-dasharray: 3 12;
+}
+.treasure-ready {
+  stroke: #b98436;
+}
+.treasure-locked {
+  stroke: #8f7fae;
+}
+#stolen text {
+  paint-order: stroke;
+  stroke: #fff2bf;
+  stroke-width: 3px;
+}
+#board.success #stolen {
+  animation: env-confirm 0.48s ease-out;
+}
+@keyframes env-confirm {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .env-signal,
+  .env-gear,
+  .env-dust,
+  .switch-unit.powered .switch-face,
+  #board.success,
+  #board.success #stolen {
+    animation: none;
+  }
+}

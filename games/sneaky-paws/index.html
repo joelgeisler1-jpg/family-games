@@ -139,6 +139,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 @keyframes beamFlash{to{opacity:.42}}
 @media(prefers-reduced-motion:reduce){.character-portrait .reaction,.character-portrait[data-mood] .character-bob,.beam-unit.charging{animation:none!important}}
 </style>
+<link rel="stylesheet" href="./environments.css">
 </head>
 <body>
 <main class="shell">
@@ -154,15 +155,12 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
    </div>
    <svg id="scene" viewBox="0 0 780 510" role="img" aria-label="Drag from the thief's glowing hand to the treasure, avoiding obstacles and red danger zones">
     <defs>
-     <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.15" fill="#aba3d1" opacity=".25"/></pattern>
-     <pattern id="floorGrid" width="85" height="85" patternUnits="userSpaceOnUse"><path d="M85 0H0V85" fill="none" stroke="#d6dcf7" stroke-width="1.6" opacity=".55"/></pattern>
-     <linearGradient id="floorPaint" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e6e9fd"/><stop offset=".52" stop-color="#f9f8ff"/><stop offset="1" stop-color="#e9ebfa"/></linearGradient>
      <linearGradient id="armGradient" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#efd7ff"/><stop offset=".5" stop-color="#b995fa"/><stop offset="1" stop-color="#8169db"/></linearGradient>
      <filter id="blur"><feGaussianBlur stdDeviation="6"/></filter>
     </defs>
-    <rect width="780" height="510" fill="url(#floorPaint)"/><rect width="780" height="510" fill="url(#floorGrid)"/><rect width="780" height="510" fill="url(#dots)"/>
-    <rect x="14" y="14" width="752" height="482" rx="20" fill="none" stroke="#c4c6e4" stroke-width="4" stroke-dasharray="8 11" id="borderFrame"/>
-    <g id="roomDecor"></g><g id="scannerFX" class="guide"></g>
+    <g id="roomDecor" aria-hidden="true"></g>
+    <rect x="14" y="14" width="752" height="482" rx="20" fill="none" stroke="#635477" opacity=".28" stroke-width="2" stroke-dasharray="8 11" id="borderFrame"/>
+    <g id="scannerFX" class="guide"></g>
     <path id="cameraCone" fill="#ffc957" opacity=".27" stroke="#f0ae38" stroke-width="2"/><g id="static"></g><g id="actors" class="guide"></g>
     <g id="dynamic"><g id="armGroup"><path id="armShadow" d=""/><path id="armOutline" d=""/><path id="arm" d=""/><path id="armHighlight" d=""/></g><g id="stolen" class="guide"></g></g>
     <g id="thief" class="guide"><ellipse cx="97" cy="465" rx="63" ry="12" fill="#3d3154" opacity=".1"/><path d="M83 414 L87 460 M83 458 L59 481 M86 458 L109 480 M83 420 L60 443" fill="none" stroke="#292239" stroke-width="11" stroke-linecap="round"/><circle cx="81" cy="391" r="26" fill="#292239"/><rect x="58" y="390" width="47" height="16" rx="8" fill="#ebe3ff"/><circle cx="76" cy="399" r="3.5" fill="#292239"/><circle cx="93" cy="399" r="3.5" fill="#292239"/><circle cx="81" cy="377" r="4" fill="#ad98e8"/>
@@ -181,7 +179,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
   <div class="notice" id="notice" role="status" aria-live="polite"><span id="noticeText">👆 Start on the glowing hand and drag to the treasure.</span><span id="attempts"></span></div>
   <div class="winpanel" id="winpanel"><div><b id="winTitle">✨ Treasure secured!</b><p id="winText">Your sneaky arm did it. Choose Next Mission above!</p></div></div>
  </section>
- <div class="legend"><span><i class="dot purple"></i> Purple = solid object</span><span><i class="dot red"></i> Red = security / guard</span><span><i class="dot yellow"></i> Gold = treasure / key</span><span><i class="dot cyan"></i> Wind reels, slide bolts &amp; ring decoys</span><span>✨ Edges bounce — keep drawing!</span></div>
+ <div class="legend"><span><i class="dot purple"></i> Outlined crates and lockers = solid</span><span><i class="dot red"></i> Red = security / guard</span><span><i class="dot yellow"></i> Gold = treasure / key</span><span><i class="dot cyan"></i> Wind reels, slide bolts &amp; ring decoys</span><span>✨ Edges bounce — keep drawing!</span></div>
 </main>
 <script type="module" src="./game.mjs"></script>
 </body></html>
