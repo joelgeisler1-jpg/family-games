@@ -1,6 +1,16 @@
-import { clamp, distance, height, offset, projection, width } from './airfield.js'
+import { clamp, distance, height, offset, width } from './airfield.js'
 
 const spacing = 9
+const snapRadius = 112
+
+// A generous, screen-size-independent magnetic target around the runway gate.
+// Only the aircraft's own runway can be selected by the caller.
+export function runwaySnap(point, runway) {
+  const gate = offset(runway, runway.heading, -17)
+  return distance(point, gate) <= snapRadius
+    ? { gate, lead: offset(runway, runway.heading, -105) }
+    : null
+}
 
 export function extendDraft(points, point) {
   const bounded = { x: clamp(point.x, 4, width - 4), y: clamp(point.y, 4, height - 4) }
@@ -38,19 +48,22 @@ export function planRoute(aircraft, draft, runway) {
   }
   if (points.length < 2) return null
 
-  const gate = offset(runway, runway.heading, -17)
-  const end = draft.at(-1)
-  const cleared = distance(end, gate) <= runway.radius + 10
-  if (cleared) {
-    // Replace the finger's endpoint with an aligned final whenever the route
-    // reached the approach from upstream. Keep intentional go-arounds intact.
-    const lead = offset(runway, runway.heading, -59)
+  const snap = runwaySnap(draft.at(-1), runway)
+  const cleared = Boolean(snap)
+  if (snap) {
+    // Take control of the final approach as soon as the finger comes close to
+    // the correct gate. Remove the hand-drawn squiggle immediately around the
+    // threshold, then join the runway's upstream centreline.
     let join = points.length - 1
-    while (join > 1 && distance(points[join - 1], gate) < 43) join--
+    while (join > 1 && distance(points[join - 1], snap.gate) < snapRadius) join--
     points.splice(join)
+    // Keep the actual aircraft position; guidance never teleports the plane.
     const last = points.at(-1)
-    if (projection(lead, runway, last) < 0.18 && distance(last, lead) > 12) points.push(lead)
-    points.push({ x: runway.x, y: runway.y }, offset(runway, runway.heading, 38))
+    if (distance(last, snap.lead) > 7) points.push(snap.lead)
+    for (const upstream of [75, 47, 17, 0, -38]) {
+      const waypoint = offset(runway, runway.heading, -upstream)
+      if (distance(points.at(-1), waypoint) > 5) points.push(waypoint)
+    }
   }
 
   const softened = [points[0]]
