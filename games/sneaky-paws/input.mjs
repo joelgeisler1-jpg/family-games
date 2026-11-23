@@ -12,8 +12,9 @@ function position(ev) {
   let r = scene.getBoundingClientRect();
   return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H };
 }
-function bindPointerControls({ fail, win }) {
+function bindPointerControls({ fail, win, advance }) {
   scene.addEventListener('pointerdown', (ev) => {
+    advance(ev.timeStamp);
     if (state.mode === 'win') return;
     let p = position(ev);
     if (state.mode === 'failed') {
@@ -49,10 +50,20 @@ function bindPointerControls({ fail, win }) {
   });
   scene.addEventListener('pointermove', (ev) => {
     if (state.mode !== 'drawing' || state.activePointer !== ev.pointerId) return;
-    sampleOnDrag(position(ev), fail, win);
+    // Chrome batches fast moves. Safari follows the same path via the event itself.
+    const coalesced = ev.getCoalescedEvents?.() || [];
+    for (const sample of coalesced) {
+      advance(sample.timeStamp);
+      if (state.mode !== 'drawing') break;
+      sampleOnDrag(position(sample), fail, win, false);
+    }
+    advance(ev.timeStamp);
+    if (state.mode === 'drawing') sampleOnDrag(position(ev), fail, win, false);
     ev.preventDefault();
   });
   function release(ev) {
+    if (ev.pointerId !== state.activePointer) return;
+    advance(ev.timeStamp);
     if (ev.pointerId !== state.activePointer) return;
     state.activePointer = null;
     state.edgeSide = '';

@@ -2,7 +2,7 @@ import { playSound } from './audio.mjs';
 import { setMood } from './characters.mjs';
 import { H, W } from './constants.mjs';
 import { actors, piece } from './dom.mjs';
-import { dist, lineOfSight } from './geometry.mjs';
+import { dist, findArmSegment, lineOfSight, segmentInView } from './geometry.mjs';
 import { LEVELS } from './levels.mjs';
 import { state } from './state.mjs';
 import { say } from './ui.mjs';
@@ -113,22 +113,16 @@ function updateAwareness(t, dt, fail) {
   if (state.mode !== 'drawing') return;
   for (let [i, g] of (LEVELS[state.level].guards || []).entries()) {
     if (!g.vision) continue;
-    const st = state.guardStates[i],
-      node = actors.querySelector(`[data-guard="${i}"]`);
-    let visible = false;
-    const stride = Math.max(2, Math.ceil(state.points.length / 240));
-    for (let j = state.points.length - 1; j >= 0; j -= stride) {
-      if (guardSeesPoint(g, state.points[j], t, LEVELS[state.level].walls, state.distractedUntil)) {
-        visible = true;
-        break;
-      }
-    }
+    const st = state.guardStates[i];
+    const loc = guardPos(g, t);
+    const visible =
+      t >= state.distractedUntil &&
+      findArmSegment(state.points, (a, b) =>
+        segmentInView(a, b, loc, g.vision.range, (p) =>
+          guardSeesPoint(g, p, t, LEVELS[state.level].walls, state.distractedUntil),
+        ),
+      );
     st.alert = Math.max(0, Math.min(1.08, st.alert + (visible ? dt / 820 : -dt / 640)));
-    node?.classList.toggle('suspicious', st.alert > 0.12 && t >= state.distractedUntil);
-    const meter = node?.querySelector('.meter-fill');
-    if (meter) meter.setAttribute('width', String(Math.round(64 * Math.min(1, st.alert))));
-    const thought = node?.querySelector('.thought-text');
-    if (thought && t >= state.distractedUntil) thought.textContent = st.alert > 0.62 ? 'WHO?!' : '?';
     if (visible && st.alert > 0.13 && !st.noticed) {
       setMood('alert', 1900);
       st.noticed = true;
@@ -143,4 +137,15 @@ function updateAwareness(t, dt, fail) {
   }
 }
 
-export { drawGuards, guardPos, updateAwareness, updatePatrols };
+function renderAwareness(t) {
+  for (const [i, st] of state.guardStates.entries()) {
+    const node = actors.querySelector(`[data-guard="${i}"]`);
+    node?.classList.toggle('suspicious', st.alert > 0.12 && t >= state.distractedUntil);
+    const meter = node?.querySelector('.meter-fill');
+    if (meter) meter.setAttribute('width', String(Math.round(64 * Math.min(1, st.alert))));
+    const thought = node?.querySelector('.thought-text');
+    if (thought && t >= state.distractedUntil) thought.textContent = st.alert > 0.62 ? 'WHO?!' : '?';
+  }
+}
+
+export { drawGuards, guardPos, renderAwareness, updateAwareness, updatePatrols };

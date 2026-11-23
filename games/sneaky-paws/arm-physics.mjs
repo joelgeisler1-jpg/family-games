@@ -1,6 +1,7 @@
+import { cameraAngleAt } from './hazards.mjs';
 import { playSound } from './audio.mjs';
 import { segmentBlocked } from './collision.mjs';
-import { ARM_R, EDGE, H, START, W } from './constants.mjs';
+import { ARM_R, EDGE, H, REEL_RIM, START, W } from './constants.mjs';
 import { arm, armOutline, armShadow, handGroup, highlight, staticLayer } from './dom.mjs';
 import { clamp, dist } from './geometry.mjs';
 import { LEVELS } from './levels.mjs';
@@ -24,33 +25,31 @@ function guideToWheel(raw) {
       best = d;
     }
   }
-  if (chosen < 0) {
-    if (state.wheelContact !== null)
-      staticLayer
-        .querySelector(`[data-spool="${state.wheelContact.index}"]`)
-        ?.classList.remove('gripping');
+  const contact = state.wheelContact;
+  if (chosen < 0 && contact) chosen = contact.index;
+  if (chosen < 0) return raw;
+
+  const sp = reels[chosen];
+  const orbit = sp.r + REEL_RIM + ARM_R + 0.5;
+  const r = dist(raw, sp);
+  const attached = contact?.index === chosen;
+  const targetAngle = r < 12 && attached ? contact.angle : Math.atan2(raw.y - sp.y, raw.x - sp.x);
+  const turn = attached
+    ? Math.atan2(Math.sin(targetAngle - contact.angle), Math.cos(targetAngle - contact.angle))
+    : 0;
+  const angle = attached ? contact.angle + clamp(turn, -0.18, 0.18) : targetAngle;
+  const blend = clamp((sp.r + ARM_R + 57 - r) / 24, 0, 1);
+  const eased = blend * blend * (3 - 2 * blend);
+  const targetRadius = r * (1 - eased) + orbit * eased;
+  const radius = attached ? contact.radius + clamp(targetRadius - contact.radius, -8, 8) : targetRadius;
+
+  if (blend === 0 && Math.abs(turn) <= 0.18 && Math.abs(radius - r) < 0.01) {
+    clearWheelGrip(contact);
     state.wheelContact = null;
     return raw;
   }
-  const sp = reels[chosen],
-    orbit = sp.r + ARM_R + 4;
-  const r = Math.hypot(raw.x - sp.x, raw.y - sp.y);
-  let angle =
-    r < 9 && state.wheelContact?.index === chosen
-      ? state.wheelContact.angle
-      : Math.atan2(raw.y - sp.y, raw.x - sp.x);
-  if (state.wheelContact?.index === chosen) {
-    // If a finger crosses the hub, don't let the drawn arm magically jump through it.
-    const turn = Math.atan2(
-      Math.sin(angle - state.wheelContact.angle),
-      Math.cos(angle - state.wheelContact.angle),
-    );
-    angle = state.wheelContact.angle + clamp(turn, -0.34, 0.34);
-  } else {
-    if (state.wheelContact !== null)
-      staticLayer
-        .querySelector(`[data-spool="${state.wheelContact.index}"]`)
-        ?.classList.remove('gripping');
+  if (!attached) {
+    clearWheelGrip(contact);
     staticLayer.querySelector(`[data-spool="${chosen}"]`)?.classList.add('gripping');
     if (performance.now() - lastGripSound > 250) {
       playSound('grip');
@@ -58,13 +57,16 @@ function guideToWheel(raw) {
     }
     status('🧲 Snapped to the reel! Trace its outside edge to wind the arm.');
   }
-  state.wheelContact = { index: chosen, angle };
-  // A narrow magnetic run-in lets the hand approach smoothly, then stick exactly
-  // to the outside edge until the finger pulls away from the reel.
-  const blend = clamp((orbit + 53 - r) / 24, 0, 1),
-    radius = r * (1 - blend) + orbit * blend;
+  // Hold the grip until the hand catches up with the finger on exit.
+  // The bounded angular step also keeps the chords between samples off the hub.
+  state.wheelContact = { index: chosen, angle, radius };
   return { x: sp.x + Math.cos(angle) * radius, y: sp.y + Math.sin(angle) * radius };
 }
+function clearWheelGrip(contact) {
+  if (contact)
+    staticLayer.querySelector(`[data-spool="${contact.index}"]`)?.classList.remove('gripping');
+}
+
 function checkSpools(p) {
   let L = LEVELS[state.level];
   if (!L.spools) return;
@@ -104,31 +106,23 @@ function checkSpools(p) {
     }
   }
 }
-function smoothPath(coords) {
-  if (!coords.length) return '';
-  let d = `M${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
-  // Catmull–Rom with conservative handles: a smooth, flexible arm without shortcutting sharp corners.
-  for (let i = 0; i < coords.length - 1; i++) {
-    const a = coords[Math.max(0, i - 1)],
-      b = coords[i],
-      c = coords[i + 1],
-      e = coords[Math.min(coords.length - 1, i + 2)];
-    const t = 0.12;
-    const x1 = b.x + (c.x - a.x) * t,
-      y1 = b.y + (c.y - a.y) * t;
-    const x2 = c.x - (e.x - b.x) * t,
-      y2 = c.y - (e.y - b.y) * t;
-    d += `C${x1.toFixed(1)} ${y1.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`;
-  }
-  return d;
-}
+// The round SVG stroke follows the same dense segments tested by collision.
+let renderedPoints;
+let renderedCount = 0;
+let path = '';
 function redraw() {
-  const shown = [state.points[0]];
-  for (let i = 1; i < state.points.length - 1; i++)
-    if (dist(state.points[i], shown[shown.length - 1]) > 11) shown.push(state.points[i]);
-  if (state.points.length > 1) shown.push(state.points[state.points.length - 1]);
-  const d = smoothPath(shown);
-  for (const e of [armShadow, armOutline, arm, highlight]) e.setAttribute('d', d);
+  if (renderedPoints !== state.points) {
+    renderedPoints = state.points;
+    renderedCount = 0;
+    path = '';
+  }
+  if (renderedCount === state.points.length) return;
+  for (let i = renderedCount; i < state.points.length; i++) {
+    const { x, y } = state.points[i];
+    path += `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`;
+  }
+  renderedCount = state.points.length;
+  for (const e of [armShadow, armOutline, arm, highlight]) e.setAttribute('d', path);
   const end = state.points.at(-1) || START,
     prev = state.points[Math.max(0, state.points.length - 6)] || START;
   const degrees =
@@ -156,10 +150,12 @@ function clampToRoom(p) {
   }
   return { x, y };
 }
-function sampleOnDrag(raw, fail, win) {
+function sampleOnDrag(raw, fail, win, draw = true) {
   const aim = clampToRoom(raw),
     from = state.lastInput;
   const steps = Math.max(1, Math.ceil(dist(from, aim) / 4));
+  const level = LEVELS[state.level];
+  const cameraAngle = level.camera ? cameraAngleAt(level.camera, state.clock) : 0;
   for (let i = 1; i <= steps; i++) {
     if (state.mode !== 'drawing') break;
     const input = {
@@ -169,28 +165,15 @@ function sampleOnDrag(raw, fail, win) {
     const prev = state.points.at(-1),
       next = guideToSlide(guideToWheel(input));
     if (dist(prev, next) < 0.8) continue;
-    let problem = segmentBlocked(
-      prev,
-      next,
-      LEVELS[state.level],
-      state.clock,
-      state.switchOn,
-      state.cameraAngle,
-    );
+    let problem = segmentBlocked(prev, next, level, state.clock, state.switchOn, cameraAngle);
     if (problem) {
       fail(problem.msg, problem.kind, problem.point);
-      redraw();
       break;
     }
     state.points.push(next);
     checkSpools(next);
     checkSlide(next);
     ringDecoy(next);
-    if (state.points.length > 3800) {
-      state.points = state.points.filter(
-        (_, j) => j === 0 || j === state.points.length - 1 || j % 2 === 0,
-      );
-    }
     if (checkTargets(next)) {
       redraw();
       win();
@@ -198,7 +181,7 @@ function sampleOnDrag(raw, fail, win) {
     }
   }
   state.lastInput = { ...aim };
-  redraw();
+  if (draw) redraw();
 }
 
 export { redraw, sampleOnDrag };

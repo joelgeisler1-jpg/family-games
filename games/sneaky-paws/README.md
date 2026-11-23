@@ -18,3 +18,21 @@ node --test games/sneaky-paws/tests/*.test.mjs
   pulse beams, and gate updates.
 - `scene.mjs` renders the SVG board. `characters.mjs`, `audio.mjs`, and
   `ui.mjs` handle companion reactions, sound, and player feedback.
+
+The route tests drive the normal pointer handlers through all ten missions and
+verify each required mechanism, treasure grab, and save unlock. They replay the
+routes with frequent updates and with sparse pointer events and delayed paints.
+
+The arm outline and collision tests share the same sampled path. Security
+advances in 16 ms steps while drawing and checks the existing arm before
+processing new pointer input. Rendering runs once per animation frame.
+
+### Route findings
+
+- Level 2 (Laser Zigzag) has a timing-sensitive direct route across the blaster.
+  The detour below the centre locker avoids its firing line.
+- Level 10 (Midnight Museum) can build guard alert on a direct approach to the
+  switch. Touching the lower-left edge of the switch activation area gives the
+  arm more clearance.
+- Level 9 (Double Wrap) requires careful exit from the bolt because the fixed
+  laser is immediately to its right. The route leaves left after latching.
