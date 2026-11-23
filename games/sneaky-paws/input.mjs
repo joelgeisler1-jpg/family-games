@@ -14,6 +14,16 @@ function position(ev) {
   return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H };
 }
 function bindPointerControls({ fail, win }) {
+  // iPad Safari may scroll or rubber-band when a dragging finger travels
+  // outside the SVG, even though the SVG itself has touch-action:none.
+  // Suppress native scrolling only during a live arm drag; menus and the
+  // level selector retain normal page scrolling.
+  document.addEventListener('touchmove', (ev) => {
+    if (state.mode === 'drawing' && state.activePointer !== null && ev.cancelable) {
+      ev.preventDefault();
+    }
+  }, { passive: false });
+
   scene.addEventListener('pointerdown', (ev) => {
     if (state.mode === 'win') return;
     let p = position(ev);
