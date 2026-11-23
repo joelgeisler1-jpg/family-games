@@ -104,7 +104,7 @@ function processEvents() {
       message = event.streak > 1 ? `${event.streak} landings in a row!` : 'Smooth landing! +1'
       messageUntil = session.time + 3
       messageTone = 'success'
-      audio.play('landing')
+      audio.play('landing', event.plane.kind)
     }
     if (event.type === 'over') {
       pointer.cancel()
