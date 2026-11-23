@@ -12,6 +12,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  cleaning-club-static:
+    name: Cleaning Club / static smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check Cleaning Club script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          find games/cleaning-club -name '*.js' -type f -print0 | while IFS= read -r -d '' file; do
+            node --check "$file"
+          done
+
+      - name: Run Cleaning Club smoke checks
+        run: node --test games/cleaning-club/tests/*.test.mjs
+
   sneaky-paws-node:
     name: Sneaky Paws / Node tests
     runs-on: ubuntu-latest
