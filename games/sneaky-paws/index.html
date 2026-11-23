@@ -101,6 +101,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 .museum-cat .tail{animation:tailWag 1.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:left center}
 @keyframes tailWag{to{transform:rotate(19deg)}}
 @media(prefers-reduced-motion:reduce){.spool-core,.spool-halo,.guard-boot,.guard-blink,.watch-turn,.museum-cat .tail,.treasure-spark,.security-blink,.dust-speck,#thief .thief-blink,#thief .thief-scarf,#thief.celebrating{animation:none!important}}
+
 /* The story dock is INSIDE the board but OUTSIDE the SVG's touch and arm area. */
 .story-dock{position:relative;z-index:2;display:flex;align-items:center;gap:12px;min-height:86px;padding:6px 17px 7px 13px;background:linear-gradient(115deg,#e9e3ff,#e8f8f6 60%,#fff4dd);border-bottom:2px solid #d4c8eb;pointer-events:none}
 .story-dock .speech{position:relative;inset:auto;flex:1;max-width:none;min-width:0;min-height:53px;width:auto;margin:0;display:flex;align-items:center;padding:9px 15px;gap:0;box-shadow:0 4px 0 #b5a5dd2e,0 6px 13px #43346312;border-radius:15px 15px 15px 4px;animation:bubblePop .24s ease-out;transform-origin:left bottom}
@@ -123,6 +124,20 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
 @media(max-width:520px){.story-dock{gap:5px;padding:5px 9px 6px;min-height:64px}.character-portrait{width:54px;height:58px;flex-basis:54px}.character-portrait svg{width:54px;height:58px}.story-dock .speech{left:auto;top:auto;max-width:none;min-width:0;padding:6px 10px;gap:0;min-height:45px;border-radius:12px 12px 12px 4px}.story-dock .speech:after{left:-9px;top:17px;width:12px;height:12px}.story-dock .speech b{font-size:8px}.story-dock .speech span.message{font-size:10px;line-height:1.35}.dock-star{display:none}}
 @media(prefers-reduced-motion:reduce){.character-portrait .character-bob,.character-portrait .character-tail,.character-portrait .character-eye,.hero-costume{animation:none!important}}
 
+
+/* The guides are companions in the dock, never costumes on top of the thief. */
+.character-portrait{position:relative}
+.character-portrait .reaction{position:absolute;right:-5px;top:-6px;background:#fffaf2;border:2px solid #d2c2e8;border-radius:999px;padding:1px 4px;font-size:19px;box-shadow:0 3px 7px #5a427a22;transition:transform .2s;pointer-events:none}
+.character-portrait[data-mood="alert"] .reaction,.character-portrait[data-mood="oops"] .reaction{animation:reactionBounce .3s ease-in-out infinite alternate}
+.character-portrait[data-mood="happy"] .character-bob{animation:characterCheer .36s ease-in-out infinite alternate}
+.character-portrait[data-mood="oops"] .character-bob{animation:characterOops .3s ease-in-out 4 alternate}
+@keyframes reactionBounce{to{transform:translateY(-5px) rotate(8deg)}}
+@keyframes characterCheer{to{transform:translateY(-8px) rotate(6deg)}}
+@keyframes characterOops{to{transform:rotate(-7deg)}}
+.beam-unit.firing{filter:drop-shadow(0 0 5px #fa5477)}
+.beam-unit.charging{animation:beamFlash .3s ease-in-out infinite alternate}
+@keyframes beamFlash{to{opacity:.42}}
+@media(prefers-reduced-motion:reduce){.character-portrait .reaction,.character-portrait[data-mood] .character-bob,.beam-unit.charging{animation:none!important}}
 </style>
 </head>
 <body>
@@ -133,7 +148,7 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
  <section class="play" aria-label="Sneaky Paws puzzle">
   <div class="board" id="board">
    <div class="story-dock" aria-label="Mission character and hints">
-    <div class="character-portrait" id="characterArt" role="img" aria-label="Mission character"></div>
+    <div class="character-portrait" id="characterArt" role="img" aria-label="Mission character"><span class="reaction" id="characterReaction" aria-hidden="true">✨</span></div>
     <div class="speech" id="speech" role="status" aria-live="polite"><div class="words"><b id="bubbleSpeaker">YOUR GUIDE</b><span class="message" id="bubbleText">Draw from my glove!</span></div></div>
     <span class="dock-star" aria-hidden="true">✦</span>
    </div>
@@ -147,11 +162,10 @@ button,a{font:inherit}button{cursor:pointer;touch-action:manipulation}button:foc
     </defs>
     <rect width="780" height="510" fill="url(#floorPaint)"/><rect width="780" height="510" fill="url(#floorGrid)"/><rect width="780" height="510" fill="url(#dots)"/>
     <rect x="14" y="14" width="752" height="482" rx="20" fill="none" stroke="#c4c6e4" stroke-width="4" stroke-dasharray="8 11" id="borderFrame"/>
-    <g id="roomDecor"></g>
+    <g id="roomDecor"></g><g id="scannerFX" class="guide"></g>
     <path id="cameraCone" fill="#ffc957" opacity=".27" stroke="#f0ae38" stroke-width="2"/><g id="static"></g><g id="actors" class="guide"></g>
     <g id="dynamic"><g id="armGroup"><path id="armShadow" d=""/><path id="armOutline" d=""/><path id="arm" d=""/><path id="armHighlight" d=""/></g><g id="stolen" class="guide"></g></g>
     <g id="thief" class="guide"><ellipse cx="97" cy="465" rx="63" ry="12" fill="#3d3154" opacity=".1"/><path d="M83 414 L87 460 M83 458 L59 481 M86 458 L109 480 M83 420 L60 443" fill="none" stroke="#292239" stroke-width="11" stroke-linecap="round"/><circle cx="81" cy="391" r="26" fill="#292239"/><rect x="58" y="390" width="47" height="16" rx="8" fill="#ebe3ff"/><circle cx="76" cy="399" r="3.5" fill="#292239"/><circle cx="93" cy="399" r="3.5" fill="#292239"/><circle cx="81" cy="377" r="4" fill="#ad98e8"/>
-     <g id="heroCostume" class="hero-costume"></g>
      <g class="thief-blink" opacity="0"><path d="M72 399h8 M90 399h8" stroke="#292239" stroke-width="4" stroke-linecap="round"/></g>
      <path class="thief-scarf" d="M89 419Q97 411 110 412L126 420L107 425L99 434Z" fill="#71cbb7" stroke="#3b8a84" stroke-width="2"/></g>
     <g id="handGroup" transform="translate(119 425)">
@@ -204,30 +218,39 @@ function characterSVG(c,hero=false){
  // The portrait and the smaller, playable character use identical vector artwork.
  return `<svg xmlns="${NS}" viewBox="0 0 100 112" aria-hidden="true"><g class="character-bob">${common}${faces[c.type]}</g></svg>`;
 }
+let moodTimer=0;
+function setMood(mood, duration=0){
+ const portrait=$('characterArt');if(!portrait)return;
+ if(moodTimer){clearTimeout(moodTimer);moodTimer=0}
+ const moods={ready:'✨',thinking:'🤔',alert:'😲',oops:'😵',happy:'🥳',clever:'😎'};
+ portrait.dataset.mood=mood;
+ const reaction=$('characterReaction');if(reaction)reaction.textContent=moods[mood]||'✨';
+ if(duration)moodTimer=setTimeout(()=>setMood('ready'),duration);
+}
 function showCharacter(){
- const c=CHARACTERS[level];$('characterArt').innerHTML=characterSVG(c);
+ const c=CHARACTERS[level];$('characterArt').innerHTML=characterSVG(c)+'<span class="reaction" id="characterReaction" aria-hidden="true">✨</span>';
  $('characterArt').setAttribute('aria-label',`${c.name} the ${c.role}`);
- // The small portrait overlays the old thief's mask, preserving arm and controls.
- $('heroCostume').innerHTML=`<svg x="51" y="352" width="58" height="68" viewBox="0 0 100 112" aria-hidden="true"><g>${characterSVG(c).replace(/^.*?<g class="character-bob">/s,'').replace(/<\/g><\/svg>$/,'')}</g></svg>`;
+ // The guide is a separate companion in the story dock. The original thief is unchanged.
+ setMood('ready');
 }
 
 const LEVELS=[
  {name:'The Crate Caper',bubble:'Slip around the crates!',clue:'More crates and lockers! Find the safe lane to the gem.',hint:'Go BELOW the large centre crate, then go around the final locker to the gem.',goal:{x:686,y:401},walls:[{x:298,y:290,w:177,h:148,type:'crate'},{x:181,y:155,w:96,h:88,type:'locker'},{x:508,y:245,w:87,h:92,type:'crate'},{x:536,y:366,w:57,h:52,type:'locker'}],lasers:[{x1:518,y1:451,x2:604,y2:451}]},
- {name:'Laser Zigzag',bubble:'Weave between red lasers!',clue:'Red beams sound the alarm. Find the gaps!',hint:'Above the first beam, BELOW the second, above the third.',goal:{x:697,y:106},walls:[{x:98,y:115,w:57,h:73,type:'crate'},{x:346,y:364,w:71,h:69,type:'locker'},{x:520,y:90,w:67,h:65,type:'crate'},{x:660,y:316,w:70,h:94,type:'locker'}],lasers:[{x1:274,y1:168,x2:274,y2:469},{x1:460,y1:44,x2:460,y2:304},{x1:623,y1:247,x2:623,y2:476}]},
+ {name:'Laser Zigzag',pulse:{x1:361,y1:342,x2:441,y2:342,period:3000,on:760,phase:650},bubble:'Weave between red lasers!',clue:'Red beams sound the alarm. Find the gaps!',hint:'Weave around the fixed beams and wait for the blaster to recharge before crossing.',goal:{x:697,y:106},walls:[{x:98,y:115,w:57,h:73,type:'crate'},{x:346,y:364,w:71,h:69,type:'locker'},{x:520,y:90,w:67,h:65,type:'crate'},{x:660,y:316,w:70,h:94,type:'locker'}],lasers:[{x1:274,y1:168,x2:274,y2:469},{x1:460,y1:44,x2:460,y2:304},{x1:623,y1:247,x2:623,y2:476}]},
  {name:'Shhh… Sleeping Guard',bubble:'Shhh… slide the bolt right!',clue:"Don't enter the guard's red listening circle.",hint:'Stay ABOVE the sleeping guard; pull the green handle right along its rail to unlock the treasure.',slider:{x:445,y:91,to:524},goal:{x:695,y:132},walls:[{x:235,y:113,w:92,h:184,type:'locker'},{x:522,y:278,w:101,h:185,type:'locker'},{x:338,y:404,w:82,h:59,type:'crate'},{x:634,y:312,w:75,h:118,type:'locker'}],guards:[{x:405,y:269,r:87}]},
  {name:'The Sweeping Eye',bubble:'Wait for the camera to turn!',clue:'The camera moves! Time your stretchy reach.',hint:'Go above the tall crate, then hide below the smaller one until the spotlight turns away.',goal:{x:704,y:391},walls:[{x:252,y:248,w:142,h:230,type:'crate'},{x:449,y:169,w:131,h:136,type:'crate'},{x:110,y:126,w:83,h:80,type:'locker'},{x:405,y:379,w:86,h:75,type:'locker'}],camera:{x:606,y:102,r:235,base:1.83,sweep:.64,half:.22,speed:.00125}},
  {name:'The Grand Vault',bubble:'Find the key. Avoid the guard!',clue:'Collect the gold key FIRST, then snatch the ruby.',hint:'Collect the key first, then loop around the guard while it scans the upper vault.',goal:{x:697,y:408},key:{x:412,y:143},walls:[{x:251,y:207,w:72,h:276,type:'locker'},{x:525,y:46,w:73,h:269,type:'locker'},{x:343,y:290,w:76,h:66,type:'crate'},{x:350,y:400,w:81,h:67,type:'locker'},{x:627,y:132,w:65,h:53,type:'crate'}],lasers:[{x1:178,y1:44,x2:178,y2:313},{x1:644,y1:92,x2:744,y2:92}],guards:[{x:650,y:228,r:55,kind:'watch',vision:{range:125,half:.42,look:-2.35,sweep:.3}}]},
- {name:'The First Loop',bubble:'Trace the reel to unlock!',clue:'The glove sticks to the reel. Trace its outside to unlock treasure!',hint:'Move beside the reel to snap onto its outer edge, then curl around until the ring fills.',goal:{x:692,y:125},walls:[{x:497,y:295,w:102,h:166,type:'crate'},{x:188,y:90,w:82,h:82,type:'locker'},{x:616,y:251,w:83,h:61,type:'crate'}],spools:[{x:351,y:258,r:25,turn:3.15}],guards:[]},
- {name:'Patrol Parade',bubble:'Ring the bell. Dodge patrols!',clue:'The security guard WALKS. Hide your arm above or below their route!',hint:'Reach the yellow music button above the locker; it distracts the patrol. Then slip along the upper path.',decoy:{x:430,y:96,duration:4600},goal:{x:686,y:111},walls:[{x:270,y:112,w:90,h:230,type:'locker'},{x:586,y:337,w:112,h:120,type:'crate'},{x:401,y:379,w:92,h:76,type:'crate'},{x:521,y:129,w:74,h:63,type:'locker'}],guards:[{x:483,y:265,r:69,kind:'patrol',patrol:{dx:120,dy:0,speed:.00105},vision:{range:128,half:.4}}]},
- {name:'Flick the Switch',bubble:'Switch off the laser gate!',clue:'Hit the green switch to disable the red security gate.',hint:'Reach the switch at the top first, then travel through the now-green laser line.',goal:{x:699,y:405},switch:{x:456,y:105},walls:[{x:270,y:274,w:106,h:190,type:'crate'},{x:421,y:201,w:81,h:91,type:'locker'},{x:93,y:158,w:78,h:101,type:'locker'},{x:589,y:312,w:78,h:60,type:'crate'}],lasers:[{x1:557,y1:202,x2:557,y2:474,gate:true}],guards:[{x:670,y:240,r:55,kind:'watch',vision:{range:135,half:.4,look:-2.55,sweep:.45}}]},
- {name:'Double Wrap',bubble:'Two reels, then slide the bolt!',clue:'Hug BOTH reel edges, weave around furniture, and avoid security.',hint:'Wind both reels, then pull the green bolt right along its track near the top before taking the loot.',slider:{x:565,y:89,to:628},goal:{x:706,y:423},spools:[{x:318,y:250,r:25,turn:3.15},{x:526,y:256,r:25,turn:3.15}],walls:[{x:269,y:75,w:85,h:82,type:'crate'},{x:411,y:391,w:103,h:73,type:'locker'},{x:142,y:161,w:73,h:68,type:'crate'},{x:602,y:380,w:61,h:63,type:'locker'}],lasers:[{x1:655,y1:48,x2:655,y2:232}],guards:[{x:666,y:320,r:51,kind:'watch',vision:{range:72,half:.42,look:-2.45,sweep:.4}}]},
- {name:'Midnight Museum',bubble:'Reel → switch → key → gem!',clue:'Wrap the reel, switch off security, grab the key, then take the diamond!',hint:'Loop the blue post, touch the green switch up top and collect the key below. Then follow the open passage ABOVE the final display to the diamond.',goal:{x:698,y:318},key:{x:453,y:363},switch:{x:488,y:102},spools:[{x:355,y:248,r:26,turn:3.15}],walls:[{x:241,y:70,w:87,h:79,type:'crate'},{x:531,y:210,w:88,h:86,type:'locker'},{x:598,y:351,w:71,h:105,type:'crate'}],lasers:[{x1:562,y1:344,x2:562,y2:480,gate:true}],guards:[{x:630,y:149,r:47,kind:'patrol',patrol:{dx:53,dy:0,speed:.00085},vision:{range:115,half:.4}}]}
+ {name:'The First Loop',pulse:{x1:462,y1:161,x2:623,y2:161,period:3600,on:750,phase:850},bubble:'Trace the reel to unlock!',clue:'The glove sticks to the reel. Trace its outside to unlock treasure!',hint:'Hug the blue reel, then wait for the firing beam to recharge before crossing the upper room.',goal:{x:692,y:125},walls:[{x:497,y:295,w:102,h:166,type:'crate'},{x:188,y:90,w:82,h:82,type:'locker'},{x:616,y:251,w:83,h:61,type:'crate'}],spools:[{x:351,y:258,r:25,turn:3.15}],guards:[]},
+ {name:'Patrol Parade',radar:{x:630,y:237,r:94,speed:.0011,half:.24,offset:-1.6},bubble:'Ring the bell. Dodge patrols!',clue:'The security guard WALKS. Hide your arm above or below their route!',hint:'Ring the bell to distract the guard, and keep clear of the rotating green radar scanner.',decoy:{x:430,y:96,duration:4600},goal:{x:686,y:111},walls:[{x:270,y:112,w:90,h:230,type:'locker'},{x:586,y:337,w:112,h:120,type:'crate'},{x:401,y:379,w:92,h:76,type:'crate'},{x:521,y:129,w:74,h:63,type:'locker'}],guards:[{x:483,y:265,r:69,kind:'patrol',patrol:{dx:120,dy:0,speed:.00105},vision:{range:128,half:.4}}]},
+ {name:'Flick the Switch',pulse:{x1:510,y1:354,x2:725,y2:354,period:3400,on:650,phase:300},bubble:'Switch off the laser gate!',clue:'Hit the green switch to disable the red security gate.',hint:'Switch off the gate, then avoid the second laser blaster when it flashes red.',goal:{x:699,y:405},switch:{x:456,y:105},walls:[{x:270,y:274,w:106,h:190,type:'crate'},{x:421,y:201,w:81,h:91,type:'locker'},{x:93,y:158,w:78,h:101,type:'locker'},{x:589,y:312,w:78,h:60,type:'crate'}],lasers:[{x1:557,y1:202,x2:557,y2:474,gate:true}],guards:[{x:670,y:240,r:55,kind:'watch',vision:{range:135,half:.4,look:-2.55,sweep:.45}}]},
+ {name:'Double Wrap',radar:{x:718,y:147,r:115,speed:-.0013,half:.24,offset:2.4},bubble:'Two reels, then slide the bolt!',clue:'Hug BOTH reel edges, weave around furniture, and avoid security.',hint:'Wind both reels, pull the slide bolt, and stay clear of the spinning radar near the top right.',slider:{x:565,y:89,to:628},goal:{x:706,y:423},spools:[{x:318,y:250,r:25,turn:3.15},{x:526,y:256,r:25,turn:3.15}],walls:[{x:269,y:75,w:85,h:82,type:'crate'},{x:411,y:391,w:103,h:73,type:'locker'},{x:142,y:161,w:73,h:68,type:'crate'},{x:602,y:380,w:61,h:63,type:'locker'}],lasers:[{x1:655,y1:48,x2:655,y2:232}],guards:[{x:666,y:320,r:51,kind:'watch',vision:{range:72,half:.42,look:-2.45,sweep:.4}}]},
+ {name:'Midnight Museum',radar:{x:718,y:71,r:112,speed:.001,half:.2,offset:2.4},bubble:'Reel → switch → key → gem!',clue:'Wrap the reel, switch off security, grab the key, then take the diamond!',hint:'Wrap the reel, flip the switch, get the key, then use the lower passage while the rooftop radar turns away.',goal:{x:698,y:318},key:{x:453,y:363},switch:{x:488,y:102},spools:[{x:355,y:248,r:26,turn:3.15}],walls:[{x:241,y:70,w:87,h:79,type:'crate'},{x:531,y:210,w:88,h:86,type:'locker'},{x:598,y:351,w:71,h:105,type:'crate'}],lasers:[{x1:562,y1:344,x2:562,y2:480,gate:true}],guards:[{x:630,y:149,r:47,kind:'patrol',patrol:{dx:53,dy:0,speed:.00085},vision:{range:115,half:.4}}]}
 
 ];
-const $=id=>document.getElementById(id),scene=$('scene'),board=$('board'),staticLayer=$('static'),actors=$('actors'),roomDecor=$('roomDecor'),cameraCone=$('cameraCone'),arm=$('arm'),armOutline=$('armOutline'),armShadow=$('armShadow'),highlight=$('armHighlight'),handGroup=$('handGroup'),targetGroup=$('targetGroup'),effects=$('effects'),stolen=$('stolen');
+const $=id=>document.getElementById(id),scene=$('scene'),board=$('board'),staticLayer=$('static'),actors=$('actors'),roomDecor=$('roomDecor'),scannerFX=$('scannerFX'),cameraCone=$('cameraCone'),arm=$('arm'),armOutline=$('armOutline'),armShadow=$('armShadow'),highlight=$('armHighlight'),handGroup=$('handGroup'),targetGroup=$('targetGroup'),effects=$('effects'),stolen=$('stolen');
 let unlocked=1;try{unlocked=Math.max(1,Math.min(LEVELS.length,Number(localStorage.getItem(SAVE))||1))}catch{}
 let lastInput={...START},wheelContact=null,lastGripSound=0,lastWindSound=0;
-let level=0,points=[],mode='ready',attempt=0,keyTaken=false,switchOn=false,spoolStates=[],slideState={progress:0,gripped:false,done:false,tick:0},decoyTriggered=false,distractedUntil=0,guardStates=[],grabbed=false,activePointer=null,cameraAngle=0,lastTime=0,edgeSide='',lastEdgeSound=0,winAnimation=0,clock=0,bubbleTimer=0;
+let scannerAlert=0,scannerWarned=false,level=0,points=[],mode='ready',attempt=0,keyTaken=false,switchOn=false,spoolStates=[],slideState={progress:0,gripped:false,done:false,tick:0},decoyTriggered=false,distractedUntil=0,guardStates=[],grabbed=false,activePointer=null,cameraAngle=0,lastTime=0,edgeSide='',lastEdgeSound=0,winAnimation=0,clock=0,bubbleTimer=0;
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),segDist=(p,a,b)=>{const dx=b.x-a.x,dy=b.y-a.y,d=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/d));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)};
 const svg=(tag,attrs={})=>{let e=document.createElementNS(NS,tag);for(let [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e};
 const piece=(content,attrs)=>{let el=svg('g',attrs);el.innerHTML=content;return el};
@@ -256,7 +279,38 @@ function sceneDetails(){
  ];
  roomDecor.insertAdjacentHTML('beforeend',props[level]);
 }
-function drawStatic(){let L=LEVELS[level];staticLayer.innerHTML='';actors.innerHTML='';sceneDetails();
+function pulseActive(p,t){return ((t+p.phase)%p.period)<p.on}
+function radarAngle(r,t){return r.offset+t*r.speed}
+function radarSeesPoint(r,p,t){
+ const d=dist(r,p);if(d>r.r||d<12)return false;
+ const angle=Math.atan2(p.y-r.y,p.x-r.x),turn=radarAngle(r,t);
+ return Math.abs(Math.atan2(Math.sin(angle-turn),Math.cos(angle-turn)))<r.half&&lineOfSight(r,p);
+}
+function updateScanners(t,dt){
+ const L=LEVELS[level];if(!L.pulse&&!L.radar){scannerFX.innerHTML='';return}
+ let markup='';
+ if(L.pulse){const q=L.pulse,elapsed=(t+q.phase)%q.period,on=elapsed<q.on,warning=!on&&elapsed>q.period-580;
+  const stroke=on?'#f44a74':warning?'#ffc74d':'#b7b9d5',width=on?10:warning?7:3;
+  markup+=`<g class="beam-unit ${on?'firing':warning?'charging':'inactive'}"><line x1="${q.x1}" y1="${q.y1}" x2="${q.x2}" y2="${q.y2}" stroke="${stroke}" stroke-width="${on?28:12}" opacity="${on?.2:.12}"/><line x1="${q.x1}" y1="${q.y1}" x2="${q.x2}" y2="${q.y2}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-dasharray="${on?'0':'9 8'}"/><circle cx="${q.x1}" cy="${q.y1}" r="13" fill="#5a5e84" stroke="${stroke}" stroke-width="4"/><circle cx="${q.x2}" cy="${q.y2}" r="13" fill="#5a5e84" stroke="${stroke}" stroke-width="4"/><text x="${(q.x1+q.x2)/2}" y="${q.y1-19}" text-anchor="middle" font-size="12" font-weight="900" fill="${on?'#d83c62':warning?'#b3811f':'#777d99'}">${on?'⚡ FIRING':warning?'⚠ CHARGING':'● RECHARGING'}</text></g>`;
+ }
+ if(L.radar){const r=L.radar,a=radarAngle(r,t),end1=a-r.half,end2=a+r.half;
+  const ex1=r.x+r.r*Math.cos(end1),ey1=r.y+r.r*Math.sin(end1),ex2=r.x+r.r*Math.cos(end2),ey2=r.y+r.r*Math.sin(end2);
+  markup+=`<g class="radar-unit"><path d="M${r.x} ${r.y}L${ex1.toFixed(1)} ${ey1.toFixed(1)}A${r.r} ${r.r} 0 0 1 ${ex2.toFixed(1)} ${ey2.toFixed(1)}Z" fill="${scannerAlert>.4?'#ff7981':'#68e4c8'}" opacity=".27" stroke="#48a8ab" stroke-width="2"/><circle cx="${r.x}" cy="${r.y}" r="19" fill="#384f72" stroke="#e0f6f4" stroke-width="4"/><circle cx="${r.x}" cy="${r.y}" r="8" fill="#7ce7ca"/><path d="M${r.x-29} ${r.y+23}h58" stroke="#5f7398" stroke-width="7" stroke-linecap="round"/><text x="${r.x}" y="${r.y-27}" text-anchor="middle" fill="#467d8a" font-size="11" font-weight="900">RADAR</text>${scannerAlert>.03?`<rect x="${r.x-23}" y="${r.y+28}" width="${Math.round(46*scannerAlert)}" height="5" rx="2" fill="#f97373"/>`:''}</g>`;
+ }
+ scannerFX.innerHTML=markup;
+ if(mode!=='drawing')return;
+ if(L.pulse&&pulseActive(L.pulse,t)){
+  const q=L.pulse,a={x:q.x1,y:q.y1},b={x:q.x2,y:q.y2};
+  for(let i=0;i<points.length;i+=Math.max(1,Math.floor(points.length/230))){if(segDist(points[i],a,b)<ARM_R+6){fail('The security blaster fired! Watch its charge light.','laser',points[i]);return}}
+ }
+ if(L.radar){let seen=false;for(let i=0;i<points.length;i+=Math.max(1,Math.floor(points.length/180)))if(radarSeesPoint(L.radar,points[i],t)){seen=true;break}
+  scannerAlert=Math.max(0,Math.min(1.06,scannerAlert+(seen?dt/1050:-dt/680)));
+  if(seen&&scannerAlert>.25&&!scannerWarned){scannerWarned=true;setMood('alert',1700);playSound('notice');say('Radar sees the arm! Move out of the green sweep!',true,1700)}
+  if(scannerAlert<.05)scannerWarned=false;
+  if(scannerAlert>=1)fail('Radar detected your arm for too long!','camera',points.at(-1));
+ }
+}
+function drawStatic(){let L=LEVELS[level];scannerFX.innerHTML='';staticLayer.innerHTML='';actors.innerHTML='';sceneDetails();
  for(let wall of L.walls){let{x,y,w,h,type}=wall;let crate=type==='crate';let g=piece(`
  <rect x="${x+8}" y="${y+10}" width="${w}" height="${h}" rx="12" fill="#353059" opacity=".17"/>
  <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${crate?'#b7a1da':'#9092bd'}" stroke="#4a456e" stroke-width="5"/>
@@ -382,7 +436,7 @@ function updateAwareness(t,dt){if(mode!=='drawing')return;
   node?.classList.toggle('suspicious',st.alert>.12&&t>=distractedUntil);
   const meter=node?.querySelector('.meter-fill');if(meter)meter.setAttribute('width',String(Math.round(64*Math.min(1,st.alert))));
   const thought=node?.querySelector('.thought-text');if(thought&&t>=distractedUntil)thought.textContent=st.alert>.62?'WHO?!':'?';
-  if(visible&&st.alert>.13&&!st.noticed){st.noticed=true;playSound('notice');say('A guard noticed something! Slip out of the spotlight.',true,2300)}
+  if(visible&&st.alert>.13&&!st.noticed){setMood('alert',1900);st.noticed=true;playSound('notice');say('A guard noticed something! Slip out of the spotlight.',true,2300)}
   if(st.alert<.08)st.noticed=false;
   if(st.alert>=1){fail('A watchful guard sounded the alarm!','guard',guardPos(g,t));return}
  }
@@ -504,10 +558,10 @@ function say(message,tip=false,duration=0){
  const bubble=$('speech');bubble.classList.toggle('tip',tip);$('bubbleSpeaker').textContent=`${tip?'💡 ':''}${CHARACTERS[level].name.toUpperCase()} · ${tip?'HINT':CHARACTERS[level].role.toUpperCase()}`;$('bubbleText').textContent=message;
  clearTimeout(bubbleTimer);if(duration)bubbleTimer=setTimeout(()=>{if(mode!=='win'&&mode!=='failed')say(LEVELS[level].bubble||LEVELS[level].clue)},duration);
 }
-function load(){if(winAnimation)cancelAnimationFrame(winAnimation);winAnimation=0;points=[{...START}];lastInput={...START};wheelContact=null;$('thief').classList.remove('celebrating');mode='ready';keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));slideState={progress:0,gripped:false,done:false,tick:0};decoyTriggered=false;distractedUntil=0;guardStates=(LEVELS[level].guards||[]).map(()=>({alert:0,noticed:false}));grabbed=false;activePointer=null;edgeSide='';stolen.innerHTML='';effects.innerHTML='';board.classList.remove('alarm');$('winpanel').classList.remove('show');$('next').classList.remove('available');$('levelTitle').textContent=`${level+1} / ${LEVELS.length} · ${LEVELS[level].name}`;showCharacter();say(LEVELS[level].bubble||LEVELS[level].clue);status(LEVELS[level].spools?'👆 Drag from your glove, then curl AROUND each blue reel.':'👆 Start on the glowing glove. Touching an edge just bounces!');drawStatic();redraw();updateLevelButtons();$('next').textContent=level===LEVELS.length-1?'Play again ↻':'Next mission →'}
+function load(){scannerAlert=0;scannerWarned=false;setMood('ready');if(winAnimation)cancelAnimationFrame(winAnimation);winAnimation=0;points=[{...START}];lastInput={...START};wheelContact=null;$('thief').classList.remove('celebrating');mode='ready';keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));slideState={progress:0,gripped:false,done:false,tick:0};decoyTriggered=false;distractedUntil=0;guardStates=(LEVELS[level].guards||[]).map(()=>({alert:0,noticed:false}));grabbed=false;activePointer=null;edgeSide='';stolen.innerHTML='';effects.innerHTML='';board.classList.remove('alarm');$('winpanel').classList.remove('show');$('next').classList.remove('available');$('levelTitle').textContent=`${level+1} / ${LEVELS.length} · ${LEVELS[level].name}`;showCharacter();say(LEVELS[level].bubble||LEVELS[level].clue);status(LEVELS[level].spools?'👆 Drag from your glove, then curl AROUND each blue reel.':'👆 Start on the glowing glove. Touching an edge just bounces!');drawStatic();redraw();updateLevelButtons();$('next').textContent=level===LEVELS.length-1?'Play again ↻':'Next mission →'}
 function fail(reason,kind='obstacle',location=points.at(-1)||START){
  if(mode!=='drawing')return;
- mode='failed';activePointer=null;edgeSide='';say(reason,true); 
+ mode='failed';activePointer=null;edgeSide='';setMood('oops');say(reason,true); 
  const alarm=kind!=='wall';status(`${alarm?'🚨':'🧱'} ${reason} Tap Try again.`, 'fail');
  if(alarm){board.classList.remove('alarm');void board.offsetWidth;board.classList.add('alarm')}
  if(kind==='guard'){
@@ -528,6 +582,7 @@ function hit(p,L){
  for(let w of L.walls)if(p.x>w.x-ARM_R&&p.x<w.x+w.w+ARM_R&&p.y>w.y-ARM_R&&p.y<w.y+w.h+ARM_R)return{msg:'The arm bumped a solid object!',kind:'wall'};
  for(let sp of L.spools||[])if(dist(p,sp)<sp.r+ARM_R)return{msg:'The reel is solid! Loop AROUND its blue ring.',kind:'wall'};
  for(let laser of L.lasers||[])if(!(laser.gate&&switchOn)&&segDist(p,{x:laser.x1,y:laser.y1},{x:laser.x2,y:laser.y2})<ARM_R+8)return{msg:'A laser beam set off the alarm!',kind:'laser'};
+ if(L.pulse&&pulseActive(L.pulse,clock)&&segDist(p,{x:L.pulse.x1,y:L.pulse.y1},{x:L.pulse.x2,y:L.pulse.y2})<ARM_R+6)return{msg:'The blaster beam hit the arm!',kind:'laser'};
  for(let g of L.guards||[])if(dist(p,guardPos(g,clock))<(g.vision?31:g.r)+ARM_R)return{msg:'A guard caught your sneaky arm!',kind:'guard'};
  if(L.camera&&inCamera(p,L.camera))return{msg:'The camera spotted your arm!',kind:'camera'};
  return null;
@@ -567,19 +622,19 @@ function sampleOnDrag(raw){
   points.push(next);checkSpools(next,prev);checkSlide(next);ringDecoy(next);
   if(points.length>3800){points=points.filter((_,j)=>j===0||j===points.length-1||j%2===0)}
   let L=LEVELS[level];
-  if(L.key&&!keyTaken&&dist(next,L.key)<29){keyTaken=true;updateTargets();status(`🔑 Key collected! ${taskMessage()}`);say(`Got the key! ${taskMessage()}`,true,2300);playSound('key');burst(L.key.x,L.key.y)}
-  if(L.switch&&!switchOn&&dist(next,L.switch)<30){switchOn=true;updateGates();updateTargets();status(`🟢 Security gate OFF! ${taskMessage()}`);say('Gate switched off! '+taskMessage(),true,2400);playSound('switch');burst(L.switch.x,L.switch.y)}
+  if(L.key&&!keyTaken&&dist(next,L.key)<29){keyTaken=true;updateTargets();status(`🔑 Key collected! ${taskMessage()}`);say(`Got the key! ${taskMessage()}`,true,2300);setMood('clever',1800);playSound('key');burst(L.key.x,L.key.y)}
+  if(L.switch&&!switchOn&&dist(next,L.switch)<30){switchOn=true;updateGates();updateTargets();status(`🟢 Security gate OFF! ${taskMessage()}`);say('Gate switched off! '+taskMessage(),true,2400);setMood('clever',1800);playSound('switch');burst(L.switch.x,L.switch.y)}
   if(dist(next,L.goal)<28){if(pendingTasks().length){status(taskMessage());say(taskMessage(),true,1800)}else{redraw();win();break}}
  }
  lastInput={...aim};redraw();
 }
 function position(ev){let r=scene.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*W,y:(ev.clientY-r.top)/r.height*H}}
-scene.addEventListener('pointerdown',ev=>{if(mode==='win')return;let p=position(ev);if(mode==='failed'){status('↻ Tap Try again to reset your arm.','fail');return}if(mode==='ready'){if(dist(p,START)>65){status('👆 Touch the glowing glove beside the thief to start.');return}mode='drawing';attempt++;points=[{...START}];lastInput={...START};wheelContact=null;playSound('start');say('Careful... guards will notice if you stay in their sight!',false,2800);status('🤫 Weave around obstacles and security. Edges just bounce!')}else if(mode!=='drawing')return;activePointer=ev.pointerId;scene.setPointerCapture(ev.pointerId);sampleOnDrag(p);ev.preventDefault()});
+scene.addEventListener('pointerdown',ev=>{if(mode==='win')return;let p=position(ev);if(mode==='failed'){status('↻ Tap Try again to reset your arm.','fail');return}if(mode==='ready'){if(dist(p,START)>65){status('👆 Touch the glowing glove beside the thief to start.');return}mode='drawing';attempt++;points=[{...START}];lastInput={...START};wheelContact=null;playSound('start');say(LEVELS[level].pulse?'Watch the beam charge before it fires!':LEVELS[level].radar?'Keep your arm outside the sweeping radar!':'Careful... guards will notice if you stay in their sight!',false,2800);status('🤫 Weave around obstacles and security. Edges just bounce!')}else if(mode!=='drawing')return;activePointer=ev.pointerId;scene.setPointerCapture(ev.pointerId);sampleOnDrag(p);ev.preventDefault()});
 scene.addEventListener('pointermove',ev=>{if(mode!=='drawing'||activePointer!==ev.pointerId)return;sampleOnDrag(position(ev));ev.preventDefault()});
 function release(ev){if(ev.pointerId!==activePointer)return;activePointer=null;edgeSide='';wheelContact=null;lastInput={...START};if(mode==='drawing'){mode='ready';points=[{...START}];keyTaken=false;switchOn=false;spoolStates=(LEVELS[level].spools||[]).map(()=>({arc:0,last:null,done:false}));drawStatic();redraw();slideState={progress:0,gripped:false,done:false,tick:0};decoyTriggered=false;distractedUntil=0;guardStates=(LEVELS[level].guards||[]).map(()=>({alert:0,noticed:false}));say('Draw in one motion to reach the treasure!',true,2500);status('↻ You let go! Start at the glove and draw in ONE motion.')}}
 scene.addEventListener('pointerup',release);scene.addEventListener('pointercancel',release);
 function win(){board.classList.remove('success');void board.offsetWidth;board.classList.add('success');mode='win';grabbed=true;activePointer=null;let last=points.at(-1);let loot=svg('text',{x:last.x,y:last.y+9,'text-anchor':'middle','font-size':29});loot.textContent=level===4||level===9?'💎':'💰';stolen.append(loot);targetGroup.innerHTML='';let duration=1150,start=performance.now(),original=points.slice();function retract(t){let fraction=Math.max(0,Math.min(1,(t-start)/duration)),idx=Math.max(0,Math.min(original.length-1,Math.floor((1-fraction)*(original.length-1)))),p=original[idx];let shortened=original.slice(0,idx+1);points=shortened;redraw();loot.setAttribute('x',p.x);loot.setAttribute('y',p.y+9);if(fraction<1){winAnimation=requestAnimationFrame(retract)}else{winAnimation=0;stolen.innerHTML='';complete()}}winAnimation=requestAnimationFrame(retract);playSound('win')}
-function complete(){$('thief').classList.add('celebrating');burst(120,388,'#e9b44c');if(level===unlocked-1&&unlocked<LEVELS.length){unlocked++;try{localStorage.setItem(SAVE,String(unlocked))}catch{}}updateLevelButtons();let final=level===LEVELS.length-1;status(final?'🏆 You mastered every Sneaky Paws mission!':'✨ Treasure secured. Nobody noticed!', 'win');$('winTitle').textContent=final?'🏆 Master thief!':'✨ Perfectly sneaky!';$('winText').textContent=final?'You solved all ten puzzles!':'The treasure is safe in your pocket.';$('winpanel').classList.add('show');$('next').classList.add('available');say(final?'All missions complete! You are a master thief!':'Treasure secured! Next mission is beside Try Again.',false)}
+function complete(){$('thief').classList.add('celebrating');setMood('happy');burst(120,388,'#e9b44c');if(level===unlocked-1&&unlocked<LEVELS.length){unlocked++;try{localStorage.setItem(SAVE,String(unlocked))}catch{}}updateLevelButtons();let final=level===LEVELS.length-1;status(final?'🏆 You mastered every Sneaky Paws mission!':'✨ Treasure secured. Nobody noticed!', 'win');$('winTitle').textContent=final?'🏆 Master thief!':'✨ Perfectly sneaky!';$('winText').textContent=final?'You solved all ten puzzles!':'The treasure is safe in your pocket.';$('winpanel').classList.add('show');$('next').classList.add('available');say(final?'All missions complete! You are a master thief!':'Treasure secured! Next mission is beside Try Again.',false)}
 let audioContext=null;let soundEnabled=true;
 function playSound(name){
  if(!soundEnabled)return;
@@ -602,7 +657,8 @@ function playSound(name){
    notice:{notes:[380,495],type:'triangle',volume:.026,step:.10,duration:.15},
    slide:{notes:[345],type:'sine',volume:.016,step:0,duration:.07,sweep:1.08},
    latch:{notes:[590,760,910],type:'triangle',volume:.04,step:.07,duration:.16},
-   decoy:{notes:[690,860,690],type:'sine',volume:.05,step:.17,duration:.24}
+   decoy:{notes:[690,860,690],type:'sine',volume:.05,step:.17,duration:.24},
+   scanner:{notes:[290,370],type:'sawtooth',volume:.024,step:.095,duration:.13}
   };
   const sound=options[name]||options.start,t=audioContext.currentTime;
   sound.notes.forEach((f,i)=>{
@@ -616,7 +672,7 @@ function playSound(name){
  }catch{}
 }
 function animate(t){
- const dt=Math.min(100,Math.max(0,t-(clock||t)));clock=t;updatePatrols(t);
+ const dt=Math.min(100,Math.max(0,t-(clock||t)));clock=t;updatePatrols(t);updateScanners(t,dt);
  if(mode==='drawing'&&t-lastTime>52){
   if((LEVELS[level].guards||[]).some(g=>g.patrol))for(let i=0;i<points.length;i+=Math.max(1,Math.floor(points.length/240))){let issue=hitGuardsOnly(points[i]);if(issue){fail(issue.msg,issue.kind,points[i]);break}}
   if(mode==='drawing')updateAwareness(t,Math.min(130,t-lastTime));
@@ -628,7 +684,7 @@ function animate(t){
  if(t-lastTime>52)lastTime=t;
  requestAnimationFrame(animate);
 }
-$('soundToggle').onclick=()=>{soundEnabled=!soundEnabled;$('soundToggle').textContent=soundEnabled?'🔊':'🔇';$('soundToggle').setAttribute('aria-label',soundEnabled?'Mute sound':'Turn sound on');$('soundToggle').setAttribute('aria-pressed',String(!soundEnabled));if(soundEnabled)playSound('boing')};$('reset').onclick=()=>{playSound('reset');load()};$('hint').onclick=()=>{playSound('hint');say(LEVELS[level].hint,true,6500)};$('next').onclick=()=>{if(level===LEVELS.length-1){level=0;attempt=0;load()}else{level++;attempt=0;load()}};window.addEventListener('keydown',ev=>{if(ev.key==='Escape')load();if(ev.key==='Enter'&&mode==='win')$('next').click()});
+$('soundToggle').onclick=()=>{soundEnabled=!soundEnabled;$('soundToggle').textContent=soundEnabled?'🔊':'🔇';$('soundToggle').setAttribute('aria-label',soundEnabled?'Mute sound':'Turn sound on');$('soundToggle').setAttribute('aria-pressed',String(!soundEnabled));if(soundEnabled)playSound('boing')};$('reset').onclick=()=>{playSound('reset');load()};$('hint').onclick=()=>{setMood('thinking',3500);playSound('hint');say(LEVELS[level].hint,true,6500)};$('next').onclick=()=>{if(level===LEVELS.length-1){level=0;attempt=0;load()}else{level++;attempt=0;load()}};window.addEventListener('keydown',ev=>{if(ev.key==='Escape')load();if(ev.key==='Enter'&&mode==='win')$('next').click()});
 load();requestAnimationFrame(animate);
 })();
 </script>
