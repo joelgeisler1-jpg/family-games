@@ -201,7 +201,8 @@ function processEvents() {
       pointer.cancel()
       document.documentElement.classList.remove('airport-playing')
       announce('Level complete. The sky is clear.', 'success')
-      showPanel('Level Complete', 'All aircraft are safely on the ground.', 'Fly again', '✓', { final: true, switchMode: true, complete: true })
+      const finale = session.level?.id === campaignLevels.at(-1).id
+      showPanel(finale ? 'Campaign Complete!' : 'Level Complete', finale ? 'Brilliant flying! You have safely cleared every airport in the campaign.' : 'All aircraft are safely on the ground.', 'Fly again', '✓', { final: true, switchMode: true, complete: true })
     }
   }
   if (session.mode === 'playing' && session.time - lastWarning > 3 && session.planes.some((plane) => plane.warning || plane.escape)) {
@@ -280,6 +281,15 @@ function frame(timestamp) {
     paintedMode = session.mode
   }
   requestAnimationFrame(frame)
+}
+
+// A PR-only review link allows the family to jump directly to new airports
+// without replaying earlier levels. The main published arcade stays locked
+// to saved progression, and no review unlocks are written to storage.
+const previewReviewAll = location.pathname.includes('/previews/pr-') &&
+  new URLSearchParams(location.search).get('review') === 'all'
+if (previewReviewAll) {
+  session.progress.unlockedLevels = campaignLevels.map(({ id }) => id)
 }
 
 function showMenu(focus = true) {
