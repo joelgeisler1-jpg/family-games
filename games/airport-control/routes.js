@@ -1,6 +1,16 @@
 import { clamp, destinationGate, distance, height, offset, projection, width } from './airfield.js'
 
 const spacing = 9
+// A tiny release tolerance prevents finger lift jitter from dropping a snap.
+// The path must first pass through the original 65-unit capture area.
+const releaseTolerance = 16
+
+export function snapsToRunway(draft, destination) {
+  const gate = destinationGate(destination)
+  const last = draft.at(-1)
+  if (!last || distance(last, gate) > destination.snapRadius + releaseTolerance) return false
+  return draft.some((point) => distance(point, gate) <= destination.snapRadius)
+}
 
 export function extendDraft(points, point) {
   const bounded = { x: clamp(point.x, 4, width - 4), y: clamp(point.y, 4, height - 4) }
@@ -39,8 +49,7 @@ export function planRoute(aircraft, draft, runway) {
   if (points.length < 2) return null
 
   const gate = destinationGate(runway)
-  const end = draft.at(-1)
-  const cleared = runway.id === aircraft.destinationId && distance(end, gate) <= runway.snapRadius
+  const cleared = runway.id === aircraft.destinationId && snapsToRunway(draft, runway)
   if (cleared) {
     // Replace the finger's endpoint with an aligned final whenever the route
     // reached the approach from upstream. Keep intentional go-arounds intact.

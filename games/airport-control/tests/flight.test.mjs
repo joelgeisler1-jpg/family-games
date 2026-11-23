@@ -4,7 +4,7 @@ import { aircraftTypes, angleDelta, distance, height, offset, coastalDestination
 import { buildLandingTexture, landingSoundProfile, TowerAudio } from '../audio.js'
 import { moveAircraft, newAircraft } from '../aircraft.js'
 import { matchingApproach } from '../landing.js'
-import { extendDraft, planRoute } from '../routes.js'
+import { extendDraft, planRoute, snapsToRunway } from '../routes.js'
 import { boundary, separation } from '../separation.js'
 import { Session } from '../session.js'
 import { arrivalInterval, chooseArrival, entryCandidate, safeEntry } from '../traffic.js'
@@ -70,6 +70,22 @@ test('both opening aircraft land on matching approaches and leave active traffic
   }
   assert.equal(game.score, 2)
   assert.equal(game.streak, 2)
+})
+
+test('runway snap tolerates a small touch-release overshoot but stays deliberate', () => {
+  const runway = runways.jet
+  const gate = offset(runway, runway.heading, -17)
+  const passing = [
+    { x: gate.x - 110, y: gate.y },
+    { x: gate.x - 42, y: gate.y },
+    { x: gate.x + 76, y: gate.y },
+  ]
+  assert.equal(snapsToRunway(passing, runway), true, 'path enters original zone and release is close')
+  assert.equal(snapsToRunway([passing[0], passing[2]], runway), false, 'must have visited 65-unit zone')
+  assert.equal(snapsToRunway([passing[0], passing[1], { x: gate.x + 86, y: gate.y }], runway), false, 'release far outside tolerance')
+  const plane = coastalAircraft(1, 'jet', { x: gate.x - 110, y: gate.y, heading: 0 })
+  assert.equal(planRoute(plane, passing, runway).cleared, true)
+  assert.equal(planRoute(plane, [passing[0], passing[2]], runway).cleared, false)
 })
 
 test('wrong runway, wrong direction and unfiled approaches never score', () => {
