@@ -1,0 +1,33 @@
+name: Family Arcade preview links
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-links:
+    name: Preview links / Safari
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out review revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify preview generator
+        run: node --test scripts/tests/preview-links.test.mjs
+
+      - name: Add game previews to job summary
+        env:
+          PREVIEW_REPO: ${{ github.repository }}
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/preview-links.mjs "$PREVIEW_REPO" "$PREVIEW_SHA" >> "$GITHUB_STEP_SUMMARY"
