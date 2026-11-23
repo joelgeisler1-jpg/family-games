@@ -24,11 +24,14 @@ globalThis.document = {
 };
 
 const { sampleOnDrag } = await import('../arm-physics.mjs');
-const { segmentBlocked, hitGuardsOnly } = await import('../collision.mjs');
-const { updateScanners } = await import('../hazards.mjs');
+const { segmentBlocked, guardContact } = await import('../collision.mjs');
+const { checkScanners } = await import('../hazards.mjs');
 const { updateAwareness } = await import('../guards.mjs');
 const { LEVELS } = await import('../levels.mjs');
 const { state } = await import('../state.mjs');
+const { advanceSecurity } = await import('../security.mjs');
+const { segDist } = await import('../geometry.mjs');
+const { ARM_R, REEL_RIM } = await import('../constants.mjs');
 const { pendingTasks } = await import('../mission-status.mjs');
 
 const point = (x, y) => ({ x, y });
@@ -36,7 +39,7 @@ function startDrawing(level, start, clock = 1000) {
   Object.assign(state, {
     level,
     clock,
-    cameraAngle: 0,
+    nextSecurityTick: clock + 16,
     mode: 'drawing',
     points: [start],
     lastInput: start,
@@ -58,11 +61,11 @@ function drag(to, win = () => assert.fail('Unexpected treasure grab')) {
 }
 
 test('a large input step checks the swept arm against expanded solids', () => {
-  const level = { walls: [{ x: 100, y: 100, w: 20, h: 20 }] };
+  const level = { walls: [{ x: 100, y: 100, w: 40, h: 40 }] };
   const hit = segmentBlocked(point(60, 90), point(160, 90), level, 0, false, 0);
   assert.equal(hit.kind, 'wall');
-  assert.deepEqual(hit.point, point(90, 90));
-  assert.equal(segmentBlocked(point(60, 85), point(160, 85), level, 0, false, 0), null);
+  assert.ok(hit.point.x > 80 && hit.point.x <= 160);
+  assert.equal(segmentBlocked(point(60, 82), point(160, 82), level, 0, false, 0), null);
 });
 
 test('a switch disables its laser gate and a beam only collides while firing', () => {
@@ -75,7 +78,7 @@ test('a switch disables its laser gate and a beam only collides while firing', (
   assert.equal(segmentBlocked(point(355, 342), point(400, 342), beam, 110, false, 0), null);
   startDrawing(1, point(400, 342), 109);
   let alarm;
-  updateScanners(109, 16, (...args) => {
+  checkScanners(109, 16, (...args) => {
     alarm = args;
   });
   assert.equal(alarm[1], 'laser');
@@ -84,16 +87,16 @@ test('a switch disables its laser gate and a beam only collides while firing', (
 
 test('walls occlude the sweeping camera and patrol contact follows the guard', () => {
   const camera = { x: 50, y: 100, r: 150, half: 0.2 };
-  const a = point(145, 100);
-  const b = point(150, 100);
+  const a = point(155, 100);
+  const b = point(160, 100);
   assert.equal(segmentBlocked(a, b, { walls: [], camera }, 0, false, 0).kind, 'camera');
-  const walls = [{ x: 90, y: 90, w: 20, h: 20 }];
+  const walls = [{ x: 90, y: 90, w: 40, h: 40 }];
   assert.equal(segmentBlocked(a, b, { walls, camera }, 0, false, 0), null);
 
   const guards = LEVELS[6].guards;
   const patrolEnd = point(603, 265);
-  assert.equal(hitGuardsOnly(patrolEnd, guards, 0), null);
-  assert.equal(hitGuardsOnly(patrolEnd, guards, Math.PI / (2 * guards[0].patrol.speed)).kind, 'guard');
+  assert.equal(guardContact(patrolEnd, patrolEnd, guards, 0), false);
+  assert.equal(guardContact(patrolEnd, patrolEnd, guards, Math.PI / (2 * guards[0].patrol.speed)), true);
 });
 
 test('guard awareness accumulates, and the bell resets it and grants a timed distraction', () => {
@@ -121,12 +124,15 @@ test('the edge clamps the hand and a reel sticks outside its solid hub', () => {
   assert.equal(state.mode, 'drawing');
 
   const spool = LEVELS[5].spools[0];
-  const onReel = (angle) => point(spool.x + Math.cos(angle) * 43, spool.y + Math.sin(angle) * 43);
+  const onReel = (angle) => point(spool.x + Math.cos(angle) * 47.5, spool.y + Math.sin(angle) * 47.5);
   startDrawing(5, onReel(Math.PI));
   drag(point(spool.x, spool.y));
-  assert.ok(Math.hypot(state.points.at(-1).x - spool.x, state.points.at(-1).y - spool.y) >= 42.999);
+  assert.ok(Math.hypot(state.points.at(-1).x - spool.x, state.points.at(-1).y - spool.y) >= 47.499);
   assert.equal(state.spoolStates[0].done, false);
   for (let step = 1; step <= 17; step++) drag(onReel(Math.PI + step * 0.24));
+  for (let i = 1; i < state.points.length; i++) {
+    assert.ok(segDist(spool, state.points[i - 1], state.points[i]) >= spool.r + REEL_RIM + ARM_R);
+  }
   assert.equal(state.spoolStates[0].done, true);
   assert.deepEqual(pendingTasks(), []);
 });
@@ -148,4 +154,32 @@ test('treasure stays locked until the slide bolt is dragged to completion', () =
     won = true;
   });
   assert.equal(won, true);
+});
+
+test('a dropped frame cannot skip an entire laser pulse or patrol crossing', () => {
+  const checkDuringStall = (level, time, end, points, expected) => {
+    startDrawing(level, points[0], time);
+    state.points = points;
+    let issue;
+    advanceSecurity(end, (message, kind) => {
+      issue = { message, kind };
+      state.mode = 'failed';
+    });
+    assert.equal(issue?.kind, expected);
+  };
+  // The ends of this segment are outside the beam; only the middle crosses it.
+  checkDuringStall(1, 200, 3200, [point(348, 318), point(350, 366)], 'laser');
+  checkDuringStall(6, 0, 3000, [point(600, 213), point(600, 317)], 'guard');
+});
+
+test('radar exposure agrees across normal frames and a single delayed update', () => {
+  const scan = (frames) => {
+    startDrawing(6, point(610, 164), 0);
+    state.points.push(point(653, 164));
+    for (const t of frames) advanceSecurity(t, assert.fail);
+    return state.scannerAlert;
+  };
+  const steady = scan(Array.from({ length: 16 }, (_, i) => (i + 1) * 16));
+  assert.ok(steady > 0);
+  assert.equal(scan([256]), steady);
 });

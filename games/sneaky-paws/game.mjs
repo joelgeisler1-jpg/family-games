@@ -1,12 +1,12 @@
+import { advanceSecurity } from './security.mjs';
 import { redraw } from './arm-physics.mjs';
 import { playSound } from './audio.mjs';
 import { setMood, showCharacter } from './characters.mjs';
-import { hitGuardsOnly } from './collision.mjs';
 import { SAVE, START } from './constants.mjs';
 import { $, actors, board, effects, stolen, svg, targetGroup } from './dom.mjs';
 import { dist } from './geometry.mjs';
-import { guardPos, updateAwareness, updatePatrols } from './guards.mjs';
-import { updateCamera, updateScanners } from './hazards.mjs';
+import { guardPos, renderAwareness, updatePatrols } from './guards.mjs';
+import { renderCamera, renderScanners } from './hazards.mjs';
 import { bindPointerControls } from './input.mjs';
 import { LEVELS } from './levels.mjs';
 import { drawStatic } from './scene.mjs';
@@ -154,23 +154,12 @@ function complete() {
   );
 }
 function animate(t) {
-  const dt = Math.min(100, Math.max(0, t - (state.clock || t)));
-  state.clock = t;
-  updatePatrols(t);
-  updateScanners(t, dt, fail);
-  if (state.mode === 'drawing' && t - state.lastTime > 52) {
-    if ((LEVELS[state.level].guards || []).some((g) => g.patrol))
-      for (let i = 0; i < state.points.length; i += Math.max(1, Math.floor(state.points.length / 240))) {
-        let issue = hitGuardsOnly(state.points[i], LEVELS[state.level].guards, state.clock);
-        if (issue) {
-          fail(issue.msg, issue.kind, state.points[i]);
-          break;
-        }
-      }
-    if (state.mode === 'drawing') updateAwareness(t, Math.min(130, t - state.lastTime), fail);
-  }
-  updateCamera(t, state.mode === 'drawing' && t - state.lastTime > 52, fail);
-  if (t - state.lastTime > 52) state.lastTime = t;
+  advanceSecurity(t, fail);
+  redraw();
+  updatePatrols(state.clock);
+  renderAwareness(state.clock);
+  renderScanners(state.clock);
+  renderCamera(state.clock);
   requestAnimationFrame(animate);
 }
 function next() {
@@ -179,6 +168,6 @@ function next() {
   load();
 }
 bindControls({ load, next });
-bindPointerControls({ fail, win });
+bindPointerControls({ fail, win, advance: (t) => advanceSecurity(t, fail) });
 load();
 requestAnimationFrame(animate);

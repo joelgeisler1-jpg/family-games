@@ -83,7 +83,7 @@ function drawStatic() {
       piece(`<g class="spool-unit" data-spool="${i}"><circle class="spool-halo" cx="${x}" cy="${y}" r="${r + 53}" fill="#73d7dc" opacity=".08"/>
    <circle class="spool-ring" cx="${x}" cy="${y}" r="${r + 47}" fill="none" stroke="#39abc0" stroke-dasharray="10 9" stroke-width="5" opacity=".74"/>
    <circle class="spool-progress" cx="${x}" cy="${y}" r="${r + 47}" fill="none" stroke="#55cc97" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 ${((r + 47) * Math.PI * 2).toFixed(2)}" transform="rotate(-90 ${x} ${y})"/>
-   <circle class="spool-groove" cx="${x}" cy="${y}" r="${r + ARM_R + 4}" fill="none" stroke="#36b7ba" stroke-width="3" stroke-dasharray="5 6" opacity=".7"/>
+   <circle class="spool-groove" cx="${x}" cy="${y}" r="${r + ARM_R + 3.5}" fill="none" stroke="#36b7ba" stroke-width="3" stroke-dasharray="5 6" opacity=".7"/>
    <circle cx="${x + 3}" cy="${y + 7}" r="${r + 4}" fill="#333c6a" opacity=".18"/>
    <circle cx="${x}" cy="${y}" r="${r + 5}" fill="#e7f7f9" stroke="#2d93ae" stroke-width="5"/>
    <g class="spool-core"><circle cx="${x}" cy="${y}" r="${r}" fill="#5cb6c9" stroke="#276a8c" stroke-width="3"/><circle cx="${x}" cy="${y}" r="${r - 10}" fill="#b2f6fa" stroke="#317894" stroke-width="3"/><path d="M${x} ${y - r + 6}v${2 * r - 12}M${x - r + 6} ${y}h${2 * r - 12}" stroke="#38819e" stroke-width="5"/></g>
