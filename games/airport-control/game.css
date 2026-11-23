@@ -79,6 +79,30 @@ button:not(:disabled):hover { filter: brightness(1.14); }
 h1, h2, h3, p { margin: 0; }
 h1 { font-size: clamp(27px, 4vw, 44px); letter-spacing: -0.055em; line-height: 0.98; }
 .controls { display: flex; align-items: center; gap: 7px; }
+.arcade-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 11px;
+  border: 1px solid #41616a;
+  border-radius: 12px;
+  background: #203941;
+  color: #f9f1dc;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+.arcade-back:hover { filter: brightness(1.14); }
+.arcade-back:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+.arcade-back span:first-child { font-size: 20px; line-height: 1; }
+@media (max-width: 440px) {
+  .arcade-back-label { display: none; }
+  .arcade-back { width: 44px; padding: 0; }
+}
 .controls button { display: grid; place-items: center; padding: 0; }
 .controls svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linejoin: round; stroke-linecap: round; }
 .audio-on, [aria-pressed="true"] .audio-off { display: none; }
