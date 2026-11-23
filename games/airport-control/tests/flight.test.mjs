@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { angleDelta, distance, height, offset, runways, step, width } from '../airfield.js'
+import { landingSoundProfile, TowerAudio } from '../audio.js'
 import { moveAircraft, newAircraft } from '../aircraft.js'
 import { matchingApproach } from '../landing.js'
 import { extendDraft, planRoute } from '../routes.js'
@@ -235,4 +236,18 @@ test('an authored six-minute shift reaches busy airspace while both runways stay
   assert.equal(game.mode, 'playing')
   assert.ok(game.score >= 25, `Expected at least 25 landings, got ${game.score}`)
   assert.ok(peakTraffic >= 3)
+})
+
+
+test('touchdown audio profiles are distinct and never play when muted', () => {
+  const jet = landingSoundProfile('jet')
+  const prop = landingSoundProfile('prop')
+  assert.ok(jet && prop)
+  assert.ok(jet.duration > prop.duration)
+  assert.notEqual(jet.base, prop.base)
+  assert.equal(landingSoundProfile('unknown'), null)
+  const audio = new TowerAudio()
+  assert.equal(audio.enabled, false)
+  assert.doesNotThrow(() => audio.play('landing', 'jet'))
+  assert.doesNotThrow(() => audio.play('landing', 'prop'))
 })
