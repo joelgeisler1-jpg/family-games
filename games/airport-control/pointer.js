@@ -19,6 +19,12 @@ export function installPointer(canvas, session, onSelect) {
     if (canvas.hasPointerCapture?.(pointer)) canvas.releasePointerCapture(pointer)
   }
 
+  // Some iOS Safari builds still try to pan a scrollable ancestor during a
+  // gesture. Explicit non-passive touchmove suppression protects route drawing.
+  canvas.addEventListener('touchmove', (event) => {
+    if (session.mode === 'playing' && event.cancelable) event.preventDefault()
+  }, { passive: false })
+
   canvas.addEventListener('pointerdown', (event) => {
     if (draft || session.mode !== 'playing' || event.button !== 0) return
     const position = point(event)
@@ -40,6 +46,7 @@ export function installPointer(canvas, session, onSelect) {
 
   canvas.addEventListener('pointermove', (event) => {
     if (draft?.pointer !== event.pointerId) return
+    if (event.cancelable) event.preventDefault()
     const samples = event.getCoalescedEvents?.()
     for (const sample of samples?.length ? samples : [event]) extendDraft(draft.points, point(sample))
   })

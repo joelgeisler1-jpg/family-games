@@ -6,7 +6,7 @@ import { matchingApproach } from '../landing.js'
 import { extendDraft, planRoute } from '../routes.js'
 import { boundary, separation } from '../separation.js'
 import { Session } from '../session.js'
-import { arrivalInterval, chooseArrival, safeEntry } from '../traffic.js'
+import { arrivalInterval, chooseArrival, entryCandidate, safeEntry } from '../traffic.js'
 
 function draw(plane, ...waypoints) {
   const draft = [{ x: plane.x, y: plane.y }]
@@ -130,6 +130,25 @@ test('entries require clear positions and clear projected inbound corridors', ()
   }
 })
 
+test('arrivals rotate through all borders with varied entry lanes', () => {
+  const samples = Array.from({ length: 40 }, (_, i) => entryCandidate(i + 2))
+  assert.ok(samples.some(entry => entry.x === 27), 'west arrivals')
+  assert.ok(samples.some(entry => entry.x === 653), 'east arrivals')
+  assert.ok(samples.some(entry => entry.y === 28), 'north arrivals')
+  assert.ok(samples.some(entry => entry.y === 752), 'south arrivals')
+  assert.ok(new Set(samples.map(entry => Math.round(entry.x) + ':' + Math.round(entry.y))).size >= 20)
+})
+
+test('the second aircraft arrives after a short opening pause', () => {
+  const game = new Session()
+  game.start()
+  assert.equal(game.nextArrival, 9)
+  // Keep first plane clear of the initial arrivals so the timing can be assessed.
+  game.planes = []
+  until(game, () => game.arrivals === 2, 10)
+  assert.ok(game.time <= 9.1, 'second arrival should not leave a long empty interval')
+})
+
 test('all blocked entries defer and retry without consuming the arrival', () => {
   const game = new Session()
   game.start()
@@ -150,7 +169,7 @@ test('all blocked entries defer and retry without consuming the arrival', () => 
 })
 
 test('arrival spacing tightens, then caps at a positive interval', () => {
-  assert.deepEqual([0, 60, 120, 180, 240, 300, 360, 420, 1200].map(arrivalInterval), [30, 20, 15, 12, 8.6, 7.7, 7, 6.5, 6.5])
+  assert.deepEqual([0, 60, 120, 180, 240, 300, 360, 420, 1200].map(arrivalInterval), [12, 10, 8.5, 7.5, 6.5, 6, 5.5, 5, 5])
 })
 
 test('pause holds the clock and aircraft, while reset preserves the local best', () => {
