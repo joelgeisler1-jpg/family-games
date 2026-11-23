@@ -1,5 +1,6 @@
 import { height, offset, runways, width } from './airfield.js'
 import { createScenery, paintBoat } from './scenery.js'
+import { planRoute, runwaySnap } from './routes.js'
 
 const silhouettes = {
   jet: 'M 23 0 Q 24 -3 16 -5 L 1 -6 L -12 -23 L -18 -23 L -11 -6 L -21 -5 L -27 -11 L -31 -11 L -28 0 L -31 11 L -27 11 L -21 5 L -11 6 L -18 23 L -12 23 L 1 6 L 16 5 Q 24 3 23 0 Z',
@@ -190,8 +191,9 @@ export class AirportView {
       if (boat > 29 && boat < 163) paintBoat(ctx, 34 + boat * 0.3, 370 + boat, 1.25)
     }
 
+    const snapped = draft ? runwaySnap(draft.points.at(-1), runways[draft.plane.kind]) : null
     for (const [kind, runway] of Object.entries(runways)) {
-      paintRunwayGate(ctx, runway, kind, session.planes.some((plane) => plane.kind === kind && plane.route?.cleared))
+      paintRunwayGate(ctx, runway, kind, session.planes.some((plane) => plane.kind === kind && plane.route?.cleared) || Boolean(snapped && draft?.plane.kind === kind))
     }
 
     if (session.mode === 'playing' && session.arrivals === 1 && session.score === 0 && !draft && !session.planes[0]?.route) {
@@ -204,7 +206,18 @@ export class AirportView {
         trail(ctx, [plane, ...plane.route.points.slice(plane.route.cursor)], runways[plane.kind].color)
       }
     }
-    if (draft) trail(ctx, draft.points, runways[draft.plane.kind].color, true)
+    if (draft) {
+      const runway = runways[draft.plane.kind]
+      if (snapped) {
+        // Show the real filed path, including its assisted final approach,
+        // before the player releases the finger.
+        const planned = planRoute(draft.plane, draft.points, runway)
+        trail(ctx, planned?.points ?? draft.points, runway.color, true)
+        badge(ctx, snapped.gate.x, snapped.gate.y - 50, `SNAPPED TO ${runway.number}`, runway.color, 13)
+      } else {
+        trail(ctx, draft.points, runway.color, true)
+      }
+    }
     for (const plane of session.planes) paintAircraft(ctx, plane, session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind])
 
     for (const effect of effects) {
