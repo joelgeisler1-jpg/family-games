@@ -1,13 +1,17 @@
 import { aircraftTypes, destinationGate, height, offset, width } from './airfield.js'
+import { paintIslandActivity } from './island.js'
+import { snapsToDestination } from './routes.js'
 import { createScenery, paintBoat } from './scenery.js'
 import { paintRegionalTrain } from './regional.js'
 
 const silhouettes = {
+  heli: 'M 24 0 C 24 -7 16 -11 7 -11 L -3 -10 Q -10 -9 -13 -5 L -25 -3 L -33 -9 H -36 L -33 0 L -36 9 H -33 L -25 3 L -13 5 Q -10 9 -3 10 L 7 11 C 16 11 24 7 24 0 Z',
   turbo: 'M 23 0 Q 25 -5 13 -6 L 0 -6 L -2 -24 L -7 -25 L -11 -22 L -11 -6 L -22 -4 L -27 -13 L -32 -13 L -29 0 L -32 13 L -27 13 L -22 4 L -11 6 L -11 22 L -7 25 L -2 24 L 0 6 L 13 6 Q 25 5 23 0 Z',
   jet: 'M 23 0 Q 24 -3 16 -5 L 1 -6 L -12 -23 L -18 -23 L -11 -6 L -21 -5 L -27 -11 L -31 -11 L -28 0 L -31 11 L -27 11 L -21 5 L -11 6 L -18 23 L -12 23 L 1 6 L 16 5 Q 24 3 23 0 Z',
   prop: 'M 20 0 Q 20 -4 14 -5 L 4 -5 L 2 -19 Q -2 -22 -5 -18 L -5 -5 L -15 -3 L -20 -10 L -23 -10 L -21 0 L -23 10 L -20 10 L -15 3 L -5 5 L -5 18 Q -2 22 2 19 L 4 5 L 14 5 Q 20 4 20 0 Z',
 }
 const trimPaths = {
+  heli: 'M -28 -2 L -10 -5 L -2 -9 L 3 -9 L -2 -3 L -24 1 Z M -28 2 L -10 5 L -2 9 L 3 9 L -2 3 L -24 -1 Z',
   turbo: 'M -5 -6 L -7 -21 L -10 -20 L -10 -6 Z M -5 6 L -7 21 L -10 20 L -10 6 Z M -30 -10 L -27 -10 L -25 -5 H -29 Z M -30 10 L -27 10 L -25 5 H -29 Z',
   jet: 'M -8 -7 L -14 -21 H -17 L -11 -6 Z M -8 7 L -14 21 H -17 L -11 6 Z',
   prop: 'M 1 -7 L 0 -18 Q -3 -20 -4 -17 V -7 Z M 1 7 L 0 18 Q -3 20 -4 17 V 7 Z',
@@ -89,9 +93,72 @@ function paintRunwayGate(ctx, runway, armed) {
   badge(ctx, gate.x + (vertical ? 39 : 0), gate.y + (vertical ? 0 : 38), runway.id, runway.color, 16)
 }
 
+function paintHelipad(ctx, pad, armed, settling) {
+  ctx.save()
+  ctx.translate(pad.x, pad.y)
+  ctx.beginPath()
+  for (let corner = 0; corner < 8; corner++) {
+    const point = offset({ x: 0, y: 0 }, Math.PI / 8 + corner * Math.PI / 4, 29)
+    if (corner === 0) ctx.moveTo(point.x, point.y)
+    else ctx.lineTo(point.x, point.y)
+  }
+  ctx.closePath()
+  ctx.fillStyle = armed || settling ? '#305443' : '#213e45'
+  ctx.fill()
+  ctx.lineWidth = armed || settling ? 5 : 3
+  ctx.strokeStyle = pad.color
+  ctx.stroke()
+  ring(ctx, 0, 0, 20, '#d8f4c17a', 1.75)
+  ctx.font = '850 27px system-ui'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillStyle = '#ecf6cd'
+  ctx.fillText(pad.id, 0, 0.5)
+  ctx.restore()
+}
+
+function paintRescueMarkings(ctx, time, reducedMotion, progress) {
+  ctx.strokeStyle = '#263a45'
+  ctx.lineWidth = 2.8
+  ctx.beginPath()
+  for (const rail of [-13, 13]) {
+    ctx.moveTo(-10, rail)
+    ctx.lineTo(14, rail)
+    ctx.quadraticCurveTo(18, rail, 21, rail * 0.8)
+  }
+  ctx.stroke()
+  ctx.fillStyle = '#d76c49'
+  ctx.fillRect(-9, -6, 7, 12)
+  ctx.fillStyle = '#f8f4d3'
+  ctx.fillRect(-7, -1.5, 6, 3)
+  ctx.fillStyle = '#477282'
+  ctx.beginPath()
+  ctx.ellipse(14, 0, 6, 7, 0, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.save()
+  ctx.translate(1, 0)
+  if (!reducedMotion) {
+    ring(ctx, 0, 0, 26, '#effbe46b', 2.4)
+    ctx.rotate(time * 21)
+  }
+  ctx.strokeStyle = reducedMotion ? '#334b52' : '#eaf4d9a4'
+  ctx.lineWidth = progress > 0.85 ? 2 : 3
+  ctx.beginPath()
+  ctx.moveTo(-25, 0)
+  ctx.lineTo(26, 0)
+  ctx.moveTo(0, -24)
+  ctx.lineTo(0, 25)
+  ctx.stroke()
+  ctx.fillStyle = '#324954'
+  ctx.beginPath()
+  ctx.arc(0, 0, 3.4, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.restore()
+}
+
 function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, { silhouette, trim }) {
   const type = aircraftTypes[plane.kind]
-  const progress = (plane.landing?.time ?? 0) / 1.55
+  const progress = (plane.landing?.time ?? 0) / (type.landingDuration ?? 1.55)
   const scale = type.size * (1 - progress * 0.24)
   const warning = plane.warning || (plane.escape ? 1 : 0)
   const x = Math.max(14, Math.min(width - 14, plane.x))
@@ -152,6 +219,8 @@ function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, {
       ctx.lineTo(4, engine + 6)
     }
     ctx.stroke()
+  } else if (plane.kind === 'heli') {
+    paintRescueMarkings(ctx, time, reducedMotion, progress)
   } else {
     ctx.strokeStyle = '#e6f8ef'
     ctx.globalAlpha *= reducedMotion ? 0.65 : 0.43 + Math.sin(time * 44) * 0.18
@@ -161,7 +230,7 @@ function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, {
     ctx.lineTo(21, 8)
     ctx.stroke()
   }
-  if (!reducedMotion && Math.sin(time * 4 + plane.id) > 0.35) {
+  if (plane.kind !== 'heli' && !reducedMotion && Math.sin(time * 4 + plane.id) > 0.35) {
     ctx.fillStyle = '#fca19b'
     ctx.fillRect(-13, -17, 3, 3)
     ctx.fillStyle = '#c5f8b4'
@@ -212,8 +281,18 @@ export class AirportView {
     }
 
     if (!reducedMotion && this.airport.scenery === 'regional') paintRegionalTrain(ctx, session.time)
+    if (!reducedMotion && this.airport.scenery === 'island') paintIslandActivity(ctx, session.time)
+    const draftDestination = draft && session.destinationFor(draft.plane)
+    const readyToSnap = draftDestination && snapsToDestination(draft.points, draftDestination)
     for (const destination of Object.values(this.airport.destinations)) {
-      paintRunwayGate(ctx, destination, session.planes.some((plane) => plane.route?.destinationId === destination.id))
+      const armed = (readyToSnap && draftDestination === destination) ||
+        session.planes.some((plane) => plane.route?.destinationId === destination.id)
+      if (destination.type === 'helipad') {
+        const settling = session.planes.some((plane) => plane.destinationId === destination.id && plane.landing)
+        paintHelipad(ctx, destination, armed, settling)
+      } else {
+        paintRunwayGate(ctx, destination, armed)
+      }
     }
 
     const first = session.planes[0]

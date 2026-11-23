@@ -1,4 +1,4 @@
-import { newAircraft, moveAircraft } from './aircraft.js'
+import { airspeed, isAirborne, moveAircraft, newAircraft } from './aircraft.js'
 import { campaignLevels, coastalAirport, loadCampaignProgress, recordCompletion } from './campaign.js'
 import { advanceLanding, matchingApproach } from './landing.js'
 import { boundary, separation } from './separation.js'
@@ -74,8 +74,14 @@ export class Session {
   step(dt) {
     if (this.mode !== 'playing') return
     this.time += dt
-    const airborne = this.planes.filter((plane) => !plane.landing)
-    const previous = airborne.map((plane) => moveAircraft(plane, dt))
+    const airborne = this.planes.filter(isAirborne)
+    const settled = []
+    const previous = airborne.map((plane) => {
+      if (!plane.landing) return moveAircraft(plane, dt)
+      const before = { x: plane.x, y: plane.y }
+      if (advanceLanding(plane, dt, this.destinationFor(plane))) settled.push(plane)
+      return before
+    })
 
     for (let index = 0; index < airborne.length; index++) {
       const plane = airborne[index]
@@ -103,7 +109,12 @@ export class Session {
       }
     }
 
-    this.planes = this.planes.filter((plane) => !plane.landing || !advanceLanding(plane, dt, this.destinationFor(plane)))
+    for (const plane of settled) this.scoreLanding(plane)
+    this.planes = this.planes.filter((plane) => {
+      if (!plane.landing) return true
+      if (isAirborne(plane)) return !settled.includes(plane)
+      return !advanceLanding(plane, dt, this.destinationFor(plane))
+    })
     for (let index = 0; index < airborne.length; index++) {
       const plane = airborne[index]
       if (matchingApproach(plane, previous[index], this.destinationFor(plane))) this.land(plane)
@@ -125,6 +136,15 @@ export class Session {
   land(plane) {
     plane.landing = { x: plane.x, y: plane.y, heading: plane.heading, time: 0 }
     plane.route = null
+    if (plane.kind === 'heli') {
+      plane.landing.speed = airspeed(plane)
+      this.events.push({ type: 'settle' })
+    } else {
+      this.scoreLanding(plane)
+    }
+  }
+
+  scoreLanding(plane) {
     this.score++
     this.streak = this.time - this.lastLanding <= 34 ? this.streak + 1 : 1
     this.lastLanding = this.time
@@ -140,7 +160,7 @@ export class Session {
   }
 
   get traffic() {
-    return this.planes.filter((plane) => !plane.landing).length
+    return this.planes.filter(isAirborne).length
   }
 
   get level() {

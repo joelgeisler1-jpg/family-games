@@ -1,4 +1,5 @@
 import { aircraftTypes, distance, offset } from './airfield.js'
+import { airspeed, isAirborne } from './aircraft.js'
 import { coastalAirport } from './campaign.js'
 
 export function arrivalInterval(seconds, airport = coastalAirport) {
@@ -24,14 +25,14 @@ export function entryCandidate(index, attempt = 0) {
 
 export function safeEntry(entry, kind, planes) {
   for (const plane of planes) {
-    if (plane.landing) continue
+    if (!isAirborne(plane)) continue
     if (distance(entry, plane) < 122) return false
     // Protect a moving arrival's first five seconds even against a head-on entry.
     const incomingSpeed = aircraftTypes[kind].speed
-    const nearbySpeed = aircraftTypes[plane.kind].speed
+    const nearbySpeed = airspeed(plane)
     for (let time = 1; time <= 5; time++) {
       const inbound = offset(entry, entry.heading, incomingSpeed * time)
-      const nearby = offset(plane, plane.heading, nearbySpeed * time)
+      const nearby = offset(plane, plane.landing?.track ?? plane.heading, nearbySpeed * time)
       if (distance(inbound, nearby) < 84) return false
     }
   }

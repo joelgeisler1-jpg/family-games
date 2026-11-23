@@ -1,6 +1,6 @@
 # Airport Control — campaign roadmap
 
-> **Status:** Coastal Airport, Regional Junction and Endless Challenge are playable. Levels 3–5 are proposed.
+> **Status:** Coastal Airport, Regional Junction, Island Rescue and Endless Challenge are playable. City International and Grand Airport await their own review stages.
 
 ## Design objectives
 - Accessible for the family's 6- and 9-year-old players; intuitive first level and growing tactical depth.
@@ -17,7 +17,7 @@
 6. Save unlocked levels and personal bests locally, defensively as current game does; never require accounts.
 7. Do not advance or unlock a new level solely because time elapsed or the landing quota was reached. A safe shift closure matters.
 
-## Proposed difficulty roadmap
+## Campaign difficulty roadmap
 
 | Level | Working name | Approx. duration | Landing target | Destinations | New skill |
 | --- | --- | --- | --- | --- | --- |
@@ -29,19 +29,19 @@
 
 **Numbers are targets for playtesting, not committed progression values.** Adjust to ensure the difficulty rises without spikes.
 
-## Helicopters and helipads (from Level 3)
+## Helicopters and helipads
 - Visually distinctive helicopter body and spinning rotor; own clearly marked **H** pad.
 - Lower cruise speed, smaller turn radius than airliners; no need to approach from a runway-heading corridor.
-- Helipad has a **smaller snap radius** than runways and requires safe proximity and sufficiently low speed / hover to land. Introduce a short, visually clear descent effect.
-- Design path planning and collision behaviour so helicopters and fixed-wing aircraft share airspace fairly; do not teleport to pad.
+- Helipad snaps within 38 map units. Capture requires a filed final approach within 13 units of the center and at five units per second or slower. The helicopter visibly settles onto the center before scoring.
+- Fixed-wing aircraft and helicopters share the same swept collision checks, including while helicopters descend.
 - Keep destination identification accessible via **H** letter and outline/shape, not colour alone.
 
 ## Engineering plan — separate future PRs
 1. Define campaign metadata, level rules, objective displays, completion-state transitions and progression persistence in testable modules.
 2. Playtest Level 1 completion and Endless Challenge on physical iPhone and iPad.
 3. Build Level 2 airport scenery, third runway and third fixed-wing traffic profile.
-4. Add helicopter movement, helipad approach/capture, collision checks, animation and audio for Level 3.
-5. Add Levels 4–5 only once earlier levels are tested on physical iPhone/iPad.
+4. Review Island Rescue helicopter movement, helipad capture and Foley on physical iPhone/iPad.
+5. Build City International and Grand Airport on the approved main branch in separate stages.
 6. Test boundary cases: quota reached before time, time reached before quota, remaining aircraft while cleared, collision during clearance, pause/visibility, reload, storage unavailable, and wrong destination.
 
 **Release gate:** Do not link new levels on the Family Arcade homepage or auto-merge without owner approval.

@@ -6,6 +6,7 @@ export const aircraftTypes = {
   jet: { label: 'Airliner', speed: 34, turn: 1.25, size: 1.18, collisionRadius: 15 },
   prop: { label: 'Light plane', speed: 26, turn: 1.9, size: 0.92, collisionRadius: 12 },
   turbo: { label: 'Turboprop', speed: 30, turn: 1.53, size: 1.06, collisionRadius: 14 },
+  heli: { label: 'Rescue helicopter', speed: 21, turn: 2.7, size: 1, collisionRadius: 12, landingDuration: 1.25 },
 }
 
 export const runwaySnapRadius = 65
@@ -14,13 +15,17 @@ export function runway(id, label, shape, color, x, y, heading, length, width, ra
   return { id, label, shape, color, x, y, heading, length, width, radius, angle, type: 'runway', snapRadius: runwaySnapRadius }
 }
 
+export function helipad(id, label, color, x, y) {
+  return { id, label, color, x, y, type: 'helipad', shape: 'octagon', radius: 13, snapRadius: 38 }
+}
+
 export const coastalDestinations = {
   '09': runway('09', 'Main runway', 'diamond', '#ffb36a', 237, 360, 0, 359, 54, 37, 0.93),
   '27': runway('27', 'Short runway', 'circle', '#80e6ff', 491, 531, Math.PI, 283, 37, 35, 1.08),
 }
 
 export function destinationGate(destination) {
-  return offset(destination, destination.heading, -17)
+  return destination.type === 'helipad' ? { x: destination.x, y: destination.y } : offset(destination, destination.heading, -17)
 }
 
 export const clamp = (value, low, high) => Math.max(low, Math.min(high, value))
