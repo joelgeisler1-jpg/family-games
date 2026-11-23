@@ -1,0 +1,225 @@
+import { height, offset, runways, width } from './airfield.js'
+import { createScenery, paintBoat } from './scenery.js'
+
+const silhouettes = {
+  jet: 'M 23 0 Q 24 -3 16 -5 L 1 -6 L -12 -23 L -18 -23 L -11 -6 L -21 -5 L -27 -11 L -31 -11 L -28 0 L -31 11 L -27 11 L -21 5 L -11 6 L -18 23 L -12 23 L 1 6 L 16 5 Q 24 3 23 0 Z',
+  prop: 'M 20 0 Q 20 -4 14 -5 L 4 -5 L 2 -19 Q -2 -22 -5 -18 L -5 -5 L -15 -3 L -20 -10 L -23 -10 L -21 0 L -23 10 L -20 10 L -15 3 L -5 5 L -5 18 Q -2 22 2 19 L 4 5 L 14 5 Q 20 4 20 0 Z',
+}
+const trimPaths = {
+  jet: 'M -8 -7 L -14 -21 H -17 L -11 -6 Z M -8 7 L -14 21 H -17 L -11 6 Z',
+  prop: 'M 1 -7 L 0 -18 Q -3 -20 -4 -17 V -7 Z M 1 7 L 0 18 Q -3 20 -4 17 V 7 Z',
+}
+
+function ring(ctx, x, y, radius, color, weight = 2) {
+  ctx.beginPath()
+  ctx.arc(x, y, radius, 0, Math.PI * 2)
+  ctx.lineWidth = weight
+  ctx.strokeStyle = color
+  ctx.stroke()
+}
+
+function badge(ctx, x, y, text, color, size = 13) {
+  ctx.font = `800 ${size}px system-ui`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  const w = ctx.measureText(text).width + 15
+  ctx.fillStyle = '#102933'
+  ctx.beginPath()
+  ctx.roundRect(x - w / 2, y - size * 0.8, w, size * 1.6, 5)
+  ctx.fill()
+  ctx.fillStyle = color
+  ctx.fillText(text, x, y + 0.5)
+}
+
+function trail(ctx, points, color, draft = false) {
+  if (points.length < 2) return
+  ctx.beginPath()
+  ctx.moveTo(points[0].x, points[0].y)
+  for (let index = 1; index < points.length - 1; index++) {
+    const a = points[index]
+    const b = points[index + 1]
+    ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2)
+  }
+  ctx.lineTo(points.at(-1).x, points.at(-1).y)
+  ctx.strokeStyle = '#15353da8'
+  ctx.lineWidth = draft ? 8 : 6
+  ctx.stroke()
+  ctx.strokeStyle = color
+  ctx.lineWidth = draft ? 4 : 3
+  ctx.setLineDash(draft ? [] : [9, 7])
+  ctx.stroke()
+  ctx.setLineDash([])
+  ring(ctx, points.at(-1).x, points.at(-1).y, draft ? 7 : 5, color)
+}
+
+function paintRunwayGate(ctx, runway, kind, armed) {
+  const gate = offset(runway, runway.heading, -17)
+  ctx.save()
+  ctx.translate(gate.x, gate.y)
+  ctx.rotate(runway.heading)
+  ctx.beginPath()
+  if (kind === 'prop') ctx.arc(0, 0, 20, 0, Math.PI * 2)
+  else {
+    ctx.moveTo(0, -24)
+    ctx.lineTo(24, 0)
+    ctx.lineTo(0, 24)
+    ctx.lineTo(-24, 0)
+    ctx.closePath()
+  }
+  ctx.fillStyle = armed ? '#223b39' : '#263f43'
+  ctx.fill()
+  ctx.strokeStyle = runway.color
+  ctx.lineWidth = armed ? 5 : 2.75
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(-8, -8)
+  ctx.lineTo(2, 0)
+  ctx.lineTo(-8, 8)
+  ctx.moveTo(1, -8)
+  ctx.lineTo(11, 0)
+  ctx.lineTo(1, 8)
+  ctx.lineWidth = 3
+  ctx.stroke()
+  ctx.restore()
+  badge(ctx, gate.x, gate.y + 38, runway.number, runway.color, 16)
+}
+
+function paintAircraft(ctx, plane, time, selected, reducedMotion, { silhouette, trim }) {
+  const type = runways[plane.kind]
+  const progress = (plane.landing?.time ?? 0) / 1.55
+  const scale = type.size * (1 - progress * 0.24)
+  const warning = plane.warning || (plane.escape ? 1 : 0)
+  const x = Math.max(14, Math.min(width - 14, plane.x))
+  const y = Math.max(14, Math.min(height - 14, plane.y))
+  if (selected) ring(ctx, x, y, 36, type.color, 3)
+  if (!warning && !selected && plane.age < 2 && !plane.landing) {
+    ctx.save()
+    ctx.globalAlpha = reducedMotion ? 0.8 : 1 - plane.age / 2
+    ring(ctx, x, y, 32 + (reducedMotion ? 0 : plane.age * 5), type.color, 2.5)
+    ctx.restore()
+  }
+  if (warning) {
+    const severity = warning === 2 ? '#ff816e' : '#ffdf85'
+    ring(ctx, x, y, 33, '#273844', 5)
+    ring(ctx, x, y, 33, severity, 3)
+    if (!reducedMotion) ring(ctx, x, y, 39 + Math.sin(time * 7) * 3, severity + '88', 1.5)
+    badge(ctx, x, y - 45, plane.escape ? 'TURN BACK' : '!', severity)
+  }
+
+  ctx.save()
+  ctx.globalAlpha = 1 - Math.max(0, progress - 0.7) * 2.8
+  ctx.translate(plane.x, plane.y)
+  ctx.save()
+  ctx.translate(6 * (1 - progress), 8 * (1 - progress))
+  ctx.rotate(plane.heading)
+  ctx.scale(scale, scale)
+  ctx.fillStyle = '#142d3770'
+  ctx.fill(silhouette)
+  ctx.restore()
+  ctx.rotate(plane.heading)
+  ctx.scale(scale, scale)
+  ctx.fillStyle = '#fff3d8'
+  ctx.strokeStyle = '#253a44'
+  ctx.lineWidth = 2
+  ctx.fill(silhouette)
+  ctx.stroke(silhouette)
+  ctx.fillStyle = type.color
+  ctx.fill(trim)
+  ctx.fillStyle = '#305066'
+  ctx.beginPath()
+  ctx.ellipse(13, 0, 4, 2.6, 0, 0, Math.PI * 2)
+  ctx.fill()
+  if (plane.kind === 'jet') {
+    ctx.fillStyle = '#687b82'
+    ctx.fillRect(-9, -12, 7, 4)
+    ctx.fillRect(-9, 8, 7, 4)
+    for (let x = -14; x <= 5; x += 4) ctx.fillRect(x, -2, 1.5, 4)
+  } else {
+    ctx.strokeStyle = '#e6f8ef'
+    ctx.globalAlpha *= reducedMotion ? 0.65 : 0.43 + Math.sin(time * 44) * 0.18
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.moveTo(21, -8)
+    ctx.lineTo(21, 8)
+    ctx.stroke()
+  }
+  if (!reducedMotion && Math.sin(time * 4 + plane.id) > 0.35) {
+    ctx.fillStyle = '#fca19b'
+    ctx.fillRect(-13, -17, 3, 3)
+    ctx.fillStyle = '#c5f8b4'
+    ctx.fillRect(-13, 14, 3, 3)
+  }
+  ctx.restore()
+  if (!plane.landing && !plane.escape && !plane.warning) badge(ctx, x, y + 32, type.number, type.color, 14)
+}
+
+export class AirportView {
+  constructor(canvas) {
+    this.canvas = canvas
+    this.ctx = canvas.getContext('2d', { alpha: false })
+    this.scenery = createScenery()
+    this.paths = Object.fromEntries(Object.entries(silhouettes).map(([kind, path]) => [
+      kind, { silhouette: new Path2D(path), trim: new Path2D(trimPaths[kind]) },
+    ]))
+  }
+
+  paint(session, draft, effects, reducedMotion) {
+    const { canvas, ctx } = this
+    const dpr = Math.min(devicePixelRatio || 1, 2)
+    const pixelWidth = Math.round(canvas.clientWidth * dpr)
+    const pixelHeight = Math.round(canvas.clientHeight * dpr)
+    if (pixelWidth < 1 || pixelHeight < 1) return
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+      canvas.width = pixelWidth
+      canvas.height = pixelHeight
+    }
+    ctx.setTransform(pixelWidth / width, 0, 0, pixelHeight / height, 0, 0)
+    ctx.drawImage(this.scenery, 0, 0, width, height)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+
+    if (!reducedMotion) {
+      const sweep = session.time * 0.7
+      ctx.beginPath()
+      ctx.moveTo(542, 424)
+      ctx.arc(542, 424, 48, sweep - 0.51, sweep)
+      ctx.closePath()
+      ctx.fillStyle = '#c8f4d43b'
+      ctx.fill()
+      const boat = (session.time * 4) % 180
+      if (boat > 29 && boat < 163) paintBoat(ctx, 34 + boat * 0.3, 370 + boat, 1.25)
+    }
+
+    for (const [kind, runway] of Object.entries(runways)) {
+      paintRunwayGate(ctx, runway, kind, session.planes.some((plane) => plane.kind === kind && plane.route?.cleared))
+    }
+
+    if (session.mode === 'playing' && session.arrivals === 1 && session.score === 0 && !draft && !session.planes[0]?.route) {
+      const plane = session.planes[0]
+      const gate = offset(runways.jet, 0, -17)
+      if (plane.x < gate.x - 28) trail(ctx, [{ x: plane.x + 27, y: plane.y }, gate], '#ffe9ad')
+    }
+    for (const plane of session.planes) {
+      if (plane.route && plane !== draft?.plane) {
+        trail(ctx, [plane, ...plane.route.points.slice(plane.route.cursor)], runways[plane.kind].color)
+      }
+    }
+    if (draft) trail(ctx, draft.points, runways[draft.plane.kind].color, true)
+    for (const plane of session.planes) paintAircraft(ctx, plane, session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind])
+
+    for (const effect of effects) {
+      const age = session.time - effect.time
+      const rise = reducedMotion ? 0 : age * 29
+      ctx.save()
+      ctx.globalAlpha = Math.max(0, 1 - age / 1.65)
+      if (!reducedMotion) {
+        for (let i = 0; i < 7; i++) {
+          const spark = offset(effect, i * 0.9, 14 + age * 38)
+          ring(ctx, spark.x, spark.y, 2.6 * (1 - age / 1.65), effect.color, 2)
+        }
+      }
+      badge(ctx, effect.x, effect.y - 36 - rise, '+1', effect.color, 21)
+      ctx.restore()
+    }
+  }
+}
