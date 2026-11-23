@@ -56,7 +56,7 @@ export class Session {
     }
     this.planes.push(newAircraft(++this.arrivals, arrival.kind, arrival.entry))
     this.events.push({ type: 'arrival', kind: arrival.kind })
-    this.nextArrival = this.time + (this.arrivals === 1 ? 25 : arrivalInterval(this.time + 12))
+    this.nextArrival = this.time + (this.arrivals === 1 ? 9 : arrivalInterval(this.time))
   }
 
   finish(reason, planes) {
