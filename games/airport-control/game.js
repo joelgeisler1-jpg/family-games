@@ -108,6 +108,7 @@ function processEvents() {
     }
     if (event.type === 'over') {
       pointer.cancel()
+      document.documentElement.classList.remove('airport-playing')
       audio.play('over')
       const collision = event.reason === 'collision'
       const text = collision ? 'Two aircraft got too close. Give their routes more room to pass.' : 'An aircraft left the airspace. Guide it back as soon as you see the edge warning.'
@@ -126,6 +127,7 @@ function pauseShift() {
   if (session.mode !== 'playing') return
   pointer.cancel()
   session.pause()
+  document.documentElement.classList.remove('airport-playing')
   showPanel('Shift paused', 'Your aircraft will hold here until you resume.', 'Resume shift', 'Ⅱ')
 }
 
@@ -145,6 +147,7 @@ action.addEventListener('click', () => {
     lastWarning = -10
     session.start()
   }
+  document.documentElement.classList.add('airport-playing')
   accumulator = 0
   previousTimestamp = undefined
   overlay.hidden = true
