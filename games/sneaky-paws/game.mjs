@@ -1,3 +1,4 @@
+import { mountThief, setThiefPose } from './thief.mjs';
 import { redraw } from './arm-physics.mjs';
 import { playSound } from './audio.mjs';
 import { setMood, showCharacter } from './characters.mjs';
@@ -31,7 +32,7 @@ function load() {
   state.points = [{ ...START }];
   state.lastInput = { ...START };
   state.wheelContact = null;
-  $('thief').classList.remove('celebrating');
+  setThiefPose('idle');
   state.mode = 'ready';
   state.keyTaken = false;
   state.switchOn = false;
@@ -69,6 +70,7 @@ function fail(reason, kind = 'obstacle', location = state.points.at(-1) || START
   state.mode = 'failed';
   state.activePointer = null;
   state.edgeSide = '';
+  setThiefPose('caught');
   setMood('oops');
   say(reason, true);
   const alarm = kind !== 'wall';
@@ -92,6 +94,7 @@ function win() {
   void board.offsetWidth;
   board.classList.add('success');
   state.mode = 'win';
+  setThiefPose('recovering');
   state.activePointer = null;
   let last = state.points.at(-1);
   let loot = svg('text', { x: last.x, y: last.y + 9, 'text-anchor': 'middle', 'font-size': 29 });
@@ -125,7 +128,7 @@ function win() {
   playSound('win');
 }
 function complete() {
-  $('thief').classList.add('celebrating');
+  setThiefPose('victory');
   setMood('happy');
   burst(120, 388, '#e9b44c');
   if (state.level === state.unlocked - 1 && state.unlocked < LEVELS.length) {
@@ -178,6 +181,7 @@ function next() {
   state.attempt = 0;
   load();
 }
+mountThief();
 bindControls({ load, next });
 bindPointerControls({ fail, win });
 load();

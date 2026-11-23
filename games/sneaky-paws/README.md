@@ -1,5 +1,11 @@
 # Sneaky Paws
 
+Character artwork lives in `thief.mjs`, `guard-art.mjs`, and
+`companion-art.mjs`. Presentation events select a thief pose and set a shared
+expression for the thief and dock companion. Guards use their existing
+sleeping, walking, suspicious, distracted, and alerted classes. Character
+animations live in `characters.css` and respect reduced motion.
+
 The artwork for all ten rooms lives in `environments.mjs` and
 `environments.css`. The backdrop is painted behind the game and ignores
 pointer input. Solid obstacle artwork takes its dimensions from the existing
