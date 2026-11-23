@@ -3,7 +3,7 @@ import test from 'node:test'
 import { angleDelta, distance, height, offset, runways, step, width } from '../airfield.js'
 import { moveAircraft, newAircraft } from '../aircraft.js'
 import { matchingApproach } from '../landing.js'
-import { extendDraft, planRoute } from '../routes.js'
+import { extendDraft, planRoute, runwaySnap } from '../routes.js'
 import { boundary, separation } from '../separation.js'
 import { Session } from '../session.js'
 import { arrivalInterval, chooseArrival, entryCandidate, safeEntry } from '../traffic.js'
@@ -66,6 +66,41 @@ test('both opening aircraft land on matching approaches and leave active traffic
   }
   assert.equal(game.score, 2)
   assert.equal(game.streak, 2)
+})
+
+test('the correct runway captures a nearby finger endpoint and shows an aligned final', () => {
+  for (const kind of ['jet', 'prop']) {
+    const runway = runways[kind]
+    const gate = offset(runway, runway.heading, -17)
+    // Missing the small painted ring by a lot should still snap.
+    const near = { x: gate.x, y: gate.y + 82 }
+    assert.ok(runwaySnap(near, runway))
+    const plane = newAircraft(1, kind, offset(runway, runway.heading, -210))
+    const draft = [{ x: plane.x, y: plane.y }]
+    extendDraft(draft, near)
+    const route = planRoute(plane, draft, runway)
+    assert.equal(route.cleared, true)
+    assert.deepEqual(route.points[0], { x: plane.x, y: plane.y })
+    assert.ok(distance(route.points.at(-1), offset(runway, runway.heading, 38)) < 1)
+    assert.ok(route.points.some(point => distance(point, offset(runway, runway.heading, -105)) < 20))
+    // The long final path should be a runway-centred line, not a sideways hop.
+    const final = route.points.slice(-3)
+    assert.ok(final.every(point => Math.abs(
+      (point.x - runway.x) * -Math.sin(runway.heading) +
+      (point.y - runway.y) * Math.cos(runway.heading)
+    ) < 25))
+  }
+})
+
+test('runway assistance does not snap distant endpoints or wrong destinations', () => {
+  const jet = runways.jet
+  const prop = runways.prop
+  assert.equal(runwaySnap({ x: 10, y: 10 }, jet), null)
+  assert.equal(runwaySnap(offset(prop, prop.heading, -17), jet), null)
+  const plane = newAircraft(1, 'jet', { x: 95, y: 340, heading: 0 })
+  const draft = [{ x: plane.x, y: plane.y }]
+  extendDraft(draft, offset(prop, prop.heading, -17))
+  assert.equal(planRoute(plane, draft, jet).cleared, false)
 })
 
 test('wrong runway, wrong direction and unfiled approaches never score', () => {
