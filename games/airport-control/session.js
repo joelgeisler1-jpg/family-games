@@ -1,4 +1,5 @@
 import { newAircraft, moveAircraft } from './aircraft.js'
+import { coastalAirport, loadCampaignProgress, recordCompletion } from './campaign.js'
 import { advanceLanding, matchingApproach } from './landing.js'
 import { boundary, separation } from './separation.js'
 import { arrivalInterval, chooseArrival } from './traffic.js'
@@ -15,14 +16,17 @@ function loadBest(storage) {
 }
 
 export class Session {
-  constructor(storage) {
+  constructor(storage, playMode = 'endless') {
     this.storage = storage
     this.best = loadBest(storage)
-    this.reset()
+    this.progress = loadCampaignProgress(storage)
+    this.reset(playMode)
   }
 
-  reset() {
+  reset(playMode = this.playMode) {
+    this.playMode = playMode
     this.mode = 'ready'
+    this.closing = false
     this.time = 0
     this.score = 0
     this.planes = []
@@ -49,6 +53,7 @@ export class Session {
   }
 
   spawn() {
+    if (this.closing) return
     const arrival = chooseArrival(this.arrivals, this.planes)
     if (!arrival) {
       this.nextArrival = this.time + 1
@@ -101,7 +106,18 @@ export class Session {
       const plane = airborne[index]
       if (matchingApproach(plane, previous[index])) this.land(plane)
     }
-    if (this.time >= this.nextArrival) this.spawn()
+
+    // Assess qualification before any arrival due on this step.
+    const level = this.level
+    if (level && this.score >= level.minLandings && this.elapsedSeconds >= level.minSeconds) {
+      this.closing = true
+      if (this.planes.length === 0) {
+        this.mode = 'complete'
+        recordCompletion(this.storage, this.progress, level.id)
+        this.events.push({ type: 'complete' })
+      }
+    }
+    if (!this.closing && this.time >= this.nextArrival) this.spawn()
   }
 
   land(plane) {
@@ -110,7 +126,7 @@ export class Session {
     this.score++
     this.streak = this.time - this.lastLanding <= 34 ? this.streak + 1 : 1
     this.lastLanding = this.time
-    if (this.score > this.best) {
+    if (this.playMode === 'endless' && this.score > this.best) {
       this.best = this.score
       try {
         this.storage?.setItem(bestKey, String(this.best))
@@ -123,5 +139,14 @@ export class Session {
 
   get traffic() {
     return this.planes.filter((plane) => !plane.landing).length
+  }
+
+  get level() {
+    return this.playMode === 'campaign' ? coastalAirport : null
+  }
+
+  get elapsedSeconds() {
+    // Account for rounding when a fixed simulation step reaches a whole second.
+    return Math.floor(this.time + 1e-9)
   }
 }

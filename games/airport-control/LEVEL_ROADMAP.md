@@ -1,6 +1,6 @@
-# Airport Control — proposed campaign roadmap (design only)
+# Airport Control — campaign roadmap
 
-> **Status:** Proposal for owner playtesting and approval. This document does **not** implement a campaign, levels 2–5, or alter the existing endless shift. Keep the current mode functioning until the campaign progression is built and tested separately.
+> **Status:** Level 1 completion and Endless Challenge are available for owner playtesting. Levels 2–5 are proposals.
 
 ## Design objectives
 - Accessible for the family's 6- and 9-year-old players; intuitive first level and growing tactical depth.
@@ -8,7 +8,7 @@
 - A successful level is a satisfying short session (target **2–4 minutes**; longer in later stages), not an abrupt end mid-route.
 - Aircraft spawn cadence, aircraft speed, collision tolerance, runway layouts and landing requirements need player testing before release.
 
-## Proposed level-completion rules
+## Level 1 completion rules
 1. Show a visible progress indicator: **Landings 0/8** and **Time 0:00/2:00** in Level 1.
 2. Level 1 qualifies when the player has made **8 correct landings** AND has controlled traffic for **at least 2 minutes**. These values are provisional for playtesting.
 3. Once qualified, stop scheduling new arrivals; allow any existing airborne traffic to be landed safely. Then display a celebratory level-clear screen with **Next airport**, **Replay**, and **Endless mode** options.
@@ -37,8 +37,8 @@
 - Keep destination identification accessible via **H** letter and outline/shape, not colour alone.
 
 ## Engineering plan — separate future PRs
-1. Define campaign metadata, destination registry, level rules, objective displays, completion-state transitions and progression persistence in testable modules.
-2. Implement Level 1 objective state and transition while preserving existing Endless Challenge.
+1. Define campaign metadata, level rules, objective displays, completion-state transitions and progression persistence in testable modules.
+2. Playtest Level 1 completion and Endless Challenge on physical iPhone and iPad.
 3. Build Level 2 airport scenery, third runway and third fixed-wing traffic profile.
 4. Add helicopter movement, helipad approach/capture, collision checks, animation and audio for Level 3.
 5. Add Levels 4–5 only once earlier levels are tested on physical iPhone/iPad.

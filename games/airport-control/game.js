@@ -10,9 +10,15 @@ const canvas = element('airspace')
 const pause = element('pause')
 const sound = element('sound')
 const action = element('action')
+const alternate = element('alternate')
+const nextAirport = element('next-airport')
 const overlay = element('overlay')
 const radio = element('radio')
+const instruments = element('instruments')
+const mapTitle = element('map-title')
+const mapStatus = element('map-status')
 const score = element('score')
+const shiftTime = element('shift-time')
 const best = element('best')
 const traffic = element('traffic')
 const audio = new TowerAudio()
@@ -22,7 +28,7 @@ try {
 } catch {
   // Private browsing or preview restrictions can block access.
 }
-const session = new Session(storage)
+const session = new Session(storage, 'campaign')
 const view = new AirportView(canvas)
 const pointer = installPointer(canvas, session, () => audio.play('select'))
 const motion = matchMedia('(prefers-reduced-motion: reduce)')
@@ -42,26 +48,53 @@ new ResizeObserver(() => {
 }).observe(canvas)
 motion.addEventListener('change', () => { repaint = true })
 
-function showPanel(title, description, button, icon, final = false) {
+function showPanel(title, description, button, icon, { final = false, switchMode = false, complete = false, focus = true } = {}) {
   element('panel-title').textContent = title
   element('panel-message').textContent = description
-  action.firstChild.textContent = button + ' '
+  action.textContent = button
   element('panel-icon').textContent = icon
   element('results').hidden = !final
   if (final) {
     element('result-score').textContent = session.score
-    element('result-best').textContent = session.best
+    element('result-detail-label').textContent = session.level ? 'Time' : 'Personal best'
+    element('result-detail').textContent = session.level ? formatTime(session.elapsedSeconds) : session.best
   }
-  action.disabled = false
+  alternate.textContent = session.level ? 'Endless Challenge' : 'Play Level 1'
+  alternate.hidden = !switchMode
+  nextAirport.hidden = !complete
   pause.disabled = true
   overlay.hidden = false
-  action.focus({ preventScroll: true })
+  if (focus) action.focus({ preventScroll: true })
+}
+
+function formatTime(seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
+}
+
+function updateValue(node, value) {
+  if (node.textContent !== String(value)) node.textContent = value
 }
 
 function syncInstruments() {
-  if (score.textContent !== String(session.score)) score.textContent = session.score
-  if (best.textContent !== String(session.best)) best.textContent = session.best
-  if (traffic.textContent !== String(session.traffic)) traffic.textContent = session.traffic
+  const level = session.level
+  if (level) {
+    updateValue(score, `${session.score} / ${level.minLandings}`)
+    updateValue(shiftTime, `${formatTime(session.elapsedSeconds)} / ${formatTime(level.minSeconds)}`)
+  } else {
+    updateValue(score, session.score)
+    updateValue(best, session.best)
+  }
+  updateValue(traffic, session.traffic)
+  const closing = session.closing && (session.mode === 'playing' || session.mode === 'paused')
+  mapTitle.toggleAttribute('data-closing', closing)
+  updateValue(mapStatus, closing ? 'Closing traffic' : 'Coastal Airport')
+}
+
+function syncMode() {
+  const campaign = Boolean(session.level)
+  instruments.toggleAttribute('data-campaign', campaign)
+  shiftTime.parentElement.hidden = !campaign
+  best.parentElement.hidden = campaign
 }
 
 function announce(text, tone = '') {
@@ -78,6 +111,8 @@ function updateRadio() {
     announce('Near the edge! Draw a wide turn back.', 'danger')
   } else if (session.planes.some((plane) => plane.warning)) {
     announce('Aircraft are closing in. Give them room to pass.', 'danger')
+  } else if (session.closing) {
+    announce(session.traffic ? 'Shift ending — land remaining aircraft.' : 'Shift ending — all aircraft are touching down.')
   } else if (session.time < messageUntil) {
     announce(message, messageTone)
   } else if (session.planes.some((plane) => plane.missed)) {
@@ -113,7 +148,13 @@ function processEvents() {
       const collision = event.reason === 'collision'
       const text = collision ? 'Two aircraft got too close. Give their routes more room to pass.' : 'An aircraft left the airspace. Guide it back as soon as you see the edge warning.'
       announce(collision ? 'Aircraft collision.' : 'Aircraft left the airspace.', 'danger')
-      showPanel('Shift complete', text, 'Play again', collision ? '!' : '↶', true)
+      showPanel(session.level ? 'Shift ended' : 'Shift complete', text, 'Play again', collision ? '!' : '↶', { final: true, switchMode: true })
+    }
+    if (event.type === 'complete') {
+      pointer.cancel()
+      document.documentElement.classList.remove('airport-playing')
+      announce('Level complete. The sky is clear.', 'success')
+      showPanel('Level Complete', 'All aircraft are safely on the ground.', 'Fly again', '✓', { final: true, switchMode: true, complete: true })
     }
   }
   if (session.mode === 'playing' && session.time - lastWarning > 3 && session.planes.some((plane) => plane.warning || plane.escape)) {
@@ -138,10 +179,10 @@ document.addEventListener('visibilitychange', () => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && session.mode === 'playing') pauseShift()
 })
-action.addEventListener('click', () => {
+function beginShift(playMode) {
   if (session.mode === 'paused') session.resume()
   else {
-    session.reset()
+    session.reset(playMode)
     effects = []
     messageUntil = 0
     lastWarning = -10
@@ -153,9 +194,13 @@ action.addEventListener('click', () => {
   overlay.hidden = true
   pause.disabled = false
   pause.focus({ preventScroll: true })
+  syncMode()
   syncInstruments()
   updateRadio()
-})
+}
+
+action.addEventListener('click', () => beginShift(session.playMode))
+alternate.addEventListener('click', () => beginShift(session.level ? 'endless' : 'campaign'))
 sound.addEventListener('click', async () => {
   sound.disabled = true
   await audio.toggle()
@@ -185,5 +230,15 @@ function frame(timestamp) {
   requestAnimationFrame(frame)
 }
 
+const { id, minLandings, minSeconds } = session.level
+const completed = session.progress.completedLevels.includes(id)
+showPanel(
+  `Level ${id} · Coastal Airport`,
+  `Guide planes to their matching runways. Land ${minLandings} and keep the airspace safe for ${formatTime(minSeconds)}.`,
+  completed ? `Replay Level ${id}` : `Start Level ${id}`,
+  '✈︎',
+  { switchMode: true, focus: false },
+)
+syncMode()
 syncInstruments()
 requestAnimationFrame(frame)
