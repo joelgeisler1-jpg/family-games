@@ -23,7 +23,7 @@ test('undirected aircraft move, and routes rotate them gradually at constant spe
   const plane = newAircraft(1, 'jet', { x: 90, y: 150, heading: 0 })
   moveAircraft(plane, 1)
   assert.equal(plane.x, 124)
-  draw(plane, { x: 225, y: 150 }, { x: 425, y: 300 })
+  draw(plane, { x: 225, y: 150 }, { x: 425, y: 520 })
   let maximumHeading = 0
   for (let i = 0; i < 420; i++) {
     const heading = plane.heading
