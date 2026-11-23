@@ -29,27 +29,32 @@
       <canvas id="airspace" width="680" height="780" aria-label="Airport map. Drag a plane to its matching numbered approach.">
         Your browser needs canvas support to display the airspace.
       </canvas>
-      <div class="map-title" aria-hidden="true">
-        <span class="map-light"></span><span>Coastal Airport</span>
+      <div class="map-title" id="map-title" aria-hidden="true">
+        <span class="map-light"></span><span id="map-status">Coastal Airport</span>
       </div>
       <div class="overlay" id="overlay">
         <div class="panel" role="dialog" aria-labelledby="panel-title" aria-describedby="panel-message">
           <span class="panel-icon" id="panel-icon" aria-hidden="true">✈︎</span>
-          <h2 id="panel-title">Ready for your shift?</h2>
-          <p id="panel-message">Drag from a plane to the approach with its matching number. Give each aircraft room to turn.</p>
+          <h2 id="panel-title">Level 1</h2>
+          <p id="panel-message"></p>
           <div class="results" id="results" hidden>
             <div><span>Landings</span><strong id="result-score">0</strong></div>
-            <div><span>Personal best</span><strong id="result-best">0</strong></div>
+            <div><span id="result-detail-label">Time</span><strong id="result-detail">0:00</strong></div>
           </div>
-          <button class="primary" id="action" type="button">Start shift <span aria-hidden="true">→</span></button>
+          <div class="panel-actions">
+            <button class="primary" id="action" type="button">Start Level 1</button>
+            <button id="alternate" type="button">Endless Challenge</button>
+            <button id="next-airport" type="button" disabled hidden>Next Airport <small>Coming soon</small></button>
+          </div>
         </div>
       </div>
     </section>
     <aside class="tower" aria-label="Tower instruments">
       <div class="tower-head"><span class="station-icon" aria-hidden="true">◉</span><h2>Control tower</h2></div>
-      <div class="instruments">
+      <div class="instruments" id="instruments">
         <div class="instrument score"><span>Landings</span><strong id="score">0</strong></div>
-        <div class="instrument"><span>Best</span><strong id="best">0</strong></div>
+        <div class="instrument"><span>Time</span><strong id="shift-time">0:00</strong></div>
+        <div class="instrument" hidden><span>Best</span><strong id="best">0</strong></div>
         <div class="instrument traffic"><span>Traffic</span><strong id="traffic">0</strong></div>
       </div>
       <div class="runways">

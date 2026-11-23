@@ -124,6 +124,8 @@ canvas {
   pointer-events: none;
 }
 .map-light { width: 6px; height: 6px; border-radius: 50%; background: #c0e49f; }
+.map-title[data-closing] { color: #ffe1a9; border-color: #f8d291; }
+.map-title[data-closing] .map-light { background: #f8d291; }
 
 .tower {
   align-self: start;
@@ -148,6 +150,8 @@ canvas {
 }
 .instrument span, .results span { color: var(--muted); font-size: 9px; font-weight: 750; text-transform: uppercase; letter-spacing: 0.06em; }
 .instrument strong, .results strong { font-variant-numeric: tabular-nums; font-size: 22px; line-height: 1; }
+.instruments[data-campaign] { grid-template-columns: 1fr 1.45fr 0.78fr; }
+.instruments[data-campaign] strong { font-size: 16px; white-space: nowrap; }
 .score strong { color: #f8d291; }
 .runways { padding: 16px 0 12px; }
 .runways h3 { margin-block-end: 9px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.085em; }
@@ -182,8 +186,16 @@ canvas {
 .panel-icon { width: 42px; height: 42px; border-radius: 12px; font-size: 24px; margin: 0 auto 12px; }
 .panel h2 { font-size: clamp(23px, 4vw, 34px); font-weight: 850; letter-spacing: -0.05em; line-height: 1.02; }
 .panel p { color: #dce6db; font-size: 14px; line-height: 1.45; margin: 9px auto 16px; }
-.primary { background: #f8d291; color: #172b32; border: 0; min-width: min(100%, 150px); padding: 0 13px; }
-.primary span { margin-inline-start: 5px; }
+.panel-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.panel-actions button { flex: 1 1 0; padding: 5px 7px; font-size: 13px; }
+.primary { background: #f8d291; color: #172b32; border: 0; }
+#next-airport {
+  flex-basis: 100%;
+  background: #192f38;
+  color: #adc2c2;
+  opacity: 1;
+}
+#next-airport small { font-size: 10px; margin-inline-start: 5px; font-weight: 700; }
 .results { display: flex; justify-content: center; gap: 20px; margin: 0 0 13px; }
 .results div { display: grid; gap: 3px; }
 
@@ -200,6 +212,7 @@ canvas {
   .tower-head, .runways h3, .assignment small { display: none; }
   .instruments { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .instrument { display: flex; align-items: center; justify-content: space-between; gap: 2px; padding: 5px; }
+  .instruments[data-campaign] .instrument { display: grid; justify-content: start; }
   .instrument strong { font-size: 18px; }
   .runways { display: flex; justify-content: space-around; gap: 7px; padding: 3px 0; }
   .assignment { min-height: 32px; font-size: 12px; gap: 7px; }
@@ -216,6 +229,9 @@ canvas {
   .console { grid-template-columns: var(--map-width) 208px; gap: 12px; }
   .tower { padding: 9px; }
   .tower-head { padding-block-end: 7px; }
+  .instruments[data-campaign] .instrument { padding-inline: 5px; }
+  .instruments[data-campaign] .instrument span { font-size: 8px; }
+  .instruments[data-campaign] strong { font-size: 14px; }
   .runways { padding: 8px 0; }
   .assignment { min-height: 33px; }
   .panel { padding: 11px; }
