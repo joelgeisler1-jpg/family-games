@@ -268,7 +268,7 @@ canvas {
   .instruments[data-campaign] strong { font-size: 14px; }
   .runways { padding: 8px 0; }
   .assignment { min-height: 33px; }
-  .runways[data-expanded] .assignment { min-height: 29px; }
+  .runways[data-expanded] .assignment { min-height: 29px; line-height: 1.1; }
   .panel { padding: 11px; }
   .panel-icon { display: none; }
   .panel p { font-size: 12px; margin: 6px 0 9px; }
