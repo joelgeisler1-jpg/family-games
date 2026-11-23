@@ -1,5 +1,6 @@
 import { aircraftTypes, destinationGate, height, offset, width } from './airfield.js'
 import { paintIslandActivity } from './island.js'
+import { paintMetroActivity } from './metro.js'
 import { snapsToDestination } from './routes.js'
 import { createScenery, paintBoat } from './scenery.js'
 import { paintRegionalTrain } from './regional.js'
@@ -282,6 +283,9 @@ export class AirportView {
 
     if (!reducedMotion && this.airport.scenery === 'regional') paintRegionalTrain(ctx, session.time)
     if (!reducedMotion && this.airport.scenery === 'island') paintIslandActivity(ctx, session.time)
+    if (!reducedMotion && (this.airport.scenery === 'city' || this.airport.scenery === 'grand')) {
+      paintMetroActivity(ctx, session.time, this.airport.scenery === 'grand')
+    }
     const draftDestination = draft && session.destinationFor(draft.plane)
     const readyToSnap = draftDestination && snapsToDestination(draft.points, draftDestination)
     for (const destination of Object.values(this.airport.destinations)) {
