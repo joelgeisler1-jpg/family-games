@@ -2,6 +2,7 @@ import { height, offset, width } from './airfield.js'
 
 import { building, circle, generator, rect, shape } from './art.js'
 import { paintIsland } from './island.js'
+import { paintCityAirport, paintGrandAirport } from './metro.js'
 import { paintRegional } from './regional.js'
 
 const shore = 'M 155 -15 C 155 67 120 87 133 148 C 146 201 188 211 166 274 C 147 324 127 335 138 386 C 151 433 103 472 115 528 C 133 594 179 587 188 637 C 205 699 260 694 310 677 C 362 659 375 702 420 710 C 479 717 534 660 581 674 C 624 686 652 732 706 733 L 708 -15 Z'
@@ -219,7 +220,11 @@ export function createScenery(airport) {
   canvas.height = height * 2
   const ctx = canvas.getContext('2d')
   ctx.scale(2, 2)
-  if (airport.scenery === 'island') {
+  if (airport.scenery === 'grand') {
+    paintGrandAirport(ctx)
+  } else if (airport.scenery === 'city') {
+    paintCityAirport(ctx)
+  } else if (airport.scenery === 'island') {
     paintIsland(ctx)
   } else if (airport.scenery === 'regional') {
     paintRegional(ctx)
