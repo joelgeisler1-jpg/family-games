@@ -1,0 +1,32 @@
+name: Star Post prototype QA
+
+on:
+  pull_request:
+    paths:
+      - 'games/star-post/**'
+      - '.github/workflows/star-post-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  star-post:
+    name: Star Post / Node rules tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check game JavaScript syntax
+        run: |
+          node --check games/star-post/game.js
+          node --check games/star-post/logic.mjs
+      - name: Verify level rules
+        run: node --test games/star-post/tests/*.test.mjs
