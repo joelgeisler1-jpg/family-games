@@ -1,3 +1,4 @@
+import { environment, obstacle } from './environments.mjs';
 import { ARM_R } from './constants.mjs';
 import { actors, cameraCone, piece, roomDecor, scannerFX, staticLayer, targetGroup } from './dom.mjs';
 import { drawGuards, updatePatrols } from './guards.mjs';
@@ -6,60 +7,17 @@ import { LEVELS } from './levels.mjs';
 import { pendingTasks } from './mission-status.mjs';
 import { state } from './state.mjs';
 
-function sceneDetails() {
-  const labels = [
-    'THE WAREHOUSE',
-    'LASER HALL',
-    'NIGHT SHIFT',
-    'SECURITY OFFICE',
-    'THE VAULT',
-    'LOOP LAB',
-    'PATROL HALL',
-    'CONTROL ROOM',
-    'DOUBLE REELS',
-    'MIDNIGHT MUSEUM',
-  ];
-  roomDecor.innerHTML = `<g opacity=".8">
-  <path d="M20 80H760 M20 484H760" stroke="#fff" stroke-width="7" opacity=".7"/>
-  <g fill="none" stroke="#cbd0ed" stroke-width="3" opacity=".6"><path d="M58 72h92v-18h26 M710 429h-34v24h-50"/><circle cx="58" cy="72" r="6" fill="#d4d8f4"/><circle cx="710" cy="429" r="6" fill="#d4d8f4"/></g>
-  <rect x="38" y="29" width="183" height="29" rx="9" fill="#fff" opacity=".77"/>
-  <text x="52" y="49" fill="#6e648f" font-size="12" font-family="ui-rounded,system-ui,sans-serif" font-weight="900" letter-spacing="1.6">${labels[state.level]}</text>
-  <g transform="translate(720 44)"><rect x="-33" y="-12" width="66" height="22" rx="6" fill="#d7e6df" stroke="#a8c7b7" stroke-width="2"/><circle cx="-20" cy="-1" r="5" fill="#64bf9c"/><text x="-10" y="3" fill="#4b7f6e" font-size="10" font-weight="900">SAFE?</text></g>
-  <g opacity=".5"><rect x="282" y="34" width="165" height="11" rx="4" fill="#d9d5ec"/><rect x="282" y="34" width="64" height="11" rx="4" fill="#a9dacc"/><circle cx="457" cy="39" r="7" fill="#e3bf80" class="security-blink"/></g><g class="dust-speck" opacity=".52"><circle cx="220" cy="160" r="3" fill="#aa9acb"/><circle cx="586" cy="105" r="2.7" fill="#c7a4dd"/><circle cx="688" cy="289" r="2.6" fill="#9dbee1"/></g>
-  <path d="M47 468h164 M575 468h160" stroke="#c4cbe9" stroke-width="4" stroke-linecap="round" stroke-dasharray="15 10" opacity=".57"/>
- </g>`;
-  const props = [
-    `<g transform="translate(537 162)" opacity=".54"><rect x="0" y="0" width="99" height="65" rx="9" fill="#dce1f3" stroke="#c3c9e9" stroke-width="3"/><path d="M15 20h65M15 34h45" stroke="#afb9da" stroke-width="5" stroke-linecap="round"/><circle cx="79" cy="49" r="6" fill="#8cdbb2"/></g>`,
-    `<g opacity=".7"><path d="M48 151l16 -27 16 27z" fill="#ffe7b3" stroke="#edc479" stroke-width="3"/><text x="64" y="144" text-anchor="middle" fill="#936f37" font-size="17" font-weight="900">!</text><path d="M105 295h110 M495 435h80" stroke="#ced3ea" stroke-width="7" stroke-dasharray="13 11"/></g>`,
-    `<g opacity=".72" transform="translate(688 350)"><rect x="0" y="0" width="45" height="63" rx="7" fill="#e0dff3" stroke="#bfbadb" stroke-width="3"/><path d="M11 18h23M11 30h16M11 42h23" stroke="#aaa4d0" stroke-width="4"/></g>`,
-    `<g opacity=".72"><rect x="681" y="40" width="54" height="23" rx="8" fill="#f3dba9" stroke="#d8b96c" stroke-width="2"/><path d="M695 52h26" stroke="#ad925e" stroke-width="5" stroke-linecap="round"/><circle cx="61" cy="167" r="25" fill="none" stroke="#d1d8ed" stroke-width="7"/></g>`,
-    `<g opacity=".75"><circle cx="692" cy="404" r="65" fill="#ecdfef" stroke="#d7c4df" stroke-width="5" stroke-dasharray="13 10"/><circle cx="692" cy="404" r="42" fill="none" stroke="#d1bfdc" stroke-width="4"/><path d="M658 404h68M692 369v70" stroke="#d1bfdc" stroke-width="5"/></g>`,
-    `<g opacity=".8"><rect x="575" y="35" width="98" height="37" rx="9" fill="#d2e7e4"/><text x="624" y="59" text-anchor="middle" font-size="12" font-weight="900" fill="#428a86">SPIN TO WIN</text><path d="M41 180h80m-54-20v40" stroke="#d0dcef" stroke-width="7" stroke-linecap="round"/></g>`,
-    `<g opacity=".8"><path d="M380 96h85l22 24h126" stroke="#cccfec" stroke-width="9" stroke-dasharray="10 10" fill="none"/><rect x="510" y="393" width="59" height="41" rx="9" fill="#f1e1bd"/><text x="539" y="417" font-size="12" fill="#a48656" font-weight="900" text-anchor="middle">SHHH</text></g>`,
-    `<g opacity=".75"><rect x="40" y="77" width="95" height="53" rx="10" fill="#d8e6f4" stroke="#b5cde1" stroke-width="3"/><circle cx="68" cy="103" r="9" fill="#9bc9b5"/><path d="M88 100h32m-32 12h20" stroke="#9ba8c9" stroke-width="4"/><path d="M614 76v60h72" stroke="#bdd8db" stroke-width="5" stroke-dasharray="9 10" fill="none"/></g>`,
-    `<g opacity=".7"><circle cx="390" cy="82" r="26" stroke="#b8d8ed" stroke-width="5" fill="none"/><path d="M366 82h48M390 60v44" stroke="#b8d8ed" stroke-width="4"/><path d="M28 340h135" stroke="#d0d5ec" stroke-width="7" stroke-dasharray="18 10"/></g>`,
-    `<g opacity=".8"><path d="M65 110v52h70 M686 99h-87" stroke="#c3d4dc" stroke-width="6" stroke-dasharray="8 10" fill="none"/><rect x="35" y="80" width="85" height="24" rx="8" fill="#f7e8d4"/><text x="77" y="97" text-anchor="middle" font-size="12" font-weight="900" fill="#ab8e66">SECRET!</text></g>`,
-  ];
-  roomDecor.insertAdjacentHTML('beforeend', props[state.level]);
-}
+let illustratedLevel;
 function drawStatic() {
   let L = LEVELS[state.level];
   scannerFX.innerHTML = '';
   staticLayer.innerHTML = '';
   actors.innerHTML = '';
-  sceneDetails();
-  for (let wall of L.walls) {
-    let { x, y, w, h, type } = wall;
-    let crate = type === 'crate';
-    let g = piece(`
- <rect x="${x + 8}" y="${y + 10}" width="${w}" height="${h}" rx="12" fill="#353059" opacity=".17"/>
- <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${crate ? '#b7a1da' : '#9092bd'}" stroke="#4a456e" stroke-width="5"/>
- <rect x="${x + 8}" y="${y + 8}" width="${w - 16}" height="${h - 16}" rx="7" fill="none" stroke="#e7def8" stroke-width="3.5" opacity=".9"/>
- ${crate ? `<path d="M${x + 25} ${y + 27}L${x + w - 25} ${y + h - 27}M${x + w - 25} ${y + 27}L${x + 25} ${y + h - 27}" stroke="#756399" stroke-width="10" opacity=".55"/><path d="M${x + w / 2} ${y + 12}v${h - 24}" stroke="#e0ccef" stroke-width="5" opacity=".7"/>` : `<path d="M${x + 11} ${y + h / 2}h${w - 22}" stroke="#7778a4" stroke-width="4"/><rect x="${x + w - 28}" y="${y + h / 2 - 19}" width="7" height="32" rx="3" fill="#f4f0ff"/>`}
- <rect x="${x + 14}" y="${y + 14}" width="${crate ? 35 : 23}" height="11" rx="4" fill="#fff2c6" opacity=".8"/><g opacity=".64"><path d="M${x + 10} ${y + Math.max(23, h - 18)}h${Math.min(w - 20, 44)}" stroke="#fff2ae" stroke-width="6" stroke-dasharray="9 7"/></g>
- `);
-    staticLayer.append(g);
+  if (illustratedLevel !== state.level) {
+    roomDecor.innerHTML = environment(state.level);
+    illustratedLevel = state.level;
   }
+  for (const wall of L.walls) staticLayer.append(piece(obstacle(wall, state.level)));
   for (let [li, laser] of (L.lasers || []).entries()) {
     let { x1, y1, x2, y2 } = laser;
     staticLayer.append(
@@ -136,7 +94,7 @@ function updateTargets() {
   const locked = pendingTasks().length > 0;
   targetGroup.append(
     piece(
-      `<g class="treasure-spark"><path d="M${t.x - 29} ${t.y - 35}l4 -10 4 10 10 4 -10 4 -4 10 -4 -10 -10 -4Z" fill="#f5ba45"/><circle cx="${t.x + 37}" cy="${t.y - 24}" r="4" fill="#ffe98a"/></g><circle cx="${t.x}" cy="${t.y}" r="36" fill="${locked ? '#c8bfe3' : '#f9d76d'}" opacity=".31"/><circle cx="${t.x}" cy="${t.y}" r="29" fill="${locked ? '#eceaf5' : '#fff6d3'}" stroke="${locked ? '#b1a8cb' : '#e7c65e'}" stroke-width="3"/><text x="${t.x}" y="${t.y + 13}" font-size="37" text-anchor="middle">${locked ? '🔒' : state.level === 4 || state.level === 9 ? '💎' : '💰'}</text>`,
+      `<g class="treasure-spark"><path d="M${t.x - 29} ${t.y - 35}l4 -10 4 10 10 4 -10 4 -4 10 -4 -10 -10 -4Z" fill="#f5ba45"/><circle cx="${t.x + 37}" cy="${t.y - 24}" r="4" fill="#ffe98a"/></g><circle cx="${t.x}" cy="${t.y}" r="36" fill="${locked ? '#c8bfe3' : '#f9d76d'}" opacity=".31"/><circle class="${locked ? 'treasure-locked' : 'treasure-ready'}" cx="${t.x}" cy="${t.y}" r="29" fill="${locked ? '#eceaf5' : '#fff6d3'}" stroke="${locked ? '#b1a8cb' : '#e7c65e'}" stroke-width="3"/><text x="${t.x}" y="${t.y + 13}" font-size="37" text-anchor="middle">${locked ? '🔒' : state.level === 4 || state.level === 9 ? '💎' : '💰'}</text>`,
     ),
   );
   if (L.key && !state.keyTaken) {
@@ -158,7 +116,7 @@ function updateTargets() {
     let k = L.switch;
     targetGroup.append(
       piece(
-        `<g class="switch-unit"><circle cx="${k.x}" cy="${k.y}" r="33" fill="${state.switchOn ? '#b7f4c8' : '#d2f2f0'}" stroke="${state.switchOn ? '#47ae82' : '#439faa'}" stroke-width="4"/><rect x="${k.x - 18}" y="${k.y - 17}" width="36" height="34" rx="7" fill="#426579"/><circle cx="${k.x}" cy="${k.y - 1}" r="12" fill="${state.switchOn ? '#5eff8b' : '#d4ffb0'}" stroke="#eaffd8" stroke-width="3"/><text x="${k.x}" y="${k.y + 49}" font-size="12" font-weight="900" text-anchor="middle" fill="#4b9087">${state.switchOn ? 'ON ✓' : 'SWITCH'}</text></g>`,
+        `<g class="switch-unit${state.switchOn ? ' powered' : ''}"><circle class="switch-face" cx="${k.x}" cy="${k.y}" r="33" fill="${state.switchOn ? '#b7f4c8' : '#d2f2f0'}" stroke="${state.switchOn ? '#47ae82' : '#439faa'}" stroke-width="4"/><rect x="${k.x - 18}" y="${k.y - 17}" width="36" height="34" rx="7" fill="#426579"/><circle cx="${k.x}" cy="${k.y - 1}" r="12" fill="${state.switchOn ? '#5eff8b' : '#d4ffb0'}" stroke="#eaffd8" stroke-width="3"/><text x="${k.x}" y="${k.y + 49}" font-size="12" font-weight="900" text-anchor="middle" fill="#4b9087">${state.switchOn ? 'ON ✓' : 'SWITCH'}</text></g>`,
       ),
     );
   }

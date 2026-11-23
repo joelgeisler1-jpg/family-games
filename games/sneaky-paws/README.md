@@ -1,5 +1,11 @@
 # Sneaky Paws
 
+The artwork for all ten rooms lives in `environments.mjs` and
+`environments.css`. The backdrop is painted behind the game and ignores
+pointer input. Solid obstacle artwork takes its dimensions from the existing
+level data. CSS controls decorative motion and disables it when the device
+requests reduced motion.
+
 Serve the repository root over HTTP and open `games/sneaky-paws/`. The game
 uses native JavaScript modules and has no build step. From the repository root,
 run the dependency-free gameplay tests with Node.js 20 or later.
