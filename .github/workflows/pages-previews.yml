@@ -1,0 +1,83 @@
+name: Family Arcade Pages previews
+
+# This workflow always runs from the trusted default branch. Never execute
+# code, npm scripts or GitHub Actions from a pull request being previewed.
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: family-arcade-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Assemble main arcade and open PR previews
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out trusted main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Build first-party preview site
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/previews
+          cp -a index.html arcade.css games dist/
+          touch dist/.nojekyll
+
+          # Open same-repository PRs only. We never execute PR code.
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls?state=open&per_page=100" \
+            --jq '.[] | [.number, .head.sha, .head.repo.full_name] | @tsv' |
+          while IFS=$'\t' read -r number revision source; do
+            [[ "$source" == "$GITHUB_REPOSITORY" ]] || continue
+            [[ "$number" =~ ^[0-9]+$ && "$revision" =~ ^[0-9a-f]{40}$ ]] || continue
+            echo "Assembling PR #$number at $revision"
+            mkdir -p "dist/previews/pr-$number"
+            git fetch --depth=1 origin "$revision"
+            # Copy static game files and common root assets only, not Actions,
+            # secret files, CI scripts or dependency packages from PRs.
+            git archive FETCH_HEAD index.html arcade.css games |
+              tar -xf - -C "dist/previews/pr-$number"
+            printf '%s\n' "$revision" > "dist/previews/pr-$number/revision.txt"
+          done
+
+          echo "## GitHub Pages Safari URLs" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Live Family Arcade](https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- PR previews: \`https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/previews/pr-NUMBER/games/GAME/\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Previews update after deployments. Each URL tracks the latest head commit of an open same-repository PR." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Publish first-party Safari previews
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
