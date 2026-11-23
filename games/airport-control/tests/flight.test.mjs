@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { angleDelta, distance, height, offset, runways, step, width } from '../airfield.js'
-import { landingSoundProfile, TowerAudio } from '../audio.js'
+import { buildLandingTexture, landingSoundProfile, TowerAudio } from '../audio.js'
 import { moveAircraft, newAircraft } from '../aircraft.js'
 import { matchingApproach } from '../landing.js'
 import { extendDraft, planRoute } from '../routes.js'
@@ -250,4 +250,26 @@ test('touchdown audio profiles are distinct and never play when muted', () => {
   assert.equal(audio.enabled, false)
   assert.doesNotThrow(() => audio.play('landing', 'jet'))
   assert.doesNotThrow(() => audio.play('landing', 'prop'))
+})
+
+test('aircraft Foley creates distinct sampled noise textures without fetching assets', () => {
+  const samples = []
+  const fakeContext = {
+    createBuffer: (channels, count, rate) => {
+      assert.equal(channels, 1)
+      assert.equal(rate, 24000)
+      const buffer = { samples: new Float32Array(count), getChannelData: () => buffer.samples }
+      samples.push(buffer)
+      return buffer
+    },
+  }
+  const jet = buildLandingTexture(fakeContext, 'jet')
+  const prop = buildLandingTexture(fakeContext, 'prop')
+  assert.ok(jet.samples.length > prop.samples.length)
+  for (const buffer of samples) {
+    assert.ok(buffer.samples.some(value => Math.abs(value) > 0.001), 'texture has audible movement')
+    assert.ok(buffer.samples.every(Number.isFinite), 'no invalid samples')
+    assert.ok(buffer.samples.every(value => Math.abs(value) <= 1), 'no sample clipping')
+  }
+  assert.equal(buildLandingTexture(fakeContext, 'unknown'), null)
 })
