@@ -1,37 +1,7 @@
-import { height, offset, runways, width } from './airfield.js'
+import { height, offset, width } from './airfield.js'
 
-function shape(ctx, path, fill, stroke, weight = 1) {
-  const outline = new Path2D(path)
-  if (fill) {
-    ctx.fillStyle = fill
-    ctx.fill(outline)
-  }
-  if (stroke) {
-    ctx.strokeStyle = stroke
-    ctx.lineWidth = weight
-    ctx.stroke(outline)
-  }
-}
-
-function circle(ctx, x, y, radius, fill) {
-  ctx.beginPath()
-  ctx.arc(x, y, radius, 0, Math.PI * 2)
-  ctx.fillStyle = fill
-  ctx.fill()
-}
-
-function rect(ctx, x, y, w, h, fill) {
-  ctx.fillStyle = fill
-  ctx.fillRect(x, y, w, h)
-}
-
-function generator() {
-  let seed = 84217
-  return () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0
-    return seed / 4294967296
-  }
-}
+import { building, circle, generator, rect, shape } from './art.js'
+import { paintRegional } from './regional.js'
 
 const shore = 'M 155 -15 C 155 67 120 87 133 148 C 146 201 188 211 166 274 C 147 324 127 335 138 386 C 151 433 103 472 115 528 C 133 594 179 587 188 637 C 205 699 260 694 310 677 C 362 659 375 702 420 710 C 479 717 534 660 581 674 C 624 686 652 732 706 733 L 708 -15 Z'
 const road = 'M 242 -12 C 243 77 204 84 200 145 C 197 191 238 204 238 246 L 238 268 Q 238 282 256 282 H 459 Q 483 282 483 260 V 132 Q 483 113 502 113 H 691'
@@ -127,17 +97,6 @@ function paintTrees(ctx) {
   }
 }
 
-function building(ctx, x, y, w, h, roof, trim) {
-  rect(ctx, x + 5, y + 8, w + 3, h, '#667d6e')
-  rect(ctx, x, y + 5, w, h + 1, '#426779')
-  rect(ctx, x, y, w, h, roof)
-  rect(ctx, x, y, w, 3, trim)
-  rect(ctx, x + 3, y + h - 3, w - 6, 3, '#6f9196')
-  for (let column = 6; column < w - 4; column += 10) {
-    rect(ctx, x + column, y + h, 6, 4, '#8ebfc4')
-  }
-}
-
 function paintTerminal(ctx) {
   shape(ctx, 'M 261 311 V 297 Q 261 291 269 291 H 453 L 477 309 H 613 V 455 L 561 485 H 306 L 258 454 V 318 Z', '#939e90', '#c5c79f', 4)
   for (const y of [326, 482]) {
@@ -195,14 +154,14 @@ function paintRunway(ctx, runway) {
   ctx.textBaseline = 'middle'
   ctx.font = '800 14px system-ui'
   ctx.fillStyle = '#f6f3dd'
-  ctx.fillText(runway.number, 36, 0)
+  ctx.fillText(runway.id, 36, 0)
   for (const side of [-1, 1]) {
     rect(ctx, -2, side * (span / 2 + 6) - 2, 10, 4, runway.color)
   }
   ctx.restore()
 }
 
-function paintDetails(ctx) {
+function paintDetails(ctx, destinations) {
   ctx.save()
   ctx.translate(86, 705)
   circle(ctx, 0, 0, 27, '#145f6d')
@@ -234,7 +193,7 @@ function paintDetails(ctx) {
     for (let post = -27; post < 5; post += 7) rect(ctx, post, -5, 1, 10, '#987f61')
     ctx.restore()
   }
-  for (const runway of Object.values(runways)) {
+  for (const runway of Object.values(destinations)) {
     const point = offset(runway, runway.heading, -77)
     const approach = offset(runway, runway.heading, -11)
     ctx.setLineDash([5, 8])
@@ -253,17 +212,21 @@ export function paintBoat(ctx, x, y, heading) {
   ctx.restore()
 }
 
-export function createScenery() {
+export function createScenery(airport) {
   const canvas = document.createElement('canvas')
   canvas.width = width * 2
   canvas.height = height * 2
   const ctx = canvas.getContext('2d')
   ctx.scale(2, 2)
-  paintNature(ctx)
-  paintRoads(ctx)
-  paintTrees(ctx)
-  paintTerminal(ctx)
-  for (const runway of Object.values(runways)) paintRunway(ctx, runway)
-  paintDetails(ctx)
+  if (airport.scenery === 'regional') {
+    paintRegional(ctx)
+  } else {
+    paintNature(ctx)
+    paintRoads(ctx)
+    paintTrees(ctx)
+    paintTerminal(ctx)
+  }
+  for (const runway of Object.values(airport.destinations)) paintRunway(ctx, runway)
+  if (airport.scenery === 'coast') paintDetails(ctx, airport.destinations)
   return canvas
 }

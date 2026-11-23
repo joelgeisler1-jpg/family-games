@@ -1,4 +1,4 @@
-import { clamp, distance, height, offset, projection, width } from './airfield.js'
+import { clamp, destinationGate, distance, height, offset, projection, width } from './airfield.js'
 
 const spacing = 9
 
@@ -38,9 +38,9 @@ export function planRoute(aircraft, draft, runway) {
   }
   if (points.length < 2) return null
 
-  const gate = offset(runway, runway.heading, -17)
+  const gate = destinationGate(runway)
   const end = draft.at(-1)
-  const cleared = distance(end, gate) <= runway.radius + 10
+  const cleared = runway.id === aircraft.destinationId && distance(end, gate) <= runway.snapRadius
   if (cleared) {
     // Replace the finger's endpoint with an aligned final whenever the route
     // reached the approach from upstream. Keep intentional go-arounds intact.
@@ -61,5 +61,5 @@ export function planRoute(aircraft, draft, runway) {
     softened.push({ x: (a.x + 2 * b.x + c.x) / 4, y: (a.y + 2 * b.y + c.y) / 4 })
   }
   softened.push(points.at(-1))
-  return { points: softened, cleared, cursor: 1 }
+  return { points: softened, cleared, destinationId: cleared ? runway.id : null, cursor: 1 }
 }

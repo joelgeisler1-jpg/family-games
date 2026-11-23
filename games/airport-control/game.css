@@ -158,8 +158,9 @@ canvas {
 .assignment { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 13px; }
 .assignment small { display: block; color: var(--muted); font-size: 11px; margin-block-start: 2px; }
 .runway-icon { display: grid; place-items: center; width: 27px; height: 27px; border: 2px solid currentColor; color: var(--blue); border-radius: 50%; }
-.jet .runway-icon { color: var(--orange); border-radius: 5px; transform: rotate(45deg) scale(0.84); }
-.jet .runway-icon b { transform: rotate(-45deg) scale(1.19); }
+.runway-icon[data-shape="diamond"] { border-radius: 5px; transform: rotate(45deg) scale(0.84); }
+.runway-icon[data-shape="diamond"] b { transform: rotate(-45deg) scale(1.19); }
+.runway-icon[data-shape="square"] { border-radius: 5px; }
 .radio { min-height: 50px; padding: 9px 10px; display: flex; align-items: flex-start; gap: 7px; color: #e7ead6; background: #14252e; border-radius: 9px; }
 .radio p { font-size: 12px; line-height: 1.35; }
 .radio-icon { color: #a6d5c1; font-weight: 850; line-height: 1; }
@@ -177,6 +178,8 @@ canvas {
 .panel {
   width: min(100%, 325px);
   text-align: center;
+  max-height: 100%;
+  overflow-y: auto;
   padding: clamp(14px, 3vw, 26px);
   border-radius: 19px;
   background: #142d37f5;
@@ -186,11 +189,24 @@ canvas {
 .panel-icon { width: 42px; height: 42px; border-radius: 12px; font-size: 24px; margin: 0 auto 12px; }
 .panel h2 { font-size: clamp(23px, 4vw, 34px); font-weight: 850; letter-spacing: -0.05em; line-height: 1.02; }
 .panel p { color: #dce6db; font-size: 14px; line-height: 1.45; margin: 9px auto 16px; }
+.overlay[data-complete] .panel { border-color: #e0c696; }
+@media (prefers-reduced-motion: no-preference) {
+  .overlay[data-complete] .panel { animation: airport-complete 240ms ease-out both; }
+  @keyframes airport-complete {
+    from { opacity: 0.6; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+.level-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 8px; }
+.level-list button { display: grid; align-content: center; padding: 5px 6px; gap: 3px; font-size: 12px; }
+.level-list small { color: var(--muted); font-size: 10px; }
 .panel-actions { display: flex; flex-wrap: wrap; gap: 7px; }
 .panel-actions button { flex: 1 1 0; padding: 5px 7px; font-size: 13px; }
 .primary { background: #f8d291; color: #172b32; border: 0; }
 #next-airport {
   flex-basis: 100%;
+}
+#next-airport:disabled {
   background: #192f38;
   color: #adc2c2;
   opacity: 1;
@@ -214,7 +230,7 @@ canvas {
   .instrument { display: flex; align-items: center; justify-content: space-between; gap: 2px; padding: 5px; }
   .instruments[data-campaign] .instrument { display: grid; justify-content: start; }
   .instrument strong { font-size: 18px; }
-  .runways { display: flex; justify-content: space-around; gap: 7px; padding: 3px 0; }
+  .runways { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2px 7px; padding: 3px 0; }
   .assignment { min-height: 32px; font-size: 12px; gap: 7px; }
   .runway-icon { width: 22px; height: 22px; font-size: 11px; }
   .radio { min-height: 35px; padding: 5px 7px; }

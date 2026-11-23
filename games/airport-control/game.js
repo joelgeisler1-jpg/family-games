@@ -1,5 +1,6 @@
-import { runways, step } from './airfield.js'
+import { aircraftTypes, step } from './airfield.js'
 import { TowerAudio } from './audio.js'
+import { campaignLevels, nextLevel } from './campaign.js'
 import { installPointer } from './pointer.js'
 import { AirportView } from './render.js'
 import { Session } from './session.js'
@@ -12,6 +13,9 @@ const sound = element('sound')
 const action = element('action')
 const alternate = element('alternate')
 const nextAirport = element('next-airport')
+const menu = element('menu')
+const levelList = element('level-list')
+const assignments = element('assignments')
 const overlay = element('overlay')
 const radio = element('radio')
 const instruments = element('instruments')
@@ -48,10 +52,12 @@ new ResizeObserver(() => {
 }).observe(canvas)
 motion.addEventListener('change', () => { repaint = true })
 
-function showPanel(title, description, button, icon, { final = false, switchMode = false, complete = false, focus = true } = {}) {
+function showPanel(title, description, button, icon, { final = false, switchMode = false, complete = false, lobby = false, focus = true } = {}) {
   element('panel-title').textContent = title
   element('panel-message').textContent = description
   action.textContent = button
+  action.hidden = lobby
+  levelList.hidden = !lobby
   element('panel-icon').textContent = icon
   element('results').hidden = !final
   if (final) {
@@ -59,12 +65,20 @@ function showPanel(title, description, button, icon, { final = false, switchMode
     element('result-detail-label').textContent = session.level ? 'Time' : 'Personal best'
     element('result-detail').textContent = session.level ? formatTime(session.elapsedSeconds) : session.best
   }
-  alternate.textContent = session.level ? 'Endless Challenge' : 'Play Level 1'
-  alternate.hidden = !switchMode
+  alternate.hidden = !switchMode || session.playMode === 'endless'
+  menu.hidden = !final
   nextAirport.hidden = !complete
+  overlay.toggleAttribute('data-complete', complete)
+  if (complete) {
+    const next = nextLevel(session.airport.id)
+    const detail = document.createElement('small')
+    detail.textContent = next?.name ?? 'Coming soon'
+    nextAirport.disabled = !next
+    nextAirport.replaceChildren('Next Airport ', detail)
+  }
   pause.disabled = true
   overlay.hidden = false
-  if (focus) action.focus({ preventScroll: true })
+  if (focus) (lobby ? levelList.querySelector('button:not(:disabled)') : action).focus({ preventScroll: true })
 }
 
 function formatTime(seconds) {
@@ -87,7 +101,7 @@ function syncInstruments() {
   updateValue(traffic, session.traffic)
   const closing = session.closing && (session.mode === 'playing' || session.mode === 'paused')
   mapTitle.toggleAttribute('data-closing', closing)
-  updateValue(mapStatus, closing ? 'Closing traffic' : 'Coastal Airport')
+  updateValue(mapStatus, closing ? 'Closing traffic' : session.airport.name)
 }
 
 function syncMode() {
@@ -95,6 +109,30 @@ function syncMode() {
   instruments.toggleAttribute('data-campaign', campaign)
   shiftTime.parentElement.hidden = !campaign
   best.parentElement.hidden = campaign
+  canvas.parentElement.setAttribute('aria-label', `${session.airport.name} airspace`)
+  const heading = document.createElement('h3')
+  heading.textContent = 'Destination assignments'
+  assignments.replaceChildren(heading)
+  for (const { kind, destinationId } of session.airport.traffic.rotation) {
+    const destination = session.airport.destinations[destinationId]
+    const row = document.createElement('div')
+    row.className = 'assignment'
+    const icon = document.createElement('span')
+    icon.className = 'runway-icon'
+    icon.dataset.shape = destination.shape
+    icon.style.color = destination.color
+    const number = document.createElement('b')
+    number.textContent = destination.id
+    icon.append(number)
+    const details = document.createElement('div')
+    const label = document.createElement('b')
+    label.textContent = aircraftTypes[kind].label
+    const name = document.createElement('small')
+    name.textContent = destination.label
+    details.append(label, name)
+    row.append(icon, details)
+    assignments.append(row)
+  }
 }
 
 function announce(text, tone = '') {
@@ -122,20 +160,20 @@ function updateRadio() {
   } else if (session.arrivals === 2 && session.score === 1) {
     announce('The light plane lands at the blue 27 circle.')
   } else {
-    announce(arrivalInterval(session.time) <= 12 ? 'Traffic is picking up. Leave room between routes.' : 'Drag again to change a route.')
+    announce(arrivalInterval(session.time, session.airport) <= 12 ? 'Traffic is picking up. Leave room between routes.' : 'Drag again to change a route.')
   }
 }
 
 function processEvents() {
   for (const event of session.events.splice(0)) {
     if (event.type === 'arrival' && session.arrivals > 2 && session.time >= messageUntil) {
-      const runway = runways[event.kind]
-      message = `${runway.label} inbound for runway ${runway.number}.`
+      const destination = session.airport.destinations[event.destinationId]
+      message = `${aircraftTypes[event.kind].label} inbound for runway ${destination.id}.`
       messageUntil = session.time + 2.5
       messageTone = ''
     }
     if (event.type === 'landing') {
-      effects.push({ x: event.plane.x, y: event.plane.y, time: session.time, color: runways[event.plane.kind].color })
+      effects.push({ x: event.plane.x, y: event.plane.y, time: session.time, color: session.destinationFor(event.plane).color })
       message = event.streak > 1 ? `${event.streak} landings in a row!` : 'Smooth landing! +1'
       messageUntil = session.time + 3
       messageTone = 'success'
@@ -179,10 +217,10 @@ document.addEventListener('visibilitychange', () => {
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && session.mode === 'playing') pauseShift()
 })
-function beginShift(playMode) {
+function beginShift(playMode, levelId = session.airport.id) {
   if (session.mode === 'paused') session.resume()
   else {
-    session.reset(playMode)
+    session.reset(playMode, levelId)
     effects = []
     messageUntil = 0
     lastWarning = -10
@@ -200,7 +238,12 @@ function beginShift(playMode) {
 }
 
 action.addEventListener('click', () => beginShift(session.playMode))
-alternate.addEventListener('click', () => beginShift(session.level ? 'endless' : 'campaign'))
+alternate.addEventListener('click', () => beginShift('endless'))
+menu.addEventListener('click', () => showMenu())
+nextAirport.addEventListener('click', () => {
+  const next = nextLevel(session.airport.id)
+  if (next) beginShift('campaign', next.id)
+})
 sound.addEventListener('click', async () => {
   sound.disabled = true
   await audio.toggle()
@@ -230,15 +273,30 @@ function frame(timestamp) {
   requestAnimationFrame(frame)
 }
 
-const { id, minLandings, minSeconds } = session.level
-const completed = session.progress.completedLevels.includes(id)
-showPanel(
-  `Level ${id} · Coastal Airport`,
-  `Guide planes to their matching runways. Land ${minLandings} and keep the airspace safe for ${formatTime(minSeconds)}.`,
-  completed ? `Replay Level ${id}` : `Start Level ${id}`,
-  '✈︎',
-  { switchMode: true, focus: false },
-)
-syncMode()
-syncInstruments()
+function showMenu(focus = true) {
+  session.reset('campaign', campaignLevels[0].id)
+  effects = []
+  levelList.replaceChildren()
+  for (const level of campaignLevels) {
+    const unlocked = session.progress.unlockedLevels.includes(level.id)
+    const completed = session.progress.completedLevels.includes(level.id)
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.disabled = !unlocked
+    const title = document.createElement('b')
+    title.textContent = level.name
+    const status = document.createElement('small')
+    status.textContent = completed ? `Level ${level.id} · Complete` : unlocked ? `Level ${level.id}` : `Level ${level.id} · Locked`
+    button.append(title, status)
+    button.addEventListener('click', () => beginShift('campaign', level.id))
+    levelList.append(button)
+  }
+  showPanel('Campaign', 'Match each aircraft to its marked approach.', '', '✈︎', { switchMode: true, lobby: true, focus })
+  announce('Match each plane to its runway.')
+  syncMode()
+  syncInstruments()
+  repaint = true
+}
+
+showMenu(false)
 requestAnimationFrame(frame)

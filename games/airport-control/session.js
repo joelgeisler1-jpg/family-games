@@ -1,5 +1,5 @@
 import { newAircraft, moveAircraft } from './aircraft.js'
-import { coastalAirport, loadCampaignProgress, recordCompletion } from './campaign.js'
+import { campaignLevels, coastalAirport, loadCampaignProgress, recordCompletion } from './campaign.js'
 import { advanceLanding, matchingApproach } from './landing.js'
 import { boundary, separation } from './separation.js'
 import { arrivalInterval, chooseArrival } from './traffic.js'
@@ -20,10 +20,12 @@ export class Session {
     this.storage = storage
     this.best = loadBest(storage)
     this.progress = loadCampaignProgress(storage)
-    this.reset(playMode)
+    this.reset(playMode, coastalAirport.id)
   }
 
-  reset(playMode = this.playMode) {
+  reset(playMode = this.playMode, levelId = this.airport.id) {
+    const level = campaignLevels.find(({ id }) => id === levelId && this.progress.unlockedLevels.includes(id))
+    this.airport = playMode === 'campaign' ? level ?? coastalAirport : coastalAirport
     this.playMode = playMode
     this.mode = 'ready'
     this.closing = false
@@ -54,14 +56,14 @@ export class Session {
 
   spawn() {
     if (this.closing) return
-    const arrival = chooseArrival(this.arrivals, this.planes)
+    const arrival = chooseArrival(this.arrivals, this.planes, this.airport)
     if (!arrival) {
       this.nextArrival = this.time + 1
       return
     }
-    this.planes.push(newAircraft(++this.arrivals, arrival.kind, arrival.entry))
-    this.events.push({ type: 'arrival', kind: arrival.kind })
-    this.nextArrival = this.time + (this.arrivals === 1 ? 9 : arrivalInterval(this.time))
+    this.planes.push(newAircraft(++this.arrivals, arrival.kind, arrival.destinationId, arrival.entry))
+    this.events.push({ type: 'arrival', kind: arrival.kind, destinationId: arrival.destinationId })
+    this.nextArrival = this.time + (this.airport.traffic.openingGaps[this.arrivals - 1] ?? arrivalInterval(this.time, this.airport))
   }
 
   finish(reason, planes) {
@@ -101,10 +103,10 @@ export class Session {
       }
     }
 
-    this.planes = this.planes.filter((plane) => !plane.landing || !advanceLanding(plane, dt))
+    this.planes = this.planes.filter((plane) => !plane.landing || !advanceLanding(plane, dt, this.destinationFor(plane)))
     for (let index = 0; index < airborne.length; index++) {
       const plane = airborne[index]
-      if (matchingApproach(plane, previous[index])) this.land(plane)
+      if (matchingApproach(plane, previous[index], this.destinationFor(plane))) this.land(plane)
     }
 
     // Assess qualification before any arrival due on this step.
@@ -142,7 +144,11 @@ export class Session {
   }
 
   get level() {
-    return this.playMode === 'campaign' ? coastalAirport : null
+    return this.playMode === 'campaign' ? this.airport : null
+  }
+
+  destinationFor(plane) {
+    return this.airport.destinations[plane.destinationId]
   }
 
   get elapsedSeconds() {

@@ -41,10 +41,12 @@
             <div><span>Landings</span><strong id="result-score">0</strong></div>
             <div><span id="result-detail-label">Time</span><strong id="result-detail">0:00</strong></div>
           </div>
+          <div class="level-list" id="level-list" aria-label="Campaign airports" hidden></div>
           <div class="panel-actions">
             <button class="primary" id="action" type="button">Start Level 1</button>
             <button id="alternate" type="button">Endless Challenge</button>
-            <button id="next-airport" type="button" disabled hidden>Next Airport <small>Coming soon</small></button>
+            <button id="menu" type="button" hidden>Menu</button>
+            <button id="next-airport" type="button" hidden></button>
           </div>
         </div>
       </div>
@@ -57,11 +59,7 @@
         <div class="instrument" hidden><span>Best</span><strong id="best">0</strong></div>
         <div class="instrument traffic"><span>Traffic</span><strong id="traffic">0</strong></div>
       </div>
-      <div class="runways">
-        <h3>Runway assignments</h3>
-        <div class="assignment jet"><span class="runway-icon"><b>09</b></span><div><b>Airliner</b><small>Main runway</small></div></div>
-        <div class="assignment prop"><span class="runway-icon"><b>27</b></span><div><b>Light plane</b><small>Short runway</small></div></div>
-      </div>
+      <div class="runways" id="assignments" aria-label="Destination assignments"></div>
       <div class="radio">
         <span class="radio-icon" aria-hidden="true">⌁</span>
         <p id="radio" aria-live="polite">Match each plane to its runway.</p>

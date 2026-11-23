@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { newAircraft } from '../aircraft.js'
-import { runways, step, width } from '../airfield.js'
+import { coastalDestinations, step, width } from '../airfield.js'
 import { Session } from '../session.js'
+
+const runways = { jet: coastalDestinations['09'], prop: coastalDestinations['27'] }
+const coastalAircraft = (id, kind, entry) => newAircraft(id, kind, runways[kind].id, entry)
 
 const bestKey = 'family-arcade.airport-control.best.v1'
 const campaignKey = 'family-arcade.airport-control.campaign.v1'
@@ -21,8 +24,8 @@ function campaign({ time = 120 - step, score = 8, planes = [] } = {}, storage) {
 
 function approach(id = 2, kind = 'jet') {
   const { x, y, heading } = runways[kind]
-  const plane = newAircraft(id, kind, { x, y, heading })
-  plane.route = { cleared: true, cursor: 1, points: [plane, { x: x + 120 * Math.cos(heading), y }] }
+  const plane = coastalAircraft(id, kind, { x, y, heading })
+  plane.route = { cleared: true, destinationId: plane.destinationId, cursor: 1, points: [plane, { x: x + 120 * Math.cos(heading), y }] }
   return plane
 }
 
@@ -64,7 +67,7 @@ test('the qualifying landing prevents a scheduled arrival on the same step and l
 test('completion waits for remaining aircraft to land and finish their rollout', () => {
   const storage = mockStorage([[bestKey, '5']])
   const jet = approach(2)
-  const prop = newAircraft(3, 'prop', { x: 620, y: runways.prop.y, heading: Math.PI })
+  const prop = coastalAircraft(3, 'prop', { x: 620, y: runways.prop.y, heading: Math.PI })
   const game = campaign({ planes: [jet, prop] }, storage)
   game.step(step)
   assert.equal(game.closing, true)
@@ -72,7 +75,7 @@ test('completion waits for remaining aircraft to land and finish their rollout',
   assert.equal(game.mode, 'playing')
   assert.equal(storage.getItem(campaignKey), undefined)
 
-  prop.route = { cleared: true, cursor: 1, points: [prop, { x: 425, y: prop.y }] }
+  prop.route = { cleared: true, destinationId: prop.destinationId, cursor: 1, points: [prop, { x: 425, y: prop.y }] }
   for (let tick = 0; game.traffic > 0 && tick < 600; tick++) game.step(step)
   assert.equal(game.traffic, 0)
   assert.equal(game.mode, 'playing')
@@ -81,7 +84,7 @@ test('completion waits for remaining aircraft to land and finish their rollout',
   assert.equal(game.planes.length, 0)
   assert.equal(game.mode, 'complete')
   assert.equal(game.events.at(-1).type, 'complete')
-  assert.deepEqual(new Session(storage, 'campaign').progress, { completedLevels: [1], unlockedLevels: [1] })
+  assert.deepEqual(new Session(storage, 'campaign').progress, { completedLevels: [1], unlockedLevels: [1, 2] })
   assert.equal(storage.getItem(bestKey), '5')
   assert.equal(game.best, 5)
 })
@@ -89,12 +92,12 @@ test('completion waits for remaining aircraft to land and finish their rollout',
 test('collision and escape during closing still lose the shift without saving completion', () => {
   for (const reason of ['collision', 'escape']) {
     const storage = mockStorage()
-    const plane = newAircraft(2, 'jet', { x: 400, y: 200, heading: 0 })
+    const plane = coastalAircraft(2, 'jet', { x: 400, y: 200, heading: 0 })
     const game = campaign({ planes: [plane] }, storage)
     game.step(step)
     assert.equal(game.closing, true)
     if (reason === 'collision') {
-      game.planes.push(newAircraft(3, 'prop', { x: plane.x + 25, y: plane.y, heading: Math.PI }))
+      game.planes.push(coastalAircraft(3, 'prop', { x: plane.x + 25, y: plane.y, heading: Math.PI }))
     } else {
       plane.x = width + 25
     }
@@ -157,6 +160,6 @@ test('malformed or inaccessible storage still allows completion', () => {
     assert.deepEqual(game.progress, { completedLevels: [], unlockedLevels: [1] })
     game.step(step)
     assert.equal(game.mode, 'complete')
-    assert.deepEqual(game.progress, { completedLevels: [1], unlockedLevels: [1] })
+    assert.deepEqual(game.progress, { completedLevels: [1], unlockedLevels: [1, 2] })
   }
 })
