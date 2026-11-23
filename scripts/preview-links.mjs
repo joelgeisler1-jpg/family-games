@@ -4,8 +4,8 @@ import { join } from 'node:path';
 // GitHub Pages publishes the main arcade plus a distinct directory for each
 // open, same-repository PR. No independent proxy or public file mirroring.
 export function previewUrl(repo, number, slug) {
-  if (!/^[\\w.-]+\\/[\\w.-]+$/.test(repo)) throw new Error('Invalid repository');
-  if (!Number.isSafeInteger(Number(number)) || Number(number) < 0 || !/^\\d+$/.test(String(number))) throw new Error('Invalid PR number');
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) throw new Error('Invalid repository');
+  if (!Number.isSafeInteger(Number(number)) || Number(number) < 0 || !/^\d+$/.test(String(number))) throw new Error('Invalid PR number');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Invalid game directory');
   const [owner, name] = repo.split('/');
   const folder = Number(number) === 0 ? '' : `previews/pr-${number}/`;
@@ -26,7 +26,7 @@ export function previewSummary(repo, number, base = 'games') {
   ];
   for (const slug of games) {
     const html = readFileSync(join(base, slug, 'index.html'), 'utf8');
-    const title = html.match(/<title>([^<]+)<\\/title>/i)?.[1]?.replace(/\\|/g, '–') || slug;
+    const title = html.match(/<title>([^<]+)<\/title>/i)?.[1]?.replace(/\|/g, '–') || slug;
     lines.push(`| ${title} | [Play in Safari](${previewUrl(repo, number, slug)}) |`);
   }
   if (!games.length) lines.push('| No game entry points found | — |');
@@ -42,7 +42,7 @@ export function previewSummary(repo, number, base = 'games') {
     `Preview: ${Number(number) > 0 ? `PR #${number}` : 'main arcade'}`,
     ''
   );
-  return lines.join('\\n');
+  return lines.join('\n');
 }
 
 if (process.argv[1] && import.meta.url === new URL('file://' + process.argv[1]).href) {
