@@ -2,19 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { previewUrl, previewSummary } from '../preview-links.mjs';
 
-const sha='0123456789abcdef0123456789abcdef01234567';
-test('preview URLs are commit-specific and use an isolated game entry point',()=>{
-  assert.equal(previewUrl('example/family-games',sha,'star-post'),
-    'https://raw.githack.com/example/family-games/'+sha+'/games/star-post/index.html');
+test('preview URLs are first-party GitHub Pages paths scoped to a PR', () => {
+  assert.equal(previewUrl('example/family-games', 38, 'airport-control'),
+    'https://example.github.io/family-games/previews/pr-38/games/airport-control/');
+  assert.equal(previewUrl('example/family-games', 0, 'airport-control'),
+    'https://example.github.io/family-games/games/airport-control/');
 });
-test('reject invalid refs, repositories and directory names',()=>{
-  assert.throws(()=>previewUrl('example/family-games','main','star-post'));
-  assert.throws(()=>previewUrl('example/family-games',sha,'../secrets'));
-  assert.throws(()=>previewUrl('https://example.com',sha,'star-post'));
+test('reject invalid PR numbers, repositories and directory names', () => {
+  assert.throws(() => previewUrl('example/family-games', 'main', 'star-post'));
+  assert.throws(() => previewUrl('example/family-games', -4, 'star-post'));
+  assert.throws(() => previewUrl('example/family-games', 38, '../secrets'));
+  assert.throws(() => previewUrl('https://example.com', 38, 'star-post'));
 });
-test('preview summary discovers known games without editing the homepage',()=>{
-  const summary=previewSummary('example/family-games',sha);
-  for(const slug of ['star-post','sneaky-paws','cleaning-club']) assert.match(summary,new RegExp('/games/'+slug+'/index.html'));
-  assert.match(summary,/third-party proxy/);
-  assert.match(summary,/does not change the Family Arcade homepage/);
+test('summary enumerates games without presenting links as already deployed', () => {
+  const summary = previewSummary('example/family-games', 38);
+  for (const slug of ['star-post', 'sneaky-paws', 'cleaning-club']) {
+    assert.match(summary, new RegExp('/previews/pr-38/games/' + slug + '/'));
+  }
+  assert.match(summary, /GitHub Pages/);
+  assert.match(summary, /deployment must finish successfully/);
+  assert.match(summary, /does not.*merge/);
+  assert.doesNotMatch(summary, /raw\\.githack\\.com/);
 });
