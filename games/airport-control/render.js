@@ -2,6 +2,7 @@ import { aircraftTypes, destinationGate, height, offset, width } from './airfiel
 import { paintIslandActivity } from './island.js'
 import { paintMetroActivity } from './metro.js'
 import { snapsToDestination } from './routes.js'
+import { projectedHeading, projectionStretch } from './landscape-projection.js'
 import { createScenery, paintBoat } from './scenery.js'
 import { paintRegionalTrain } from './regional.js'
 
@@ -157,11 +158,16 @@ function paintRescueMarkings(ctx, time, reducedMotion, progress) {
   ctx.restore()
 }
 
-function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, { silhouette, trim }) {
+function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, { silhouette, trim }, stretch = 1) {
   const type = aircraftTypes[plane.kind]
   const progress = (plane.landing?.time ?? 0) / (type.landingDuration ?? 1.55)
   const scale = type.size * (1 - progress * 0.24)
   const warning = plane.warning || (plane.escape ? 1 : 0)
+  const visualHeading = projectedHeading(plane.heading, stretch)
+  ctx.save()
+  ctx.translate(plane.x, plane.y)
+  ctx.scale(1 / stretch, 1)
+  ctx.translate(-plane.x, -plane.y)
   const x = Math.max(14, Math.min(width - 14, plane.x))
   const y = Math.max(14, Math.min(height - 14, plane.y))
   if (selected) ring(ctx, x, y, 36, destination.color, 3)
@@ -184,12 +190,12 @@ function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, {
   ctx.translate(plane.x, plane.y)
   ctx.save()
   ctx.translate(6 * (1 - progress), 8 * (1 - progress))
-  ctx.rotate(plane.heading)
+  ctx.rotate(visualHeading)
   ctx.scale(scale, scale)
   ctx.fillStyle = '#142d3770'
   ctx.fill(silhouette)
   ctx.restore()
-  ctx.rotate(plane.heading)
+  ctx.rotate(visualHeading)
   ctx.scale(scale, scale)
   ctx.fillStyle = '#fff3d8'
   ctx.strokeStyle = '#253a44'
@@ -239,6 +245,7 @@ function paintAircraft(ctx, plane, destination, time, selected, reducedMotion, {
   }
   ctx.restore()
   if (!plane.landing && !plane.escape && !plane.warning) badge(ctx, x, y + 32, destination.id, destination.color, 14)
+  ctx.restore()
 }
 
 export class AirportView {
@@ -260,6 +267,7 @@ export class AirportView {
       canvas.width = pixelWidth
       canvas.height = pixelHeight
     }
+    const stretch = projectionStretch(canvas.clientWidth, canvas.clientHeight, width, height)
     ctx.setTransform(pixelWidth / width, 0, 0, pixelHeight / height, 0, 0)
     if (this.airport !== session.airport) {
       this.airport = session.airport
@@ -291,12 +299,20 @@ export class AirportView {
     for (const destination of Object.values(this.airport.destinations)) {
       const armed = (readyToSnap && draftDestination === destination) ||
         session.planes.some((plane) => plane.route?.destinationId === destination.id)
+      // Compensate target outlines as well as aircraft so the helipad stays
+      // an octagon and runway approach gates remain easy to recognise.
+      const gate = destinationGate(destination)
+      ctx.save()
+      ctx.translate(gate.x, gate.y)
+      ctx.scale(1 / stretch, 1)
+      ctx.translate(-gate.x, -gate.y)
       if (destination.type === 'helipad') {
         const settling = session.planes.some((plane) => plane.destinationId === destination.id && plane.landing)
         paintHelipad(ctx, destination, armed, settling)
       } else {
         paintRunwayGate(ctx, destination, armed)
       }
+      ctx.restore()
     }
 
     const first = session.planes[0]
@@ -311,7 +327,7 @@ export class AirportView {
       }
     }
     if (draft) trail(ctx, draft.points, session.destinationFor(draft.plane).color, true)
-    for (const plane of session.planes) paintAircraft(ctx, plane, session.destinationFor(plane), session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind])
+    for (const plane of session.planes) paintAircraft(ctx, plane, session.destinationFor(plane), session.time, draft?.plane === plane, reducedMotion, this.paths[plane.kind], stretch)
 
     for (const effect of effects) {
       const age = session.time - effect.time

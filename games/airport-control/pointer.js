@@ -1,15 +1,13 @@
 import { distance, height, width } from './airfield.js'
 import { extendDraft, planRoute } from './routes.js'
+import { screenToAirspace } from './landscape-projection.js'
 
 export function installPointer(canvas, session, onSelect) {
   let draft = null
 
   function point(event) {
     const bounds = canvas.getBoundingClientRect()
-    return {
-      x: (event.clientX - bounds.left) * width / bounds.width,
-      y: (event.clientY - bounds.top) * height / bounds.height,
-    }
+    return screenToAirspace(event.clientX, event.clientY, bounds, width, height)
   }
 
   function cancel() {
