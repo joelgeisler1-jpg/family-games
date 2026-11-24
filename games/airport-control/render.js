@@ -299,12 +299,20 @@ export class AirportView {
     for (const destination of Object.values(this.airport.destinations)) {
       const armed = (readyToSnap && draftDestination === destination) ||
         session.planes.some((plane) => plane.route?.destinationId === destination.id)
+      // Compensate target outlines as well as aircraft so the helipad stays
+      // an octagon and runway approach gates remain easy to recognise.
+      const gate = destinationGate(destination)
+      ctx.save()
+      ctx.translate(gate.x, gate.y)
+      ctx.scale(1 / stretch, 1)
+      ctx.translate(-gate.x, -gate.y)
       if (destination.type === 'helipad') {
         const settling = session.planes.some((plane) => plane.destinationId === destination.id && plane.landing)
         paintHelipad(ctx, destination, armed, settling)
       } else {
         paintRunwayGate(ctx, destination, armed)
       }
+      ctx.restore()
     }
 
     const first = session.planes[0]
