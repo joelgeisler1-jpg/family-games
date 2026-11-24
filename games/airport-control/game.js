@@ -1,5 +1,6 @@
 import { aircraftTypes, step } from './airfield.js'
 import { TowerAudio } from './audio.js'
+import { flightBoardEntries } from './flight-board.js'
 import { campaignLevels, nextLevel } from './campaign.js'
 import { installPointer } from './pointer.js'
 import { AirportView } from './render.js'
@@ -25,6 +26,9 @@ const score = element('score')
 const shiftTime = element('shift-time')
 const best = element('best')
 const traffic = element('traffic')
+const flightList = element('flight-list')
+const boardCount = element('board-count')
+let lastBoardKey = ''
 const audio = new TowerAudio()
 let storage
 try {
@@ -99,9 +103,48 @@ function syncInstruments() {
     updateValue(best, session.best)
   }
   updateValue(traffic, session.traffic)
+  syncFlightBoard()
   const closing = session.closing && (session.mode === 'playing' || session.mode === 'paused')
   mapTitle.toggleAttribute('data-closing', closing)
   updateValue(mapStatus, closing ? 'Closing traffic' : session.airport.name)
+}
+
+function syncFlightBoard() {
+  const entries = flightBoardEntries(session.planes, session.airport.destinations)
+  const airborneCount = session.planes.filter(plane => !plane.landing).length
+  const key = entries.map(({ id, status, destinationId }) => `${id}:${destinationId}:${status}`).join('|') + ':' + airborneCount
+  if (key === lastBoardKey) return
+  lastBoardKey = key
+  boardCount.textContent = `${airborneCount} ACTIVE`
+  if (!entries.length) {
+    const empty = document.createElement('p')
+    empty.className = 'board-empty'
+    empty.textContent = session.mode === 'complete' ? 'All flights safely landed!' : 'The sky is clear. Ready for arrivals!'
+    flightList.replaceChildren(empty)
+    return
+  }
+  const rows = entries.map(flight => {
+    const row = document.createElement('div')
+    row.className = 'flight-row'
+    if (flight.alert) row.dataset.alert = 'true'
+    const stripe = document.createElement('span')
+    stripe.className = 'flight-stripe'
+    stripe.style.backgroundColor = flight.destinationColor
+    stripe.setAttribute('aria-hidden', 'true')
+    const details = document.createElement('div')
+    details.className = 'flight-details'
+    const name = document.createElement('strong')
+    name.textContent = `${aircraftTypes[flight.kind].label} ${String(flight.id).padStart(2, '0')}`
+    const destination = document.createElement('small')
+    destination.textContent = flight.destinationId === 'H' ? 'Helipad H' : `Runway ${flight.destinationId}`
+    details.append(name, destination)
+    const state = document.createElement('span')
+    state.className = 'flight-status'
+    state.textContent = flight.status
+    row.append(stripe, details, state)
+    return row
+  })
+  flightList.replaceChildren(...rows)
 }
 
 function syncMode() {
