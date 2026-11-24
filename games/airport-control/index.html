@@ -60,10 +60,21 @@
         <div class="instrument" hidden><span>Best</span><strong id="best">0</strong></div>
         <div class="instrument traffic"><span>Traffic</span><strong id="traffic">0</strong></div>
       </div>
-      <div class="runways" id="assignments" aria-label="Destination assignments"></div>
-      <div class="radio">
-        <span class="radio-icon" aria-hidden="true">⌁</span>
-        <p id="radio" aria-live="polite">Match each plane to its runway.</p>
+      <div class="tower-details">
+        <div class="tower-guidance">
+          <div class="runways" id="assignments" aria-label="Destination assignments"></div>
+          <div class="radio">
+            <span class="radio-icon" aria-hidden="true">⌁</span>
+            <p id="radio" aria-live="polite">Match each plane to its runway.</p>
+          </div>
+        </div>
+        <section class="flight-board" aria-label="Aircraft currently in the air">
+          <div class="board-heading"><span class="board-indicator" aria-hidden="true"></span><h3>Flight board</h3><span id="board-count" class="board-count">0 ACTIVE</span></div>
+          <div id="flight-list" class="flight-list" aria-live="off">
+            <p class="board-empty">The sky is clear. Ready for arrivals!</p>
+          </div>
+          <div class="board-footer">Match the aircraft colour and code to its runway or helipad.</div>
+        </section>
       </div>
     </aside>
   </main>
